@@ -1,0 +1,96 @@
+services:
+  # --- Web Service (Express + Prisma API) ---
+  - type: web
+    name: shopery-backend
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: |
+      corepack enable
+      corepack prepare pnpm@latest --activate
+      pnpm install --frozen-lockfile
+      pnpm prisma generate
+      pnpm run build
+      pnpm prisma migrate deploy
+    startCommand: pnpm run start
+    envVars:
+      # --- Database ---
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shopery-db
+          property: connectionString
+
+      # --- Cloudinary ---
+      - key: CLOUDINARY_CLOUD_NAME
+      - key: CLOUDINARY_API_KEY
+      - key: CLOUDINARY_API_SECRET
+
+      # --- Secrets ---
+      - key: CSRF_SECRET
+      - key: ACCESS_TOKEN_SECRET
+      - key: REFRESH_TOKEN_SECRET
+
+      # --- SMTP (Gmail) ---
+      - key: SMTP_HOST
+      - key: SMTP_PORT
+      - key: SMTP_USER
+      - key: SMTP_PASS
+      - key: SMTP_FROM
+
+      # --- Render specifics ---
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: EMAIL_QUEUE_URL
+        fromService:
+          type: worker
+          name: email-worker
+          property: url
+
+  # --- Worker for Emails ---
+  - type: worker
+    name: email-worker
+    env: node
+    plan: starter
+    buildCommand: |
+      corepack enable
+      corepack prepare pnpm@latest --activate
+      pnpm install --frozen-lockfile
+      pnpm prisma generate
+      pnpm run build
+      pnpm prisma migrate deploy
+    startCommand: pnpm run worker:email
+    envVars:
+      # --- Database ---
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shopery-db
+          property: connectionString
+
+      # --- Cloudinary ---
+      - key: CLOUDINARY_CLOUD_NAME
+      - key: CLOUDINARY_API_KEY
+      - key: CLOUDINARY_API_SECRET
+
+      # --- Secrets ---
+      - key: CSRF_SECRET
+      - key: ACCESS_TOKEN_SECRET
+      - key: REFRESH_TOKEN_SECRET
+
+      # --- SMTP (Gmail) ---
+      - key: SMTP_HOST
+      - key: SMTP_PORT
+      - key: SMTP_USER
+      - key: SMTP_PASS
+      - key: SMTP_FROM
+
+      # --- Render specifics ---
+      - key: NODE_ENV
+        value: production
+
+databases:
+  # --- Postgres Database ---
+  - name: shopery-db
+    plan: starter
+    region: oregon
