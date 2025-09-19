@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import session from "express-session";
-import { PrismaSessionStore } from "@/libs/prisma-session-store"; // ⬅️ custom store
+import { PrismaSessionStore } from "@/libs/prisma-session-store";
 import { sanitizer } from "@/libs/sanitizer";
 import { csrfMiddleware } from "@/middlewares/csrf-middlewares";
 import dotenv from "dotenv";
