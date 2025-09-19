@@ -13,8 +13,27 @@ const options: swaggerJsdoc.Options = {
     servers: [
       {
         url: "http://localhost:3000/shopery",
+        description: "Development server",
+      },
+      {
+        url: "https://shopery-backend.onrender.com/shopery",
+        description: "Production server",
       },
     ],
+    // components: {
+    //   securitySchemes: {
+    //     bearerJWT: {
+    //       type: "apiKey",
+    //       scheme: "bearer",
+    //       bearerFormat: "JWT",
+    //     },
+    //     cookieJWT: {
+    //       type: "apiKey",
+    //       in: "cookie",
+    //       name: "access_token",
+    //     },
+    //   },
+    // },
   },
   // 👇 Paths to your route files for auto docs
   apis: ["./src/routes/*/*.ts"],
