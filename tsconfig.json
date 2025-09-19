@@ -9,15 +9,15 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"],
-      "@controllers/*": ["controllers/*"],
-      "@services/*": ["services/*"],
-      "@models/*": ["models/*"],
-      "@middlewares/*": ["middlewares/*"],
-      "@config/*": ["config/*"],
-      "@libs/*": ["libs/*"]
+      "@/*": ["src/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@services/*": ["src/services/*"],
+      "@models/*": ["src/models/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@config/*": ["src/config/*"],
+      "@libs/*": ["src/libs/*"]
     }
   },
   "include": ["src"],
