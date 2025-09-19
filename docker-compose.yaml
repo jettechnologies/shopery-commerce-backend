@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: shopery-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: shopery
+      POSTGRES_PASSWORD: shoperypassword
+      POSTGRES_DB: shoperydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
