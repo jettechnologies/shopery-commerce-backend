@@ -2,7 +2,7 @@ services:
   - type: web
     name: shopery-backend
     env: node
-    plan: starter
+    plan: free
     region: oregon
     buildCommand: |
       corepack enable
@@ -46,5 +46,5 @@ services:
 
 databases:
   - name: shopery-db
-    plan: starter
+    plan: free
     region: oregon
