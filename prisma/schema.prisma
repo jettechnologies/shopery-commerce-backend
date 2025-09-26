@@ -40,6 +40,7 @@ model PasswordReset {
 
 model User {
     id           BigInt   @id @default(autoincrement())
+    userId       String   @unique @default(uuid())
     email        String   @unique
     passwordHash String?  @map("password_hash")
     name         String?
@@ -76,6 +77,7 @@ model Address {
 
 model Product {
     id               BigInt   @id @default(autoincrement())
+    productId        String   @unique @default(uuid())
     name             String
     slug             String   @unique
     description      String?
@@ -102,6 +104,7 @@ model Product {
 
 model Category {
     id          BigInt   @id @default(autoincrement())
+    categoryId  String   @unique @default(uuid())
     name        String
     slug        String   @unique
     description String?
@@ -154,6 +157,7 @@ model ProductImage {
 
 model Review {
     id         BigInt   @id @default(autoincrement())
+    reviewId   String   @unique @default(uuid())
     product    Product  @relation(fields: [productId], references: [id])
     productId  BigInt
     user       User?    @relation(fields: [userId], references: [id])
@@ -168,6 +172,7 @@ model Review {
 
 model ProductComment {
     id        BigInt           @id @default(autoincrement())
+    commentId String           @unique @default(uuid())
     product   Product          @relation(fields: [productId], references: [id])
     productId BigInt
     user      User?            @relation(fields: [userId], references: [id])
@@ -181,6 +186,7 @@ model ProductComment {
 
 model Post {
     id          BigInt    @id @default(autoincrement())
+    postId      String    @unique @default(uuid())
     author      User?     @relation(fields: [authorId], references: [id])
     authorId    BigInt?
     title       String
@@ -238,6 +244,7 @@ model WishlistItem {
 
 model Cart {
     id        BigInt   @id @default(autoincrement())
+    cartId    String   @unique @default(uuid())
     user      User?    @relation(fields: [userId], references: [id])
     userId    BigInt?
     status    String   @default("active")
@@ -262,7 +269,7 @@ model CartItem {
 
 model GuestCart {
     id        BigInt   @id @default(autoincrement())
-    token     String   @default(dbgenerated("gen_random_uuid()")) // uses pgcrypto
+    token     String   @default(dbgenerated("gen_random_uuid()"))
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 

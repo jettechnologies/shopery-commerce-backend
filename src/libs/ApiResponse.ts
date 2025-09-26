@@ -1,4 +1,5 @@
 import { Response as ExpressResponse } from "express";
+import { json } from "zod";
 
 class ApiResponse {
   static success<T>(
@@ -53,6 +54,10 @@ class ApiResponse {
 
   static notAcceptable(res: ExpressResponse, message: string) {
     return this.error(res, 406, message, "Not Acceptable");
+  }
+
+  static internalServerError(res: ExpressResponse, message: string) {
+    return this.error(res, 500, message, "Internal Server Error");
   }
 }
 

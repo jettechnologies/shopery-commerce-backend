@@ -61,7 +61,7 @@ export class AuthService {
     });
 
     return {
-      user: { id: newUser.id, email: newUser.email },
+      user: { id: String(newUser.id), email: newUser.email },
       accessToken,
       refreshToken,
     };
@@ -69,10 +69,10 @@ export class AuthService {
 
   static async login(data: LoginUserInput) {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
-    if (!user) throw new Error("Invalid email or password");
+    if (!user) throw new NotFoundError("Unregistered email");
 
     const isValid = await comparePassword(data.password, user.passwordHash!);
-    if (!isValid) throw new UnauthorizedError("Invalid email or password");
+    if (!isValid) throw new UnauthorizedError("Invalid password");
 
     // Generate tokens
     const accessToken = generateAccessToken(user.id);
@@ -110,8 +110,6 @@ export class AuthService {
       },
     });
 
-    console.log(`Password reset OTP for ${data.email}: ${otp}`);
-
     await EmailService.sendMail({
       to: user.email,
       subject: "Password Reset Request",
@@ -119,7 +117,7 @@ export class AuthService {
       context: { otp },
     });
 
-    return { message: "Password reset OTP sent to your email" };
+    return { message: "Password reset OTP sent to your email", otp };
   }
 
   //   reset password service

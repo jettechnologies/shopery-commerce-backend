@@ -1,83 +1,3 @@
-// import { Router, type Application } from "express";
-// import { AuthService } from "@/services/auth-service";
-// // import { registerSchema, loginSchema } from "../schemas/authSchemas";
-// import { CreateUserSchema, LoginUserSchema } from "@/schema/zod-schema";
-// import ApiResponse from "@/libs/ApiResponse";
-
-// const authRouter = Router();
-
-// /**
-//  * @swagger
-//  * /auth/register:
-//  *   post:
-//  *     summary: Register a new user
-//  *     tags:
-//  *       - Auth
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             $ref: '#/components/schemas/RegisterUser'
-//  *     responses:
-//  *       201:
-//  *         description: User registered successfully
-//  *       400:
-//  *         description: Validation error
-//  */
-
-// authRouter.post("/register", async (req, res, next) => {
-//   try {
-//     const data = CreateUserSchema.parse(req.body);
-//     const result = await AuthService.register(data);
-//     // res.json(result);
-//     return ApiResponse.success(
-//       res,
-//       201,
-//       "User registered successfully",
-//       result
-//     );
-//   } catch (err: any) {
-//     // res.status(400).json({ error: err.message });
-//     next(err);
-//   }
-// });
-
-// authRouter.post("/login", async (req, res, next) => {
-//   try {
-//     const data = LoginUserSchema.parse(req.body);
-//     const result = await AuthService.login(data);
-//     res.json(result);
-//   } catch (err: any) {
-//     // res.status(401).json({ error: err.message });
-//     next(err);
-//   }
-// });
-
-// authRouter.post("/refresh", async (req, res, next) => {
-//   try {
-//     const { refreshToken } = req.body;
-//     const result = await AuthService.refreshToken(refreshToken);
-//     res.json(result);
-//   } catch (err: any) {
-//     // res.status(401).json({ error: err.message });
-//     next(err);
-//   }
-// });
-
-// authRouter.post("/logout", async (req, res, next) => {
-//   try {
-//     const { refreshToken } = req.body;
-//     const result = await AuthService.logout(refreshToken);
-//     res.json(result);
-//   } catch (err: any) {
-//     // res.status(400).json({ error: err.message });
-//     next(err);
-//   }
-// });
-
-// export default authRouter;
-
 import { Router } from "express";
 import { AuthService } from "@/services/auth-service";
 import {
@@ -87,6 +7,8 @@ import {
   ResetPasswordSchema,
 } from "@/schema/zod-schema";
 import ApiResponse from "@/libs/ApiResponse";
+import { AppError, ErrorType } from "@/libs/AppError";
+import { ZodError } from "zod";
 
 const authRouter = Router();
 
@@ -183,7 +105,42 @@ authRouter.post("/register", async (req, res, next) => {
       result
     );
   } catch (err) {
-    next(err);
+    console.error(err, "error");
+
+    const error = err as AppError;
+
+    // Zod validation errors
+    if (err instanceof ZodError) {
+      const errors = err.issues.map((e) => e.message).join(", ");
+      return ApiResponse.validation(res, errors);
+    }
+
+    // Custom errors from your service (e.g. duplicate email)
+    if (error.errorType === ErrorType.CONFLICT) {
+      return ApiResponse.conflict(
+        res,
+        error.message || "User with this email already exists"
+      );
+    }
+
+    // Known auth errors
+    if (error.errorType === ErrorType.UNAUTHORIZED) {
+      return ApiResponse.unauthorized(
+        res,
+        error.message || "Unauthorized access"
+      );
+    }
+
+    // server error (500)
+    if (error.statusCode === 500) {
+      return ApiResponse.internalServerError(res, "Something went wrong");
+    }
+
+    // If it’s still not handled, send a generic bad request
+    return ApiResponse.badRequest(
+      res,
+      "Something went wrong during registration"
+    );
   }
 });
 
@@ -211,7 +168,30 @@ authRouter.post("/login", async (req, res, next) => {
     const result = await AuthService.login(data);
     return ApiResponse.success(res, 200, "Login successful", result);
   } catch (err) {
-    next(err);
+    console.error(err, "error");
+
+    const error = err as AppError;
+
+    // Unauthorization error
+    if (error.errorType === ErrorType.UNAUTHORIZED) {
+      return ApiResponse.unauthorized(
+        res,
+        error.message || "Invalid email or password"
+      );
+    }
+
+    // notFoundError
+    if (error.errorType === ErrorType.NOT_FOUND) {
+      return ApiResponse.notFound(res, error.message || "User not found");
+    }
+
+    // server error (500)
+    if (error.statusCode === 500) {
+      return ApiResponse.internalServerError(res, "Something went wrong");
+    }
+
+    // If it’s still not handled, send a generic bad request
+    return ApiResponse.badRequest(res, "Something went wrong during login");
   }
 });
 
@@ -239,7 +219,25 @@ authRouter.post("/forgot-password", async (req, res, next) => {
     const result = await AuthService.forgotPassword(data);
     return ApiResponse.success(res, 200, "OTP sent", result);
   } catch (err) {
-    next(err);
+    console.error(err, "error");
+
+    const error = err as AppError;
+
+    // notFoundError
+    if (error.errorType === ErrorType.NOT_FOUND) {
+      return ApiResponse.notFound(res, "User not found");
+    }
+
+    // server error (500)
+    if (error.statusCode === 500) {
+      return ApiResponse.internalServerError(res, "Something went wrong");
+    }
+
+    // If it’s still not handled, send a generic bad request
+    return ApiResponse.badRequest(
+      res,
+      "Something went wrong during forgot password"
+    );
   }
 });
 
@@ -267,7 +265,30 @@ authRouter.post("/reset-password", async (req, res, next) => {
     const result = await AuthService.resetPassword(data);
     return ApiResponse.success(res, 200, "Password reset successful", result);
   } catch (err) {
-    next(err);
+    console.error(err, "error");
+
+    const error = err as AppError;
+
+    // Unauthorization error
+    if (error.errorType === ErrorType.UNAUTHORIZED) {
+      return ApiResponse.unauthorized(res, error.message);
+    }
+
+    // notFoundError
+    if (error.errorType === ErrorType.NOT_FOUND) {
+      return ApiResponse.notFound(res, error.message || "User not found");
+    }
+
+    // server error (500)
+    if (error.statusCode === 500) {
+      return ApiResponse.internalServerError(res, "Something went wrong");
+    }
+
+    // If it’s still not handled, send a generic bad request
+    return ApiResponse.badRequest(
+      res,
+      "Something went wrong during reset password"
+    );
   }
 });
 
@@ -329,7 +350,20 @@ authRouter.post("/logout", async (req, res, next) => {
     const result = await AuthService.logout(refreshToken);
     return ApiResponse.success(res, 200, "Logged out successfully", result);
   } catch (err) {
-    next(err);
+    console.error(err, "error");
+
+    const error = err as AppError;
+
+    // server error (500)
+    if (error.statusCode === 500) {
+      return ApiResponse.internalServerError(res, "Something went wrong");
+    }
+
+    // If it’s still not handled, send a generic bad request
+    return ApiResponse.badRequest(
+      res,
+      "Something went wrong during reset password"
+    );
   }
 });
 
