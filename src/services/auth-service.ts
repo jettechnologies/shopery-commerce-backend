@@ -12,7 +12,6 @@ import {
   ForgotPasswordInput,
   ResetPasswordInput,
 } from "@/schema/zod-schema";
-import ApiResponse from "@/libs/ApiResponse";
 import {
   ConflictError,
   UnauthorizedError,
@@ -41,8 +40,8 @@ export class AuthService {
     });
 
     // Generate tokens
-    const accessToken = generateAccessToken(newUser.id);
-    const refreshToken = generateRefreshToken(newUser.id);
+    const accessToken = generateAccessToken(newUser.userId, newUser.role);
+    const refreshToken = generateRefreshToken(newUser.userId, newUser.role);
 
     // Store refresh token in DB
     await prisma.userSession.create({
@@ -61,7 +60,7 @@ export class AuthService {
     });
 
     return {
-      user: { id: String(newUser.id), email: newUser.email },
+      user: { id: newUser.userId, email: newUser.email },
       accessToken,
       refreshToken,
     };
@@ -75,8 +74,8 @@ export class AuthService {
     if (!isValid) throw new UnauthorizedError("Invalid password");
 
     // Generate tokens
-    const accessToken = generateAccessToken(user.id);
-    const refreshToken = generateRefreshToken(user.id);
+    const accessToken = generateAccessToken(user.userId, user.role);
+    const refreshToken = generateRefreshToken(user.userId, user.role);
 
     // Store refresh token
     await prisma.userSession.create({
@@ -88,7 +87,7 @@ export class AuthService {
     });
 
     return {
-      user: { id: user.id, email: user.email },
+      user: { id: user.userId, email: user.email },
       accessToken,
       refreshToken,
     };
@@ -117,7 +116,7 @@ export class AuthService {
       context: { otp },
     });
 
-    return { message: "Password reset OTP sent to your email", otp };
+    return { message: "Password reset OTP sent to your email" };
   }
 
   //   reset password service
@@ -184,7 +183,7 @@ export class AuthService {
     }
 
     // Issue new access token
-    const accessToken = generateAccessToken(BigInt(payload.userId));
+    const accessToken = generateAccessToken(payload.userId, payload.role);
     return { accessToken };
   }
 

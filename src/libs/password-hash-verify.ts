@@ -19,20 +19,23 @@ export async function comparePassword(
 }
 
 // Generate Access Token
-export function generateAccessToken(userId: bigint) {
-  return jwt.sign({ userId: userId.toString() }, ACCESS_TOKEN_SECRET, {
+export function generateAccessToken(userId: string, role: string) {
+  return jwt.sign({ userId, role }, ACCESS_TOKEN_SECRET, {
     expiresIn: "1d",
   });
 }
 
 // Generate Refresh Token
-export function generateRefreshToken(userId: bigint) {
-  return jwt.sign({ userId: userId.toString() }, REFRESH_TOKEN_SECRET, {
+export function generateRefreshToken(userId: string, role: string) {
+  return jwt.sign({ userId, role }, REFRESH_TOKEN_SECRET, {
     expiresIn: "7d",
   });
 }
 
 // Verify Refresh Token
 export function verifyRefreshToken(token: string) {
-  return jwt.verify(token, REFRESH_TOKEN_SECRET) as { userId: number };
+  return jwt.verify(token, REFRESH_TOKEN_SECRET) as {
+    userId: string;
+    role: string;
+  };
 }
