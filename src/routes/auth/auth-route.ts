@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AuthService } from "@/services/auth-service";
+import { Request, Response, NextFunction } from "express";
 import {
   CreateUserSchema,
   LoginUserSchema,
@@ -74,14 +75,43 @@ const authRouter = Router();
  *         password:
  *           type: string
  *           example: "NewPassword123"
+ *     RegisterUserResponse:
+ *       type: object
+ *       properties:
+ *         user:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               example: "b231f010-daa1-42e3-bc87-984a0382b8d2"
+ *             email:
+ *               type: string
+ *               example: "john@example.com"
+ *         accessToken:
+ *           type: string
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         refreshToken:
+ *           type: string
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  */
 
 /**
  * @swagger
  * /auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new user (optionally merges guest cart)
+ *     description: >
+ *       Registers a new user account.
+ *       If the request includes a `x-guest-token` header or `guestToken` cookie,
+ *       the system will automatically merge the guest cart into the new user's active cart.
  *     tags: [Auth]
+ *     parameters:
+ *       - in: header
+ *         name: x-guest-token
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Guest cart token for merging into the new user's cart
  *     requestBody:
  *       required: true
  *       content:
@@ -90,59 +120,127 @@ const authRouter = Router();
  *             $ref: '#/components/schemas/RegisterUser'
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User registered successfully and cart merged (if applicable)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegisterUserResponse'
  *       400:
- *         description: Validation error
+ *         description: Validation error or missing required fields
+ *       409:
+ *         description: Email already in use
+ *       500:
+ *         description: Internal server error
  */
-authRouter.post("/register", async (req, res, next) => {
-  try {
-    const data = CreateUserSchema.parse(req.body);
-    const result = await AuthService.register(data);
-    return ApiResponse.success(
-      res,
-      201,
-      "User registered successfully",
-      result
-    );
-  } catch (err) {
-    console.error(err, "error");
+// authRouter.post("/register", async (req, res, next) => {
+//   try {
+//     const data = CreateUserSchema.parse(req.body);
+//     const result = await AuthService.register(data);
+//     return ApiResponse.success(
+//       res,
+//       201,
+//       "User registered successfully",
+//       result
+//     );
+//   } catch (err) {
+//     console.error(err, "error");
 
-    const error = err as AppError;
+//     const error = err as AppError;
 
-    // Zod validation errors
-    if (err instanceof ZodError) {
-      const errors = err.issues.map((e) => e.message).join(", ");
-      return ApiResponse.validation(res, errors);
-    }
+//     // Zod validation errors
+//     if (err instanceof ZodError) {
+//       const errors = err.issues.map((e) => e.message).join(", ");
+//       return ApiResponse.validation(res, errors);
+//     }
 
-    // Custom errors from your service (e.g. duplicate email)
-    if (error.errorType === ErrorType.CONFLICT) {
-      return ApiResponse.conflict(
+//     // Custom errors from your service (e.g. duplicate email)
+//     if (error.errorType === ErrorType.CONFLICT) {
+//       return ApiResponse.conflict(
+//         res,
+//         error.message || "User with this email already exists"
+//       );
+//     }
+
+//     // Known auth errors
+//     if (error.errorType === ErrorType.UNAUTHORIZED) {
+//       return ApiResponse.unauthorized(
+//         res,
+//         error.message || "Unauthorized access"
+//       );
+//     }
+
+//     // server error (500)
+//     if (error.statusCode === 500) {
+//       return ApiResponse.internalServerError(res, "Something went wrong");
+//     }
+
+//     // If it’s still not handled, send a generic bad request
+//     return ApiResponse.badRequest(
+//       res,
+//       "Something went wrong during registration"
+//     );
+//   }
+// });
+
+authRouter.post(
+  "/register",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Parse and validate body
+      const data = CreateUserSchema.parse(req.body);
+
+      // Extract guest token (from headers or cookies)
+      const guestToken =
+        (req.headers["x-guest-token"] as string) ||
+        (req.cookies?.guestToken as string);
+
+      // Pass token to AuthService
+      const result = await AuthService.register({ ...data, guestToken });
+
+      return ApiResponse.success(
         res,
-        error.message || "User with this email already exists"
+        201,
+        "User registered successfully",
+        result
+      );
+    } catch (err) {
+      console.error("Registration error:", err);
+
+      // 🧩 Handle Zod validation errors
+      if (err instanceof ZodError) {
+        const errors = err.issues.map((e) => e.message).join(", ");
+        return ApiResponse.validation(res, errors);
+      }
+
+      // 🧩 Custom app errors
+      const error = err as AppError;
+
+      if (error.errorType === ErrorType.CONFLICT) {
+        return ApiResponse.conflict(
+          res,
+          error.message || "User with this email already exists"
+        );
+      }
+
+      if (error.errorType === ErrorType.UNAUTHORIZED) {
+        return ApiResponse.unauthorized(
+          res,
+          error.message || "Unauthorized access"
+        );
+      }
+
+      if (error.statusCode === 500) {
+        return ApiResponse.internalServerError(res, "Something went wrong");
+      }
+
+      // 🧩 Generic fallback
+      return ApiResponse.badRequest(
+        res,
+        "Something went wrong during registration"
       );
     }
-
-    // Known auth errors
-    if (error.errorType === ErrorType.UNAUTHORIZED) {
-      return ApiResponse.unauthorized(
-        res,
-        error.message || "Unauthorized access"
-      );
-    }
-
-    // server error (500)
-    if (error.statusCode === 500) {
-      return ApiResponse.internalServerError(res, "Something went wrong");
-    }
-
-    // If it’s still not handled, send a generic bad request
-    return ApiResponse.badRequest(
-      res,
-      "Something went wrong during registration"
-    );
   }
-});
+);
 
 /**
  * @swagger

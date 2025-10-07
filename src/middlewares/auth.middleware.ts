@@ -4,7 +4,7 @@ import { verifyToken } from "@/libs/attach-jwt";
 import { UnauthorizedError, ForbiddenError } from "@/libs/AppError";
 
 export interface AuthRequest extends Request {
-  user?: { userId: string; role: string };
+  user?: { userId: string; role: string; email: string };
 }
 
 export function authGuard(
@@ -26,7 +26,11 @@ export function authGuard(
     return next(new UnauthorizedError("Invalid or expired token"));
   }
 
-  req.user = { userId: decoded.userId, role: decoded.role };
+  req.user = {
+    userId: decoded.userId,
+    role: decoded.role,
+    email: decoded.email,
+  };
   next();
 }
 

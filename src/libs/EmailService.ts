@@ -7,6 +7,8 @@ export enum EmailTemplate {
   WELCOME = "welcome",
   PASSWORD_RESET = "password-reset",
   ORDER_CONFIRMATION = "order-confirmation",
+  ORDER_CANCELLED = "order-cancelled",
+  ORDER_STATUS_UPDATE = "order-status-update",
 }
 
 interface SendEmailProps {

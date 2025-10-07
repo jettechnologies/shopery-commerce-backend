@@ -1,6 +1,14 @@
 // services/profile.service.ts
 import { PrismaClient } from "@prisma/client";
 import { NotFoundError, BadRequestError, ConflictError } from "@/libs/AppError";
+import {
+  UpdateAddressSchema,
+  CreateAddressSchema,
+  UpdateProfileSchema,
+  type UpdateAddressSchemaType,
+  type UpdateProfileSchemaType,
+  type CreateAddressSchemaType,
+} from "@/schema/zod-schema/profile.schema";
 
 const prisma = new PrismaClient();
 
@@ -29,14 +37,12 @@ export class ProfileService {
   }
 
   // Update basic profile info
-  static async updateProfile(
-    userId: string,
-    data: Partial<{ name: string; email: string }>
-  ) {
+  static async updateProfile(userId: string, data: UpdateProfileSchemaType) {
+    const parsedData = UpdateProfileSchema.parse(data);
     try {
       return await prisma.user.update({
         where: { userId },
-        data,
+        data: parsedData,
       });
     } catch (err: any) {
       if (err.code === "P2002") {
@@ -48,20 +54,16 @@ export class ProfileService {
   }
 
   // Add a new address
-  static async addAddress(
-    userId: string,
-    address: Omit<
-      Parameters<typeof prisma.address.create>[0]["data"],
-      "userId" | "user"
-    >
-  ) {
+  static async addAddress(userId: string, address: CreateAddressSchemaType) {
+    const parsedAddress = CreateAddressSchema.parse(address);
+
     const user = await prisma.user.findUnique({ where: { userId } });
     if (!user) throw new NotFoundError("User not found");
 
     try {
       return await prisma.address.create({
         data: {
-          ...address,
+          ...parsedAddress,
           userId: user.id,
         },
       });
@@ -71,16 +73,8 @@ export class ProfileService {
   }
 
   // Update an address
-  static async updateAddress(
-    addressId: bigint,
-    data: Partial<{
-      address1: string;
-      city: string;
-      state: string;
-      zip: string;
-      country: string;
-    }>
-  ) {
+  static async updateAddress(addressId: bigint, data: UpdateAddressSchemaType) {
+    const parsedData = UpdateAddressSchema.parse(data);
     const existing = await prisma.address.findUnique({
       where: { id: addressId },
     });
@@ -89,7 +83,7 @@ export class ProfileService {
 
     return prisma.address.update({
       where: { id: addressId },
-      data,
+      data: parsedData,
     });
   }
 

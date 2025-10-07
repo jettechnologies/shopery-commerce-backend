@@ -2,7 +2,7 @@ import { Router } from "express";
 import { ProfileService } from "@/services/profile-service";
 import ApiResponse from "@/libs/ApiResponse";
 import { AppError, ErrorType } from "@/libs/AppError";
-import { ZodError, z } from "zod";
+import { ZodError } from "zod";
 import { authGuard, AuthRequest } from "@/middlewares/auth.middleware";
 
 const profileRouter = Router();
@@ -90,6 +90,13 @@ profileRouter.get("/get-profile/:userId", async (req, res) => {
     );
   } catch (err) {
     const error = err as AppError;
+
+    // Zod validation errors
+    if (err instanceof ZodError) {
+      const errors = err.issues.map((e) => e.message).join(", ");
+      return ApiResponse.validation(res, errors);
+    }
+
     if (error.errorType === ErrorType.NOT_FOUND) {
       return ApiResponse.notFound(res, error.message || "Profile not found");
     }
@@ -103,7 +110,7 @@ profileRouter.get("/get-profile/:userId", async (req, res) => {
 /**
  * @swagger
  * /profile/update-profile/{userId}:
- *   put:
+ *   patch:
  *     summary: Update user profile
  *     tags: [Profile]
  *     security:
@@ -126,7 +133,7 @@ profileRouter.get("/get-profile/:userId", async (req, res) => {
  *       400:
  *         description: Validation error
  */
-profileRouter.put("/update-profile/:userId", async (req, res) => {
+profileRouter.patch("/update-profile/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
     const updated = await ProfileService.updateProfile(userId, req.body);
@@ -138,6 +145,13 @@ profileRouter.put("/update-profile/:userId", async (req, res) => {
     );
   } catch (err) {
     const error = err as AppError;
+
+    // Zod validation errors
+    if (err instanceof ZodError) {
+      const errors = err.issues.map((e) => e.message).join(", ");
+      return ApiResponse.validation(res, errors);
+    }
+
     if (error.errorType === ErrorType.CONFLICT) {
       return ApiResponse.conflict(res, error.message || "Email already exists");
     }
@@ -150,7 +164,7 @@ profileRouter.put("/update-profile/:userId", async (req, res) => {
 
 /**
  * @swagger
- * /address/create:
+ * /profile/address/create:
  *   post:
  *     summary: Add a new address
  *     tags: [Profile]
@@ -171,6 +185,9 @@ profileRouter.put("/update-profile/:userId", async (req, res) => {
 profileRouter.post("/address/create", async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.userId!;
+
+    console.log(userId, "user id");
+
     const address = await ProfileService.addAddress(userId, req.body);
     return ApiResponse.success(
       res,
@@ -180,6 +197,13 @@ profileRouter.post("/address/create", async (req: AuthRequest, res) => {
     );
   } catch (err) {
     const error = err as AppError;
+
+    // Zod validation errors
+    if (err instanceof ZodError) {
+      const errors = err.issues.map((e) => e.message).join(", ");
+      return ApiResponse.validation(res, errors);
+    }
+
     if (error.errorType === ErrorType.NOT_FOUND) {
       return ApiResponse.notFound(res, "User not found");
     }
@@ -189,8 +213,8 @@ profileRouter.post("/address/create", async (req: AuthRequest, res) => {
 
 /**
  * @swagger
- * /address/edit-address/{id}:
- *   put:
+ * /profile/address/edit-address/{id}:
+ *   patch:
  *     summary: Update an address
  *     tags: [Profile]
  *     security:
@@ -213,7 +237,7 @@ profileRouter.post("/address/create", async (req: AuthRequest, res) => {
  *       404:
  *         description: Address not found
  */
-profileRouter.put("/address/edit-address/:id", async (req, res) => {
+profileRouter.patch("/address/edit-address/:id", async (req, res) => {
   try {
     const addressId = BigInt(req.params.id);
     const updated = await ProfileService.updateAddress(addressId, req.body);
@@ -225,6 +249,13 @@ profileRouter.put("/address/edit-address/:id", async (req, res) => {
     );
   } catch (err) {
     const error = err as AppError;
+
+    // Zod validation errors
+    if (err instanceof ZodError) {
+      const errors = err.issues.map((e) => e.message).join(", ");
+      return ApiResponse.validation(res, errors);
+    }
+
     if (error.errorType === ErrorType.NOT_FOUND) {
       return ApiResponse.notFound(res, "Address not found");
     }
@@ -259,6 +290,13 @@ profileRouter.delete("/deactive/:userId", async (req: AuthRequest, res) => {
     return ApiResponse.success(res, 200, "Profile deactivated", deactivated);
   } catch (err) {
     const error = err as AppError;
+
+    // Zod validation errors
+    if (err instanceof ZodError) {
+      const errors = err.issues.map((e) => e.message).join(", ");
+      return ApiResponse.validation(res, errors);
+    }
+
     if (error.errorType === ErrorType.NOT_FOUND) {
       return ApiResponse.notFound(res, "User not found");
     }

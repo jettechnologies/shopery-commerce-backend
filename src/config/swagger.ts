@@ -20,20 +20,16 @@ const options: swaggerJsdoc.Options = {
         description: "Production server",
       },
     ],
-    // components: {
-    //   securitySchemes: {
-    //     bearerJWT: {
-    //       type: "apiKey",
-    //       scheme: "bearer",
-    //       bearerFormat: "JWT",
-    //     },
-    //     cookieJWT: {
-    //       type: "apiKey",
-    //       in: "cookie",
-    //       name: "access_token",
-    //     },
-    //   },
-    // },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Enter JWT token as: **Bearer <token>**",
+        },
+      },
+    },
   },
   // 👇 Paths to your route files for auto docs
   apis: ["./src/routes/*/*.ts"],
