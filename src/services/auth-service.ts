@@ -52,8 +52,16 @@ export class AuthService {
     }
 
     // Generate tokens
-    const accessToken = generateAccessToken(newUser.userId, newUser.role);
-    const refreshToken = generateRefreshToken(newUser.userId, newUser.role);
+    const accessToken = generateAccessToken(
+      newUser.userId,
+      newUser.role,
+      newUser.email
+    );
+    const refreshToken = generateRefreshToken(
+      newUser.userId,
+      newUser.role,
+      newUser.email
+    );
 
     await prisma.userSession.create({
       data: {
@@ -129,8 +137,12 @@ export class AuthService {
     if (!isValid) throw new UnauthorizedError("Invalid password");
 
     // Generate tokens
-    const accessToken = generateAccessToken(user.userId, user.role);
-    const refreshToken = generateRefreshToken(user.userId, user.role);
+    const accessToken = generateAccessToken(user.userId, user.role, user.email);
+    const refreshToken = generateRefreshToken(
+      user.userId,
+      user.role,
+      user.email
+    );
 
     // Store refresh token
     await prisma.userSession.create({
@@ -238,7 +250,11 @@ export class AuthService {
     }
 
     // Issue new access token
-    const accessToken = generateAccessToken(payload.userId, payload.role);
+    const accessToken = generateAccessToken(
+      payload.userId,
+      payload.role,
+      payload.email
+    );
     return { accessToken };
   }
 

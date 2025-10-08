@@ -8,10 +8,17 @@ class ApiResponse {
     message: string = "Success",
     data?: T
   ) {
+    const serializedData = data
+      ? JSON.parse(
+          JSON.stringify(data, (_, value) =>
+            typeof value === "bigint" ? value.toString() : value
+          )
+        )
+      : null;
     return res.status(status).json({
       status,
       message,
-      data: data ?? null,
+      data: serializedData,
     });
   }
 

@@ -60,16 +60,18 @@ export class ProfileService {
     const user = await prisma.user.findUnique({ where: { userId } });
     if (!user) throw new NotFoundError("User not found");
 
-    try {
-      return await prisma.address.create({
-        data: {
-          ...parsedAddress,
-          userId: user.id,
-        },
-      });
-    } catch {
-      throw new BadRequestError("Failed to add address");
-    }
+    const existingAddress = await prisma.address.findFirst({
+      where: { userId: user.id, ...parsedAddress },
+    });
+
+    if (existingAddress) throw new ConflictError("Address already exists");
+
+    return await prisma.address.create({
+      data: {
+        ...parsedAddress,
+        userId: user.id,
+      },
+    });
   }
 
   // Update an address

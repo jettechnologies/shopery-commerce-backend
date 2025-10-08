@@ -15,5 +15,9 @@ export function handleError(res: Response, err: any) {
     return ApiResponse.notFound(res, error.message);
   if (error.errorType === ErrorType.BAD_REQUEST)
     return ApiResponse.badRequest(res, error.message);
+  if (error.errorType === ErrorType.CONFLICT)
+    return ApiResponse.conflict(res, error.message);
+  if (error.errorType === ErrorType.UNAUTHORIZED)
+    return ApiResponse.unauthorized(res, error.message);
   return ApiResponse.internalServerError(res, "Unexpected error occurred");
 }

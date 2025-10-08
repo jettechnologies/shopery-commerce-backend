@@ -1,7 +1,7 @@
 // middlewares/auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "@/libs/attach-jwt";
 import { UnauthorizedError, ForbiddenError } from "@/libs/AppError";
+import { verifyAccessToken } from "@/libs/password-hash-verify";
 
 export interface AuthRequest extends Request {
   user?: { userId: string; role: string; email: string };
@@ -20,7 +20,7 @@ export function authGuard(
   }
 
   const token = authHeader.split(" ")[1];
-  const decoded = verifyToken(token) as any;
+  const decoded = verifyAccessToken(token);
 
   if (!decoded) {
     return next(new UnauthorizedError("Invalid or expired token"));

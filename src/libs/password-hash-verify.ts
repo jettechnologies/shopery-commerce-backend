@@ -19,15 +19,23 @@ export async function comparePassword(
 }
 
 // Generate Access Token
-export function generateAccessToken(userId: string, role: string) {
-  return jwt.sign({ userId, role }, ACCESS_TOKEN_SECRET, {
+export function generateAccessToken(
+  userId: string,
+  role: string,
+  email: string
+) {
+  return jwt.sign({ userId, role, email }, ACCESS_TOKEN_SECRET, {
     expiresIn: "1d",
   });
 }
 
 // Generate Refresh Token
-export function generateRefreshToken(userId: string, role: string) {
-  return jwt.sign({ userId, role }, REFRESH_TOKEN_SECRET, {
+export function generateRefreshToken(
+  userId: string,
+  role: string,
+  email: string
+) {
+  return jwt.sign({ userId, role, email }, REFRESH_TOKEN_SECRET, {
     expiresIn: "7d",
   });
 }
@@ -37,5 +45,15 @@ export function verifyRefreshToken(token: string) {
   return jwt.verify(token, REFRESH_TOKEN_SECRET) as {
     userId: string;
     role: string;
+    email: string;
+  };
+}
+
+//  verify access token
+export function verifyAccessToken(token: string) {
+  return jwt.verify(token, ACCESS_TOKEN_SECRET) as {
+    userId: string;
+    role: string;
+    email: string;
   };
 }
