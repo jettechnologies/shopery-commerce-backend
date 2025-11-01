@@ -2,11 +2,69 @@ import { Response as ExpressResponse } from "express";
 import { json } from "zod";
 
 class ApiResponse {
+  // static success<T>(
+  //   res: ExpressResponse,
+  //   status: number = 200,
+  //   message: string = "Success",
+  //   data?: T
+  // ) {
+  //   const serializedData = data
+  //     ? JSON.parse(
+  //         JSON.stringify(data, (_, value) =>
+  //           typeof value === "bigint" ? value.toString() : value
+  //         )
+  //       )
+  //     : null;
+  //   return res.status(status).json({
+  //     status,
+  //     message,
+  //     data: serializedData,
+  //   });
+  // }
+
+  // paginated response structure
+
+  // static success<T>(
+  //   res: ExpressResponse,
+  //   status: number = 200,
+  //   message: string = "Success",
+  //   data?: T,
+  //   pagination?: {
+  //     total: number;
+  //     totalPages: number;
+  //     currentPage: number;
+  //     limit: number;
+  //     hasNextPage: boolean;
+  //     hasPreviousPage: boolean;
+  //   }
+  // ) {
+  //   const serializedData = data
+  //     ? JSON.parse(
+  //         JSON.stringify(data, (_, value) =>
+  //           typeof value === "bigint" ? value.toString() : value
+  //         )
+  //       )
+  //     : null;
+
+  //   const response: Record<string, any> = {
+  //     status,
+  //     message,
+  //     data: serializedData,
+  //   };
+
+  //   if (pagination) {
+  //     response.pagination = pagination;
+  //   }
+
+  //   return res.status(status).json(response);
+  // }
+
   static success<T>(
     res: ExpressResponse,
-    status: number = 200,
-    message: string = "Success",
-    data?: T
+    status = 200,
+    message = "Success",
+    data?: T,
+    pagination?: Record<string, any>
   ) {
     const serializedData = data
       ? JSON.parse(
@@ -15,11 +73,18 @@ class ApiResponse {
           )
         )
       : null;
-    return res.status(status).json({
+
+    const response: Record<string, any> = {
       status,
       message,
       data: serializedData,
-    });
+    };
+
+    if (pagination) {
+      response.pagination = pagination;
+    }
+
+    return res.status(status).json(response);
   }
 
   static error(

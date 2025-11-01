@@ -2,6 +2,11 @@ import * as Brevo from "@getbrevo/brevo";
 import handlebars from "handlebars";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// Add these at the top of your file (outside the class)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export enum EmailTemplate {
   WELCOME = "welcome",

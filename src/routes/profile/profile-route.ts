@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { ProfileService } from "@/services/profile-service";
 import ApiResponse from "@/libs/ApiResponse";
-import { AppError, ErrorType } from "@/libs/AppError";
-import { ZodError } from "zod";
+import { UnauthorizedError } from "@/libs/AppError";
 import { authGuard, AuthRequest } from "@/middlewares/auth.middleware";
 import { handleError } from "@/libs/misc";
 
@@ -61,27 +60,26 @@ profileRouter.use(authGuard);
 
 /**
  * @swagger
- * /profile/get-profile/{userId}:
+ * /profile/get-profile:
  *   get:
  *     summary: Get a user profile
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       200:
  *         description: User profile object
  *       404:
  *         description: Profile not found
  */
-profileRouter.get("/get-profile/:userId", async (req, res) => {
+profileRouter.get("/get-profile", async (req: AuthRequest, res) => {
   try {
-    const userId = req.params.userId;
+    const { user } = req;
+    if (!user) {
+      throw new UnauthorizedError("User not found");
+    }
+    const userId = user.userId;
+    // const userId = req.params.userId;
     const profile = await ProfileService.getProfileByUserId(userId);
     return ApiResponse.success(
       res,
@@ -96,18 +94,12 @@ profileRouter.get("/get-profile/:userId", async (req, res) => {
 
 /**
  * @swagger
- * /profile/update-profile/{userId}:
+ * /profile/update-profile:
  *   patch:
  *     summary: Update user profile
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -120,9 +112,14 @@ profileRouter.get("/get-profile/:userId", async (req, res) => {
  *       400:
  *         description: Validation error
  */
-profileRouter.patch("/update-profile/:userId", async (req, res) => {
+profileRouter.patch("/update-profile", async (req: AuthRequest, res) => {
   try {
-    const userId = req.params.userId;
+    // const userId = req.params.userId;
+    const { user } = req;
+    if (!user) {
+      throw new UnauthorizedError("User not found");
+    }
+    const userId = user.userId;
     const updated = await ProfileService.updateProfile(userId, req.body);
     return ApiResponse.success(
       res,
@@ -234,7 +231,12 @@ profileRouter.patch("/address/edit-address/:id", async (req, res) => {
  */
 profileRouter.delete("/deactive/:userId", async (req: AuthRequest, res) => {
   try {
-    const userId = req.params.userId;
+    const { user } = req;
+    if (!user) {
+      throw new UnauthorizedError("User not found");
+    }
+    //  const userId = user.userId;
+    const userId = user.userId || req.params.userId;
     const deactivated = await ProfileService.deactivateProfile(userId);
     return ApiResponse.success(res, 200, "Profile deactivated", deactivated);
   } catch (err) {
@@ -243,3 +245,18 @@ profileRouter.delete("/deactive/:userId", async (req: AuthRequest, res) => {
 });
 
 export default profileRouter;
+
+// profileRouter.get("/get-profile/:userId", async (req, res) => {
+//   try {
+//     const userId = req.params.userId;
+//     const profile = await ProfileService.getProfileByUserId(userId);
+//     return ApiResponse.success(
+//       res,
+//       200,
+//       "Profile fetched successfully",
+//       profile
+//     );
+//   } catch (err) {
+//     handleError(res, err);
+//   }
+// });
