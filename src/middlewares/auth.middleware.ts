@@ -13,7 +13,6 @@ export function authGuard(
   next: NextFunction
 ) {
   const authHeader = req.headers["authorization"];
-  console.log(authHeader, "authHeader");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return next(
       new UnauthorizedError("Missing or invalid Authorization header")

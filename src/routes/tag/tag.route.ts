@@ -23,6 +23,8 @@ tagRouter.use(authGuard);
  *     summary: Get all available tags
  *     description: Public endpoint for users to view all tags.
  *     tags: [Tags]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully fetched all tags

@@ -30,8 +30,7 @@ export class ProductService {
     data: CreateProductSchemaType,
     files?: Express.Multer.File[]
   ) {
-    const parsed = CreateProductSchema.parse(data);
-    const slug = slugify(parsed.name, { lower: true, strict: true });
+    const slug = slugify(data.name, { lower: true, strict: true });
 
     const existing = await prisma.product.findUnique({ where: { slug } });
     if (existing)
@@ -44,7 +43,7 @@ export class ProductService {
           const uploaded = await uploadToCloudinary(file.path, "products");
           return {
             imageUrl: uploaded.url,
-            altText: parsed.name,
+            altText: data.name,
             isPrimary: idx === 0,
             sortOrder: idx,
             cloudinaryPublicId: uploaded.public_id,
@@ -56,21 +55,21 @@ export class ProductService {
 
     const newProduct = await prisma.product.create({
       data: {
-        name: parsed.name,
+        name: data.name,
         slug,
-        description: parsed.description,
-        shortDescription: parsed.shortDescription,
-        price: parsed.price,
-        salePrice: parsed.salePrice,
-        sku: parsed.sku,
-        stockQuantity: parsed.stockQuantity,
-        weight: parsed.weight,
-        dimensions: parsed.dimensions,
-        categories: parsed.categoryIds
-          ? { create: parsed.categoryIds.map((categoryId) => ({ categoryId })) }
+        description: data.description,
+        shortDescription: data.shortDescription,
+        price: data.price,
+        salePrice: data.salePrice,
+        sku: data.sku,
+        stockQuantity: data.stockQuantity,
+        weight: data.weight,
+        dimensions: data.dimensions,
+        categories: data.categoryIds
+          ? { create: data.categoryIds.map((categoryId) => ({ categoryId })) }
           : undefined,
-        tags: parsed.tagIds
-          ? { create: parsed.tagIds.map((tagId) => ({ tagId })) }
+        tags: data.tagIds
+          ? { create: data.tagIds.map((tagId) => ({ tagId })) }
           : undefined,
         images: imageData.length ? { create: imageData } : undefined,
       },
@@ -88,8 +87,6 @@ export class ProductService {
     data: UpdateProductSchemaType,
     files?: Express.Multer.File[]
   ) {
-    const parsedData = UpdateProductSchema.parse(data);
-
     const existing = await prisma.product.findUnique({
       where: { productId },
       include: { images: true },
@@ -116,7 +113,7 @@ export class ProductService {
           const uploaded = await uploadToCloudinary(file.path, "products");
           return {
             imageUrl: uploaded.url,
-            altText: parsedData.name ?? existing.name,
+            altText: data.name ?? existing.name,
             isPrimary: idx === 0,
             sortOrder: idx,
             cloudinaryPublicId: uploaded.public_id,
@@ -134,19 +131,18 @@ export class ProductService {
     const updated = await prisma.product.update({
       where: { productId },
       data: {
-        name: parsedData.name ?? existing.name,
-        slug: parsedData.name
-          ? slugify(parsedData.name, { lower: true, strict: true })
+        name: data.name ?? existing.name,
+        slug: data.name
+          ? slugify(data.name, { lower: true, strict: true })
           : existing.slug,
-        description: parsedData.description ?? existing.description,
-        shortDescription:
-          parsedData.shortDescription ?? existing.shortDescription,
-        price: parsedData.price ?? existing.price,
-        salePrice: parsedData.salePrice ?? existing.salePrice,
-        sku: parsedData.sku ?? existing.sku,
-        stockQuantity: parsedData.stockQuantity ?? existing.stockQuantity,
-        weight: parsedData.weight ?? existing.weight,
-        dimensions: parsedData.dimensions ?? existing.dimensions,
+        description: data.description ?? existing.description,
+        shortDescription: data.shortDescription ?? existing.shortDescription,
+        price: data.price ?? existing.price,
+        salePrice: data.salePrice ?? existing.salePrice,
+        sku: data.sku ?? existing.sku,
+        stockQuantity: data.stockQuantity ?? existing.stockQuantity,
+        weight: data.weight ?? existing.weight,
+        dimensions: data.dimensions ?? existing.dimensions,
         images: imageData ? { create: imageData } : undefined,
       },
       include: { images: true, categories: true, tags: true },

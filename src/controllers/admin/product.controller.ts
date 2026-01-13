@@ -6,11 +6,46 @@ import {
   UpdateProductSchema,
 } from "@/schema/zod-schema/product.schema";
 import { handleError } from "@/libs/misc";
+import { parseArrayField } from "@/utils/misc";
 
 export class AdminProductController {
   static async createProduct(req: Request, res: Response) {
     try {
-      const data = CreateProductSchema.parse(req.body);
+      const body = req.body;
+
+      // 🧩 Convert string fields into correct types
+      const transformedData = {
+        ...body,
+        price: body.price ? Number(body.price) : undefined,
+        salePrice: body.salePrice ? Number(body.salePrice) : undefined,
+        stockQuantity: body.stockQuantity ? Number(body.stockQuantity) : 0,
+        weight: body.weight ? Number(body.weight) : undefined,
+
+        // Handle JSON arrays (from multipart/form-data)
+        categoryIds: parseArrayField<string>(body.categoryIds, {
+          forceType: "string",
+        }),
+        tagIds: parseArrayField<number>(body.tagIds, {
+          forceType: "number",
+        }),
+        // categoryIds: body.categoryIds
+        //   ? typeof body.categoryIds === "string"
+        //     ? JSON.parse(body.categoryIds)
+        //     : body.categoryIds
+        //   : [],
+        // tagIds: body.tagIds
+        //   ? typeof body.tagIds === "string"
+        //     ? JSON.parse(body.tagIds)
+        //     : body.tagIds
+        //   : [],
+      };
+
+      console.log(
+        transformedData,
+        "transformed data in product create controller"
+      );
+
+      const data = CreateProductSchema.parse(transformedData);
       const files = req.files as Express.Multer.File[];
       const product = await ProductService.createProduct(data, files);
       return ApiResponse.success(
@@ -20,6 +55,7 @@ export class AdminProductController {
         product
       );
     } catch (error) {
+      console.log(error, "error message");
       handleError(res, error);
     }
   }
@@ -27,7 +63,30 @@ export class AdminProductController {
   static async updateProduct(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data = UpdateProductSchema.parse(req.body);
+
+      const body = req.body;
+      const transformedData = {
+        ...body,
+        price: body.price ? Number(body.price) : undefined,
+        salePrice: body.salePrice ? Number(body.salePrice) : undefined,
+        stockQuantity: body.stockQuantity ? Number(body.stockQuantity) : 0,
+        weight: body.weight ? Number(body.weight) : undefined,
+
+        // Handle JSON arrays (from multipart/form-data)
+        categoryIds: body.categoryIds
+          ? typeof body.categoryIds === "string"
+            ? JSON.parse(body.categoryIds)
+            : body.categoryIds
+          : [],
+        tagIds: body.tagIds
+          ? typeof body.tagIds === "string"
+            ? JSON.parse(body.tagIds)
+            : body.tagIds
+          : [],
+      };
+
+      console.log(transformedData, "transformed data in update controller");
+      const data = UpdateProductSchema.parse(transformedData);
       const files = req.files as Express.Multer.File[];
       const product = await ProductService.updateProduct(id, data, files);
       return ApiResponse.success(

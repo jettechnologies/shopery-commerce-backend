@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { AdminCategoryController } from "@/controllers/admin/category.controller";
-import { authGuard } from "@/middlewares/auth.middleware";
+import { authGuard, roleGuard } from "@/middlewares/auth.middleware";
 
 const categoryRouter = Router();
-categoryRouter.use(authGuard);
+categoryRouter.use(authGuard, roleGuard(["admin", "user"]));
 
 /**
  * @swagger
@@ -14,7 +14,7 @@ categoryRouter.use(authGuard);
 
 /**
  * @swagger
- * /admin/categories:
+ * /categories:
  *   get:
  *     summary: Get all categories (paginated)
  *     description: Retrieve a paginated list of all categories.
@@ -68,7 +68,7 @@ categoryRouter.get("/", AdminCategoryController.getAllCategories);
 
 /**
  * @swagger
- * /admin/categories/cursor:
+ * /categories/cursor:
  *   get:
  *     summary: Get all categories (cursor pagination)
  *     description: Retrieve categories using cursor-based pagination.
@@ -110,5 +110,43 @@ categoryRouter.get("/", AdminCategoryController.getAllCategories);
  *                   example: "ca34ad7b-7d5c-4e8b-87a4-99ac4b3e1c31"
  */
 categoryRouter.get("/cursor", AdminCategoryController.getAllCategoriesCursor);
+
+/**
+ * @swagger
+ * /categories/{id}:
+ *   get:
+ *     summary: Get a single category by ID
+ *     description: Retrieve the details of a specific category by its ID.
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *     responses:
+ *       200:
+ *         description: Category details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "ca34ad7b-7d5c-4e8b-87a4-99ac4b3e1c31"
+ *                 name:
+ *                   type: string
+ *                   example: "Wireless Chargers"
+ *                 description:
+ *                   type: string
+ *                   example: "Fast and efficient wireless chargers for devices"
+ *       404:
+ *         description: Category not found
+ */
+categoryRouter.get("/:id", AdminCategoryController.getCategoryById);
 
 export default categoryRouter;

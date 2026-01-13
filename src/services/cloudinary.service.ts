@@ -1,6 +1,7 @@
 import { env } from "@/config/env";
 import { v4 as uuidv4 } from "uuid";
 import cloudinary from "@/config/cloudinary";
+import fs from "fs";
 
 export interface CloudinaryUploadResult {
   url: string;
@@ -24,6 +25,11 @@ export const uploadToCloudinary = async (
       public_id: `${folder}_${uniqueId}`,
       resource_type: "image",
       transformation: [{ quality: "auto", fetch_format: "auto" }],
+    });
+
+    // Remove temp file after successful upload
+    fs.unlink(filePath, (err) => {
+      if (err) console.warn("⚠️ Failed to delete temp file:", err.message);
     });
 
     return {

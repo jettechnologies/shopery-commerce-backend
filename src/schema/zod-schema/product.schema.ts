@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const CreateProductSchema = z.object({
   name: z.string().min(3, "Product name must be at least 3 characters"),
-  slug: z.string().min(3, "Slug is required"),
+  slug: z.string().min(3, "Slug is required").optional(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
   price: z.number().positive("Price must be positive"),
@@ -11,7 +11,7 @@ export const CreateProductSchema = z.object({
   stockQuantity: z.number().int().nonnegative().default(0),
   weight: z.number().optional(),
   dimensions: z.string().optional(),
-  categoryIds: z.array(z.number().int()).optional(),
+  categoryIds: z.array(z.string()).optional(),
   tagIds: z.array(z.number().int()).optional(),
   images: z
     .array(

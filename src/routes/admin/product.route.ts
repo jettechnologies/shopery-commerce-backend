@@ -1,10 +1,13 @@
 import { Router } from "express";
 import { AdminProductController } from "@/controllers/admin/product.controller";
 import { authGuard, roleGuard } from "@/middlewares/auth.middleware";
-import { upload } from "@/middlewares/multer.middleware"; // handles image uploads
+import {
+  uploadMultiple,
+  handleMulterError,
+} from "@/middlewares/multer.middleware"; // handles image uploadMultiples
 
 const productRouter = Router();
-productRouter.use(authGuard);
+productRouter.use(authGuard, handleMulterError);
 
 /**
  * @swagger
@@ -20,7 +23,7 @@ productRouter.use(authGuard);
  *     summary: Create a new product
  *     tags: [Products (Admin)]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -84,7 +87,7 @@ productRouter.use(authGuard);
 productRouter.post(
   "/",
   roleGuard(["admin"]),
-  upload.array("images", 5),
+  uploadMultiple("images"),
   AdminProductController.createProduct
 );
 
@@ -95,7 +98,7 @@ productRouter.post(
  *     summary: Update an existing product
  *     tags: [Products (Admin)]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -152,7 +155,7 @@ productRouter.post(
 productRouter.patch(
   "/:productId",
   roleGuard(["admin"]),
-  upload.array("images", 5),
+  uploadMultiple("images"),
   AdminProductController.updateProduct
 );
 
@@ -163,7 +166,7 @@ productRouter.patch(
  *     summary: Toggle a product’s active state (soft delete / restore)
  *     tags: [Products (Admin)]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -192,7 +195,7 @@ productRouter.patch(
  *     summary: Permanently delete a product
  *     tags: [Products (Admin)]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

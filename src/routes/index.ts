@@ -16,7 +16,7 @@ router.use("/checkout", checkoutRouter);
 router.use("/categories", categoryRouter);
 router.use("/guest-cart", guestCartRouter);
 router.use("/orders", orderRouter);
-router.use("/tag", tagRouter);
+router.use("/tags", tagRouter);
 router.get("/", (req, res) => {
   res.send("Welcome to Shopery Organic E-commerce API 🚀");
 });
