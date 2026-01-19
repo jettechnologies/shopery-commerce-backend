@@ -1,7 +1,8 @@
 // middleware/guestCart.ts
 import { Request, Response, NextFunction } from "express";
 import { GuestCartService } from "@/services/guest-cart.service";
-import { GuestCart } from "@prisma/client";
+// import { GuestCart } from "@prisma/client";
+import { GuestCart } from "prisma/generated/prisma";
 
 export interface GuestCartRequest extends Request {
   guestCart?: GuestCart;
@@ -10,7 +11,7 @@ export interface GuestCartRequest extends Request {
 export async function guestCartMiddleware(
   req: GuestCartRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     let guestToken = req.cookies?.guestToken;

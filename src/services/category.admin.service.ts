@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "prisma/client";
 import slugify from "slugify";
 import {
   CreateCategorySchemaType,
@@ -6,8 +6,6 @@ import {
 } from "@/schema/zod-schema/category.schema";
 import { ConflictError, NotFoundError } from "@/libs/AppError";
 import { SortOrder } from "@/utils/types";
-
-const prisma = new PrismaClient();
 
 export class CategoryService {
   /**

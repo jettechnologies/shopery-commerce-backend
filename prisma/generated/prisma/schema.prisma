@@ -1,0 +1,366 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AdminLevel {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  USER
+}
+
+enum Roles {
+  user
+  admin
+}
+
+enum OrderStatus {
+  pending
+  paid
+  failed
+  cancelled
+  shipped
+  delivered
+  refunded
+}
+
+enum CartStatus {
+  active
+  abandoned
+  checked_out
+  expired
+}
+
+model Session {
+  id     String  @id @default(cuid()) // unique session ID
+  userId BigInt? // optional: link to user if logged in
+  user   User?   @relation(fields: [userId], references: [id])
+
+  data      Json // stores session data
+  expiresAt DateTime // expiry time
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserSession {
+  id           BigInt   @id @default(autoincrement())
+  userId       BigInt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String   @unique
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+}
+
+model PasswordReset {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otp       String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id           BigInt   @id @default(autoincrement())
+  userId       String   @unique @default(uuid())
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  name         String?
+  role         Roles    @default(user)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  reviews       Review[]
+  posts         Post[]
+  comments      ProductComment[]
+  wishlist      Wishlist?
+  carts         Cart[]
+  PostComment   PostComment[]
+  Address       Address[]
+  Session       Session[]
+  UserSession   UserSession[]
+  PasswordReset PasswordReset[]
+  Admin         Admin?
+  Order         Order[]
+}
+
+model Admin {
+  id        BigInt     @id @default(autoincrement())
+  userId    BigInt     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level     AdminLevel @default(SUPER_ADMIN)
+  createdAt DateTime   @default(now())
+}
+
+model Address {
+  id       BigInt   @id @default(autoincrement())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   BigInt
+  address1 String   @map("address1")
+  address2 String?  @map("address2")
+  city     String   @map("city")
+  state    String   @map("state")
+  zip      String   @map("zip")
+  country  String   @map("country")
+  created  DateTime @default(now()) @map("created")
+  modified DateTime @updatedAt @map("modified")
+}
+
+model Product {
+  id               BigInt   @id @default(autoincrement())
+  productId        String   @unique @default(uuid())
+  name             String
+  slug             String   @unique
+  description      String?
+  shortDescription String?  @map("short_description")
+  price            Float
+  salePrice        Float?   @map("sale_price")
+  sku              String?  @unique
+  stockQuantity    Int      @default(0) @map("stock_quantity")
+  weight           Float?
+  dimensions       String?
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  images         ProductImage[]
+  categories     ProductCategory[]
+  tags           ProductTag[]
+  reviews        Review[]
+  comments       ProductComment[]
+  cartItems      CartItem[]
+  guestCartItems GuestCartItem[]
+  wishlistItems  WishlistItem[]
+  OrderItem      OrderItem[]
+}
+
+model Category {
+  id          BigInt   @id @default(autoincrement())
+  categoryId  String   @unique @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  products ProductCategory[]
+}
+
+model ProductCategory {
+  id         BigInt   @id @default(autoincrement())
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  BigInt
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId BigInt
+
+  @@unique([productId, categoryId])
+}
+
+model Tag {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @unique
+  slug      String?  @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  productTags ProductTag[]
+  postTags    PostTag[]
+}
+
+model ProductTag {
+  id        BigInt  @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId BigInt
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  tagId     BigInt
+
+  @@unique([productId, tagId])
+}
+
+model ProductImage {
+  id                 BigInt   @id @default(autoincrement())
+  product            Product  @relation(fields: [productId], references: [id])
+  productId          BigInt
+  imageUrl           String   @map("image_url")
+  altText            String?  @map("alt_text")
+  isPrimary          Boolean  @default(false) @map("is_primary")
+  sortOrder          Int      @default(0) @map("sort_order")
+  cloudinaryPublicId String?  @map("cloudinary_public_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+}
+
+model Review {
+  id         BigInt   @id @default(autoincrement())
+  reviewId   String   @unique @default(uuid())
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  BigInt
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     BigInt?
+  rating     Int
+  title      String?
+  body       String?
+  isApproved Boolean  @default(false) @map("is_approved")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+}
+
+model ProductComment {
+  id        BigInt           @id @default(autoincrement())
+  commentId String           @unique @default(uuid())
+  product   Product          @relation(fields: [productId], references: [id])
+  productId BigInt
+  user      User?            @relation(fields: [userId], references: [id])
+  userId    BigInt?
+  parent    ProductComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId  BigInt?
+  replies   ProductComment[] @relation("CommentReplies")
+  body      String
+  createdAt DateTime         @default(now()) @map("created_at")
+}
+
+model Post {
+  id          BigInt    @id @default(autoincrement())
+  postId      String    @unique @default(uuid())
+  author      User?     @relation(fields: [authorId], references: [id])
+  authorId    BigInt?
+  title       String
+  slug        String?   @unique
+  content     String
+  excerpt     String?
+  isPublished Boolean   @default(false) @map("is_published")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  postTags PostTag[]
+  comments PostComment[]
+}
+
+model PostTag {
+  id     BigInt @id @default(autoincrement())
+  post   Post   @relation(fields: [postId], references: [id])
+  postId BigInt
+  tag    Tag    @relation(fields: [tagId], references: [id])
+  tagId  BigInt
+
+  @@unique([postId, tagId])
+}
+
+model PostComment {
+  id        BigInt   @id @default(autoincrement())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    BigInt
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    BigInt?
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+}
+
+model Wishlist {
+  id        BigInt   @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    BigInt   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  items WishlistItem[]
+}
+
+model WishlistItem {
+  id         BigInt   @id @default(autoincrement())
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  wishlistId BigInt
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  BigInt
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([wishlistId, productId])
+}
+
+model Cart {
+  id        BigInt     @id @default(autoincrement())
+  cartId    String     @unique @default(uuid())
+  user      User?      @relation(fields: [userId], references: [id])
+  userId    BigInt?
+  status    CartStatus @default(active)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  items CartItem[]
+  Order Order[]
+}
+
+model CartItem {
+  id        BigInt   @id @default(autoincrement())
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  cartId    BigInt
+  product   Product  @relation(fields: [productId], references: [id])
+  productId BigInt
+  quantity  Int
+  unitPrice Float    @map("unit_price")
+  addedAt   DateTime @default(now()) @map("added_at")
+
+  @@unique([cartId, productId])
+}
+
+model GuestCart {
+  id         BigInt   @id @default(autoincrement())
+  token      String   @default(uuid())
+  ipAddress  String?
+  macAddress String?
+  userAgent  String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  expiresAt  DateTime
+
+  items GuestCartItem[]
+  Order Order[]
+}
+
+model GuestCartItem {
+  id          BigInt    @id @default(autoincrement())
+  guestCart   GuestCart @relation(fields: [guestCartId], references: [id])
+  guestCartId BigInt
+  product     Product   @relation(fields: [productId], references: [id])
+  productId   BigInt
+  quantity    Int
+  unitPrice   Float     @map("unit_price")
+
+  @@unique([guestCartId, productId])
+}
+
+model Order {
+  id      BigInt  @id @default(autoincrement())
+  orderId String  @unique @default(uuid())
+  userId  BigInt?
+  user    User?   @relation(fields: [userId], references: [id])
+
+  cartId BigInt?
+  cart   Cart?   @relation(fields: [cartId], references: [id])
+
+  guestCartId BigInt?
+  guestCart   GuestCart? @relation(fields: [guestCartId], references: [id])
+
+  email      String
+  status     OrderStatus @default(pending)
+  total      Decimal
+  paymentId  String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  OrderItems OrderItem[]
+}
+
+model OrderItem {
+  id        BigInt  @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   BigInt
+  product   Product @relation(fields: [productId], references: [id])
+  productId BigInt
+  quantity  Int
+  unitPrice Decimal @map("unit_price")
+}

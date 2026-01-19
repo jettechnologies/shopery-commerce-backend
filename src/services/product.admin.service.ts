@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import slugify from "slugify";
 import {
   CreateProductSchema,
@@ -11,8 +10,7 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "@/services/cloudinary.service";
-
-const prisma = new PrismaClient();
+import { prisma } from "prisma/client";
 
 interface ImageUploadResponse {
   imageUrl: string;
@@ -28,7 +26,7 @@ export class ProductService {
    */
   static async createProduct(
     data: CreateProductSchemaType,
-    files?: Express.Multer.File[]
+    files?: Express.Multer.File[],
   ) {
     const slug = slugify(data.name, { lower: true, strict: true });
 
@@ -48,7 +46,7 @@ export class ProductService {
             sortOrder: idx,
             cloudinaryPublicId: uploaded.public_id,
           };
-        })
+        }),
       );
       imageData = uploads;
     }
@@ -85,7 +83,7 @@ export class ProductService {
   static async updateProduct(
     productId: string,
     data: UpdateProductSchemaType,
-    files?: Express.Multer.File[]
+    files?: Express.Multer.File[],
   ) {
     const existing = await prisma.product.findUnique({
       where: { productId },
@@ -104,8 +102,8 @@ export class ProductService {
         existing.images.map((img) =>
           img.cloudinaryPublicId
             ? deleteFromCloudinary(img.cloudinaryPublicId)
-            : null
-        )
+            : null,
+        ),
       );
 
       const uploads = await Promise.all(
@@ -118,7 +116,7 @@ export class ProductService {
             sortOrder: idx,
             cloudinaryPublicId: uploaded.public_id,
           };
-        })
+        }),
       );
 
       // Delete old image records & create new ones
@@ -186,8 +184,8 @@ export class ProductService {
       existing.images.map((img) =>
         img.cloudinaryPublicId
           ? deleteFromCloudinary(img.cloudinaryPublicId)
-          : null
-      )
+          : null,
+      ),
     );
 
     await prisma.product.delete({ where: { productId } });

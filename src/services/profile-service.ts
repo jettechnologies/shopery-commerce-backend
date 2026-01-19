@@ -1,5 +1,4 @@
 // services/profile.service.ts
-import { PrismaClient } from "@prisma/client";
 import { NotFoundError, BadRequestError, ConflictError } from "@/libs/AppError";
 import {
   UpdateAddressSchema,
@@ -9,8 +8,7 @@ import {
   type UpdateProfileSchemaType,
   type CreateAddressSchemaType,
 } from "@/schema/zod-schema/profile.schema";
-
-const prisma = new PrismaClient();
+import { prisma } from "prisma/client";
 
 export class ProfileService {
   // Get a user profile by uuid (include relations)

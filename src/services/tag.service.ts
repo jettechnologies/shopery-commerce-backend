@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import {
   CreateTagSchema,
   UpdateTagSchema,
@@ -6,8 +5,7 @@ import {
   type UpdateTagSchemaType,
 } from "@/schema/zod-schema";
 import { NotFoundError, BadRequestError, ConflictError } from "@/libs/AppError";
-
-const prisma = new PrismaClient();
+import { prisma } from "prisma/client";
 
 export class TagService {
   // Get all tags (for public/product/post listing)

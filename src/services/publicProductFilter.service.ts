@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { FilterSortedBy } from "@/utils/types";
-
-const prisma = new PrismaClient();
+import { prisma } from "prisma/client";
 
 export class PublicProductFilterService {
   static async getFilteredProducts({

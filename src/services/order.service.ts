@@ -1,9 +1,8 @@
-import { PrismaClient, OrderStatus } from "@prisma/client";
+import { prisma } from "prisma/client";
+import { OrderStatus } from "prisma/generated/prisma";
 import { CreateOrderSchema, CreateOrderSchemaType } from "@/schema/zod-schema";
 import { BadRequestError, NotFoundError } from "@/libs/AppError";
 import { EmailService, EmailTemplate } from "@/libs/EmailService";
-
-const prisma = new PrismaClient();
 
 export class OrderService {
   /** ✅ Create a new order (registered or guest) */

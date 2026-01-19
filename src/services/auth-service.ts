@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import {
   hashPassword,
   comparePassword,
@@ -19,8 +18,7 @@ import {
 } from "@/libs/AppError";
 import { EmailService, EmailTemplate } from "@/libs/EmailService";
 import { GuestCartService } from "./guest-cart.service";
-
-const prisma = new PrismaClient();
+import { prisma } from "prisma/client";
 
 export class AuthService {
   static async register(data: CreateUserInput & { guestToken?: string }) {
@@ -44,7 +42,7 @@ export class AuthService {
       try {
         await GuestCartService.mergeIntoUserCart(
           data.guestToken,
-          newUser.userId
+          newUser.userId,
         );
       } catch (err) {
         console.error("Failed to merge guest cart:", err);
@@ -55,12 +53,12 @@ export class AuthService {
     const accessToken = generateAccessToken(
       newUser.userId,
       newUser.role,
-      newUser.email
+      newUser.email,
     );
     const refreshToken = generateRefreshToken(
       newUser.userId,
       newUser.role,
-      newUser.email
+      newUser.email,
     );
 
     await prisma.userSession.create({
@@ -141,7 +139,7 @@ export class AuthService {
     const refreshToken = generateRefreshToken(
       user.userId,
       user.role,
-      user.email
+      user.email,
     );
 
     // Store refresh token
@@ -253,7 +251,7 @@ export class AuthService {
     const accessToken = generateAccessToken(
       payload.userId,
       payload.role,
-      payload.email
+      payload.email,
     );
     return { accessToken };
   }

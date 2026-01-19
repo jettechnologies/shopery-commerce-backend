@@ -1,6 +1,7 @@
 import { Router, Response, NextFunction } from "express";
 import { OrderService } from "@/services/order.service";
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
+import { prisma } from "prisma/client";
 import { AuthRequest } from "@/middlewares/auth.middleware";
 import { GuestCartRequest } from "@/middlewares/guest-cart.middleware";
 import { BadRequestError, NotFoundError } from "@/libs/AppError";
@@ -8,7 +9,6 @@ import ApiResponse from "@/libs/ApiResponse";
 import { handleError } from "@/libs/misc";
 
 const checkoutRouter = Router();
-const prisma = new PrismaClient();
 
 /**
  * @swagger
@@ -51,7 +51,7 @@ checkoutRouter.post(
   async (
     req: AuthRequest & GuestCartRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       let cart: any;
@@ -86,7 +86,7 @@ checkoutRouter.post(
       // ✅ 2. Compute total cost
       const total = cart.items.reduce(
         (sum: number, item: any) => sum + item.quantity * item.unitPrice,
-        0
+        0,
       );
 
       // ✅ 3. Create "intermediate" (pending) order
@@ -113,13 +113,13 @@ checkoutRouter.post(
         res,
         201,
         "Checkout initiated successfully — pending order created",
-        order
+        order,
       );
     } catch (err) {
       handleError(res, err);
       next(err);
     }
-  }
+  },
 );
 
 export default checkoutRouter;

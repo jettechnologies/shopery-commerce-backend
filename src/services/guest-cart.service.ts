@@ -1,13 +1,11 @@
-import { PrismaClient } from "@prisma/client";
 import { Request } from "express";
 import { NotFoundError } from "@/libs/AppError";
 import {
   AddGuestCartItemSchema,
   type AddGuestCartItemSchemaType,
 } from "@/schema/zod-schema";
-import { CartStatus } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { CartStatus } from "../../prisma/generated/prisma/client";
+import { prisma } from "prisma/client";
 
 export class GuestCartService {
   // Create a new guest cart (default 7-day expiry)
@@ -57,7 +55,7 @@ export class GuestCartService {
 
     // Check if item already exists
     const existingItem = cart.items.find(
-      (i) => i.productId === parsedData.productId
+      (i) => i.productId === parsedData.productId,
     );
 
     if (existingItem) {
@@ -156,7 +154,7 @@ export class GuestCartService {
 
     for (const item of guestCart.items) {
       const existing = userCart.items.find(
-        (i) => i.productId === item.productId
+        (i) => i.productId === item.productId,
       );
       if (existing) {
         await prisma.cartItem.update({

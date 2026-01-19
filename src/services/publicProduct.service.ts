@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { SortOrder } from "@/utils/types";
-
-const prisma = new PrismaClient();
+import { prisma } from "prisma/client";
 
 type ProductQueryParams = {
   page?: number;
