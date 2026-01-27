@@ -1,4 +1,6 @@
 import {
+  CreateMultipleTagSchema,
+  CreateMultipleTagSchemaType,
   CreateTagSchema,
   UpdateTagSchema,
   type CreateTagSchemaType,
@@ -43,6 +45,30 @@ export class TagService {
       if (err.code === "P2002")
         throw new ConflictError("Tag name or slug already exists");
       throw new BadRequestError("Failed to create tag");
+    }
+  }
+
+  // Admin: create multiple tags
+  static async createMultipleTags(data: CreateMultipleTagSchemaType) {
+    const parsedData = CreateMultipleTagSchema.parse(data);
+
+    const tagsToCreate = parsedData.map((tag) => ({
+      name: tag.name,
+      slug: tag.slug ?? tag.name.toLowerCase().replace(/\s+/g, "-"),
+    }));
+
+    try {
+      const result = await prisma.tag.createMany({
+        data: tagsToCreate,
+        skipDuplicates: true,
+      });
+
+      return {
+        message: "Tags created successfully",
+        createdCount: result.count,
+      };
+    } catch (err) {
+      throw new BadRequestError("Failed to create tags");
     }
   }
 

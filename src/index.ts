@@ -5,6 +5,11 @@ import { errorHandler } from "@/middlewares/errorHandler";
 import router from "./routes";
 import { setupSwagger } from "./config/swagger";
 
+// universal fix for turning BIGINT to string at the application level
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 const app = express();
 
 app.use(cors());

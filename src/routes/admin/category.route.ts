@@ -47,7 +47,7 @@ categoryRouter.use(authGuard);
 categoryRouter.post(
   "/",
   roleGuard(["admin"]),
-  AdminCategoryController.createCategory
+  AdminCategoryController.createCategory,
 );
 
 /**
@@ -92,7 +92,7 @@ categoryRouter.post(
 categoryRouter.patch(
   "/:id",
   roleGuard(["admin"]),
-  AdminCategoryController.updateCategory
+  AdminCategoryController.updateCategory,
 );
 
 /**
@@ -122,8 +122,52 @@ categoryRouter.patch(
 categoryRouter.delete(
   "/:id",
   roleGuard(["admin"]),
-  AdminCategoryController.deleteCategory
+  AdminCategoryController.deleteCategory,
 );
+
+/**
+ * @swagger
+ * /admin/categories/{id}:
+ *   get:
+ *     summary: Get a single category by ID
+ *     description: Retrieve the details of a specific category by its ID.
+ *     tags: [Categories (Admin)]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *     responses:
+ *       200:
+ *         description: Category details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "ca34ad7b-7d5c-4e8b-87a4-99ac4b3e1c31"
+ *                 name:
+ *                   type: string
+ *                   example: "Wireless Chargers"
+ *                 description:
+ *                   type: string
+ *                   example: "Fast and efficient wireless chargers for devices"
+ *       404:
+ *         description: Category not found
+ */
+categoryRouter.get(
+  "/:id",
+  roleGuard(["admin"]),
+  AdminCategoryController.getCategoryById,
+);
+
+export default categoryRouter;
 
 // /**
 //  * @swagger
@@ -231,144 +275,3 @@ categoryRouter.delete(
 //   roleGuard(["admin"]),
 //   AdminCategoryController.getAllCategoriesCursor
 // );
-
-/**
- * @swagger
- * /admin/categories/{id}:
- *   get:
- *     summary: Get a single category by ID
- *     description: Retrieve the details of a specific category by its ID.
- *     tags: [Categories (Admin)]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Category ID
- *     responses:
- *       200:
- *         description: Category details retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: "ca34ad7b-7d5c-4e8b-87a4-99ac4b3e1c31"
- *                 name:
- *                   type: string
- *                   example: "Wireless Chargers"
- *                 description:
- *                   type: string
- *                   example: "Fast and efficient wireless chargers for devices"
- *       404:
- *         description: Category not found
- */
-categoryRouter.get(
-  "/:id",
-  roleGuard(["admin"]),
-  AdminCategoryController.getCategoryById
-);
-
-export default categoryRouter;
-
-// import { Router } from "express";
-// import { AdminCategoryController } from "@/controllers/admin/category.controller";
-// import { authGuard, roleGuard } from "@/middlewares/auth.middleware";
-
-// const categoryRouter = Router();
-// categoryRouter.use(authGuard, roleGuard(["admin"]));
-
-// /**
-//  * @swagger
-//  * tags:
-//  *   name: Admin - Categories
-//  *   description: Category management routes for administrators
-//  */
-
-// // /**
-// //  * @swagger
-// //  * /admin/categories:
-// //  *   post:
-// //  *     summary: Create a new category
-// //  *     tags: [Admin - Categories]
-// //  *     security:
-// //  *       - BearerAuth: []
-// //  *     requestBody:
-// //  *       required: true
-// //  *       content:
-// //  *         application/json:
-// //  *     properties:
-// //  *       name:
-// //  *         type: string
-// //  *          example: "Wireless Charging Pad"
-// //  *        description:
-// //  *          type: string
-// //  *          example: "Fast 15W wireless charger for mobile devices"
-// //  *          schema:
-// //  *             $ref: '#/components/schemas/CreateCategory'
-// //  *     responses:
-// //  *       201:
-// //  *         description: Category created successfully
-// //  */
-// // categoryRouter.post("/", AdminCategoryController.createCategory);
-
-// // /**
-// //  * @swagger
-// //  * /admin/categories/{id}:
-// //  *   patch:
-// //  *     summary: Update an existing category
-// //  *     tags: [Admin - Categories]
-// //  *     parameters:
-// //  *       - in: path
-// //  *         name: id
-// //  *         required: true
-// //  *     security:
-// //  *       - BearerAuth: []
-// //  *     responses:
-// //  *       200:
-// //  *         description: Category updated successfully
-// //  */
-// // categoryRouter.patch("/:id", AdminCategoryController.updateCategory);
-
-// // /**
-// //  * @swagger
-// //  * /admin/categories/{id}:
-// //  *   delete:
-// //  *     summary: Delete a category
-// //  *     tags: [Admin - Categories]
-// //  */
-// // categoryRouter.delete("/:id", AdminCategoryController.deleteCategory);
-
-// // /**
-// //  * @swagger
-// //  * /admin/categories:
-// //  *   get:
-// //  *     summary: Get all categories (page pagination)
-// //  *     tags: [Admin - Categories]
-// //  */
-// // categoryRouter.get("/", AdminCategoryController.getAllCategories);
-
-// // /**
-// //  * @swagger
-// //  * /admin/categories/cursor:
-// //  *   get:
-// //  *     summary: Get all categories (cursor pagination)
-// //  *     tags: [Admin - Categories]
-// //  */
-// // categoryRouter.get("/cursor", AdminCategoryController.getAllCategoriesCursor);
-
-// // /**
-// //  * @swagger
-// //  * /admin/categories/{id}:
-// //  *   get:
-// //  *     summary: Get a category by ID
-// //  *     tags: [Admin - Categories]
-// //  */
-// // categoryRouter.get("/:id", AdminCategoryController.getCategoryById);
-
-// export default categoryRouter;

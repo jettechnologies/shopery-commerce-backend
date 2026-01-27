@@ -7,6 +7,7 @@ import guestCartRouter from "./guest-cart/guestCart.route";
 import tagRouter from "./tag/tag.route";
 import adminRouter from "./admin";
 import categoryRouter from "./category/category.route";
+import publicProductRouter from "./product/product.route";
 const router = Router();
 
 router.use("/auth", appRouter);
@@ -15,6 +16,7 @@ router.use("/profile", profileRouter);
 router.use("/checkout", checkoutRouter);
 router.use("/categories", categoryRouter);
 router.use("/guest-cart", guestCartRouter);
+router.use("/products", publicProductRouter);
 router.use("/orders", orderRouter);
 router.use("/tags", tagRouter);
 router.get("/", (req, res) => {

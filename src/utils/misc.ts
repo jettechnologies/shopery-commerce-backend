@@ -1,6 +1,6 @@
 export const parseArrayField = <T extends string | number = string | number>(
   field: unknown,
-  options: { forceType?: "string" | "number" } = {}
+  options: { forceType?: "string" | "number" } = {},
 ): T[] => {
   if (!field) return [] as T[];
 
@@ -20,6 +20,7 @@ export const parseArrayField = <T extends string | number = string | number>(
   if (typeof field === "string") {
     try {
       const parsed = JSON.parse(field);
+
       if (Array.isArray(parsed)) {
         return parsed.map((item) => {
           if (options.forceType === "number") {

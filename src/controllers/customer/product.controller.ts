@@ -11,6 +11,8 @@ export class PublicProductController {
         limit: Number(limit) || 10,
         sortOrder: (sortOrder as "asc" | "desc") || "desc",
       });
+
+      console.log(data, "data");
       res.json(data);
     } catch (err: any) {
       res.status(500).json({ message: err.message });

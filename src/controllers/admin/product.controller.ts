@@ -28,22 +28,9 @@ export class AdminProductController {
         tagIds: parseArrayField<number>(body.tagIds, {
           forceType: "number",
         }),
-        // categoryIds: body.categoryIds
-        //   ? typeof body.categoryIds === "string"
-        //     ? JSON.parse(body.categoryIds)
-        //     : body.categoryIds
-        //   : [],
-        // tagIds: body.tagIds
-        //   ? typeof body.tagIds === "string"
-        //     ? JSON.parse(body.tagIds)
-        //     : body.tagIds
-        //   : [],
       };
 
-      console.log(
-        transformedData,
-        "transformed data in product create controller"
-      );
+      console.log(transformedData, "transformed data");
 
       const data = CreateProductSchema.parse(transformedData);
       const files = req.files as Express.Multer.File[];
@@ -52,7 +39,7 @@ export class AdminProductController {
         res,
         201,
         "Product created successfully",
-        product
+        product,
       );
     } catch (error) {
       console.log(error, "error message");
@@ -62,38 +49,50 @@ export class AdminProductController {
 
   static async updateProduct(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const { productId } = req.params;
 
       const body = req.body;
-      const transformedData = {
-        ...body,
-        price: body.price ? Number(body.price) : undefined,
-        salePrice: body.salePrice ? Number(body.salePrice) : undefined,
-        stockQuantity: body.stockQuantity ? Number(body.stockQuantity) : 0,
-        weight: body.weight ? Number(body.weight) : undefined,
 
-        // Handle JSON arrays (from multipart/form-data)
-        categoryIds: body.categoryIds
-          ? typeof body.categoryIds === "string"
-            ? JSON.parse(body.categoryIds)
-            : body.categoryIds
-          : [],
-        tagIds: body.tagIds
-          ? typeof body.tagIds === "string"
-            ? JSON.parse(body.tagIds)
-            : body.tagIds
-          : [],
+      const transformedData = {
+        name: body.name || undefined,
+        description: body.description || undefined,
+        shortDescription: body.shortDescription || undefined,
+        sku: body.sku || undefined,
+        dimensions: body.dimensions || undefined,
+
+        price: body.price === "" ? undefined : Number(body.price),
+        salePrice: body.salePrice === "" ? undefined : Number(body.salePrice),
+        stockQuantity:
+          body.stockQuantity === "" ? undefined : Number(body.stockQuantity),
+        weight: body.weight === "" ? undefined : Number(body.weight),
+
+        categoryIds:
+          body.categoryIds && body.categoryIds !== ""
+            ? typeof body.categoryIds === "string"
+              ? body.categoryIds.split(",")
+              : body.categoryIds
+            : undefined,
+
+        tagIds:
+          body.tagIds && body.tagIds !== ""
+            ? typeof body.tagIds === "string"
+              ? body.tagIds.split(",").map(Number)
+              : body.tagIds
+            : undefined,
       };
 
-      console.log(transformedData, "transformed data in update controller");
       const data = UpdateProductSchema.parse(transformedData);
       const files = req.files as Express.Multer.File[];
-      const product = await ProductService.updateProduct(id, data, files);
+      const product = await ProductService.updateProduct(
+        productId,
+        data,
+        files,
+      );
       return ApiResponse.success(
         res,
         200,
         "Product updated successfully",
-        product
+        product,
       );
     } catch (error: any) {
       handleError(res, error);
@@ -118,7 +117,7 @@ export class AdminProductController {
         res,
         200,
         "Product deleted successfully",
-        product
+        product,
       );
     } catch (error: any) {
       handleError(res, error);

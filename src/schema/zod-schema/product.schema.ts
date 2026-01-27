@@ -20,7 +20,7 @@ export const CreateProductSchema = z.object({
         altText: z.string().optional(),
         isPrimary: z.boolean().default(false),
         sortOrder: z.number().default(0),
-      })
+      }),
     )
     .optional(),
 });

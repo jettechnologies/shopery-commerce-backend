@@ -134,7 +134,7 @@ publicProductRouter.get("/", PublicProductController.getAllProducts);
  */
 publicProductRouter.get(
   "/cursor",
-  PublicProductController.getAllProductsCursor
+  PublicProductController.getAllProductsCursor,
 );
 
 /**
@@ -219,7 +219,7 @@ publicProductRouter.get("/filter", PublicProductController.getFilteredProducts);
  */
 publicProductRouter.get(
   "/filter/cursor",
-  PublicProductController.getFilteredProductsCursor
+  PublicProductController.getFilteredProductsCursor,
 );
 
 /**
@@ -268,7 +268,7 @@ publicProductRouter.get("/:id", PublicProductController.getProductById);
  */
 publicProductRouter.get(
   "/slug/:slug",
-  PublicProductController.getProductBySlug
+  PublicProductController.getProductBySlug,
 );
 
 export default publicProductRouter;

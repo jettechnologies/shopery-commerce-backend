@@ -94,6 +94,63 @@ tagRouter.post("/create", roleGuard(["admin"]), async (req, res) => {
 
 /**
  * @swagger
+ * /admin/tags/create-multiple:
+ *   post:
+ *     summary: Create multiple tags
+ *     description: Admin-only endpoint to create multiple tags at once. Duplicate tags are skipped.
+ *     tags: [Tags (Admin)]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: array
+ *             items:
+ *               type: object
+ *               required:
+ *                 - name
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   example: "Technology"
+ *                 slug:
+ *                   type: string
+ *                   example: "technology"
+ *     responses:
+ *       201:
+ *         description: Tags created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Tags created successfully
+ *                 createdCount:
+ *                   type: number
+ *                   example: 3
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
+
+// Admin: create multiple tags
+tagRouter.post("/create-multiple", roleGuard(["admin"]), async (req, res) => {
+  try {
+    const result = await TagService.createMultipleTags(req.body);
+
+    return ApiResponse.success(res, 201, "Tags created successfully", result);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+/**
+ * @swagger
  * /admin/tags/edit/{id}:
  *   put:
  *     summary: Update an existing tag

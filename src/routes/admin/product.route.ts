@@ -69,8 +69,8 @@ productRouter.use(authGuard, handleMulterError);
  *               tagIds:
  *                 type: array
  *                 items:
- *                   type: string
- *                 example: ["t1f1bcb3-7a8f-4c19-9b2c-03d2e4f26a4d"]
+ *                   type: number
+ *                 example: [4, 5, 6]
  *               images:
  *                 type: array
  *                 items:
@@ -88,7 +88,7 @@ productRouter.post(
   "/",
   roleGuard(["admin"]),
   uploadMultiple("images"),
-  AdminProductController.createProduct
+  AdminProductController.createProduct,
 );
 
 /**
@@ -101,7 +101,7 @@ productRouter.post(
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
@@ -138,7 +138,7 @@ productRouter.post(
  *               tagIds:
  *                 type: array
  *                 items:
- *                   type: string
+ *                   type: number
  *               images:
  *                 type: array
  *                 items:
@@ -156,7 +156,7 @@ productRouter.patch(
   "/:productId",
   roleGuard(["admin"]),
   uploadMultiple("images"),
-  AdminProductController.updateProduct
+  AdminProductController.updateProduct,
 );
 
 /**
@@ -169,7 +169,7 @@ productRouter.patch(
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
@@ -185,7 +185,7 @@ productRouter.patch(
 productRouter.patch(
   "/:productId/toggle",
   roleGuard(["admin"]),
-  AdminProductController.toggleProductActive
+  AdminProductController.toggleProductActive,
 );
 
 /**
@@ -198,7 +198,7 @@ productRouter.patch(
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: productId
  *         required: true
  *         schema:
  *           type: string
@@ -214,7 +214,7 @@ productRouter.patch(
 productRouter.delete(
   "/:productId",
   roleGuard(["admin"]),
-  AdminProductController.deleteProduct
+  AdminProductController.deleteProduct,
 );
 
 export default productRouter;
