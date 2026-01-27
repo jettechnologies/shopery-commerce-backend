@@ -16,7 +16,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force && pnpm run db:seed",
     "postinstall": "prisma generate",
-    "swagger": "tsx ./src/config/swagger.ts"
+    "swagger": "tsx ./src/config/swagger.ts",
+    "test": "glob -c \"node --no-warnings --import tsx --test\" \"src/**/*.test.ts\""
   },
   "keywords": [],
   "author": "",

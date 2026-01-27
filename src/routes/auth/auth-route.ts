@@ -1,15 +1,5 @@
 import { Router } from "express";
-import { AuthService } from "@/services/auth-service";
-import { Request, Response, NextFunction } from "express";
-import {
-  CreateUserSchema,
-  LoginUserSchema,
-  ForgotPasswordSchema,
-  ResetPasswordSchema,
-} from "@/schema/zod-schema";
-import ApiResponse from "@/libs/ApiResponse";
-import { AppError, ErrorType } from "@/libs/AppError";
-import { ZodError } from "zod";
+import { AuthController } from "@/controllers/auth/auth.controller";
 
 const authRouter = Router();
 
@@ -93,6 +83,9 @@ const authRouter = Router();
  *         refreshToken:
  *           type: string
  *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         guestCartMerged:
+ *           type: boolean
+ *           example: true
  */
 
 /**
@@ -132,115 +125,7 @@ const authRouter = Router();
  *       500:
  *         description: Internal server error
  */
-// authRouter.post("/register", async (req, res, next) => {
-//   try {
-//     const data = CreateUserSchema.parse(req.body);
-//     const result = await AuthService.register(data);
-//     return ApiResponse.success(
-//       res,
-//       201,
-//       "User registered successfully",
-//       result
-//     );
-//   } catch (err) {
-//     console.error(err, "error");
-
-//     const error = err as AppError;
-
-//     // Zod validation errors
-//     if (err instanceof ZodError) {
-//       const errors = err.issues.map((e) => e.message).join(", ");
-//       return ApiResponse.validation(res, errors);
-//     }
-
-//     // Custom errors from your service (e.g. duplicate email)
-//     if (error.errorType === ErrorType.CONFLICT) {
-//       return ApiResponse.conflict(
-//         res,
-//         error.message || "User with this email already exists"
-//       );
-//     }
-
-//     // Known auth errors
-//     if (error.errorType === ErrorType.UNAUTHORIZED) {
-//       return ApiResponse.unauthorized(
-//         res,
-//         error.message || "Unauthorized access"
-//       );
-//     }
-
-//     // server error (500)
-//     if (error.statusCode === 500) {
-//       return ApiResponse.internalServerError(res, "Something went wrong");
-//     }
-
-//     // If it’s still not handled, send a generic bad request
-//     return ApiResponse.badRequest(
-//       res,
-//       "Something went wrong during registration"
-//     );
-//   }
-// });
-
-authRouter.post(
-  "/register",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      // Parse and validate body
-      const data = CreateUserSchema.parse(req.body);
-
-      // Extract guest token (from headers or cookies)
-      const guestToken =
-        (req.headers["x-guest-token"] as string) ||
-        (req.cookies?.guestToken as string);
-
-      // Pass token to AuthService
-      const result = await AuthService.register({ ...data, guestToken });
-
-      return ApiResponse.success(
-        res,
-        201,
-        "User registered successfully",
-        result
-      );
-    } catch (err) {
-      console.error("Registration error:", err);
-
-      // 🧩 Handle Zod validation errors
-      if (err instanceof ZodError) {
-        const errors = err.issues.map((e) => e.message).join(", ");
-        return ApiResponse.validation(res, errors);
-      }
-
-      // 🧩 Custom app errors
-      const error = err as AppError;
-
-      if (error.errorType === ErrorType.CONFLICT) {
-        return ApiResponse.conflict(
-          res,
-          error.message || "User with this email already exists"
-        );
-      }
-
-      if (error.errorType === ErrorType.UNAUTHORIZED) {
-        return ApiResponse.unauthorized(
-          res,
-          error.message || "Unauthorized access"
-        );
-      }
-
-      if (error.statusCode === 500) {
-        return ApiResponse.internalServerError(res, "Something went wrong");
-      }
-
-      // 🧩 Generic fallback
-      return ApiResponse.badRequest(
-        res,
-        "Something went wrong during registration"
-      );
-    }
-  }
-);
+authRouter.post("/register", AuthController.register);
 
 /**
  * @swagger
@@ -260,38 +145,7 @@ authRouter.post(
  *       401:
  *         description: Invalid email or password
  */
-authRouter.post("/login", async (req, res, next) => {
-  try {
-    const data = LoginUserSchema.parse(req.body);
-    const result = await AuthService.login(data);
-    return ApiResponse.success(res, 200, "Login successful", result);
-  } catch (err) {
-    console.error(err, "error");
-
-    const error = err as AppError;
-
-    // Unauthorization error
-    if (error.errorType === ErrorType.UNAUTHORIZED) {
-      return ApiResponse.unauthorized(
-        res,
-        error.message || "Invalid email or password"
-      );
-    }
-
-    // notFoundError
-    if (error.errorType === ErrorType.NOT_FOUND) {
-      return ApiResponse.notFound(res, error.message || "User not found");
-    }
-
-    // server error (500)
-    if (error.statusCode === 500) {
-      return ApiResponse.internalServerError(res, "Something went wrong");
-    }
-
-    // If it’s still not handled, send a generic bad request
-    return ApiResponse.badRequest(res, "Something went wrong during login");
-  }
-});
+authRouter.post("/login", AuthController.login);
 
 /**
  * @swagger
@@ -311,33 +165,7 @@ authRouter.post("/login", async (req, res, next) => {
  *       404:
  *         description: User not found
  */
-authRouter.post("/forgot-password", async (req, res, next) => {
-  try {
-    const data = ForgotPasswordSchema.parse(req.body);
-    const result = await AuthService.forgotPassword(data);
-    return ApiResponse.success(res, 200, "OTP sent", result);
-  } catch (err) {
-    console.error(err, "error");
-
-    const error = err as AppError;
-
-    // notFoundError
-    if (error.errorType === ErrorType.NOT_FOUND) {
-      return ApiResponse.notFound(res, "User not found");
-    }
-
-    // server error (500)
-    if (error.statusCode === 500) {
-      return ApiResponse.internalServerError(res, "Something went wrong");
-    }
-
-    // If it’s still not handled, send a generic bad request
-    return ApiResponse.badRequest(
-      res,
-      "Something went wrong during forgot password"
-    );
-  }
-});
+authRouter.post("/forgot-password", AuthController.forgotPassword);
 
 /**
  * @swagger
@@ -357,38 +185,7 @@ authRouter.post("/forgot-password", async (req, res, next) => {
  *       400:
  *         description: Invalid OTP or expired
  */
-authRouter.post("/reset-password", async (req, res, next) => {
-  try {
-    const data = ResetPasswordSchema.parse(req.body);
-    const result = await AuthService.resetPassword(data);
-    return ApiResponse.success(res, 200, "Password reset successful", result);
-  } catch (err) {
-    console.error(err, "error");
-
-    const error = err as AppError;
-
-    // Unauthorization error
-    if (error.errorType === ErrorType.UNAUTHORIZED) {
-      return ApiResponse.unauthorized(res, error.message);
-    }
-
-    // notFoundError
-    if (error.errorType === ErrorType.NOT_FOUND) {
-      return ApiResponse.notFound(res, error.message || "User not found");
-    }
-
-    // server error (500)
-    if (error.statusCode === 500) {
-      return ApiResponse.internalServerError(res, "Something went wrong");
-    }
-
-    // If it’s still not handled, send a generic bad request
-    return ApiResponse.badRequest(
-      res,
-      "Something went wrong during reset password"
-    );
-  }
-});
+authRouter.post("/reset-password", AuthController.resetPassword);
 
 /**
  * @swagger
@@ -412,15 +209,7 @@ authRouter.post("/reset-password", async (req, res, next) => {
  *       401:
  *         description: Invalid or expired refresh token
  */
-authRouter.post("/refresh", async (req, res, next) => {
-  try {
-    const { refreshToken } = req.body;
-    const result = await AuthService.refreshToken(refreshToken);
-    return ApiResponse.success(res, 200, "Token refreshed", result);
-  } catch (err) {
-    next(err);
-  }
-});
+authRouter.post("/refresh", AuthController.refreshToken);
 
 /**
  * @swagger
@@ -442,27 +231,7 @@ authRouter.post("/refresh", async (req, res, next) => {
  *       200:
  *         description: Logged out successfully
  */
-authRouter.post("/logout", async (req, res, next) => {
-  try {
-    const { refreshToken } = req.body;
-    const result = await AuthService.logout(refreshToken);
-    return ApiResponse.success(res, 200, "Logged out successfully", result);
-  } catch (err) {
-    console.error(err, "error");
-
-    const error = err as AppError;
-
-    // server error (500)
-    if (error.statusCode === 500) {
-      return ApiResponse.internalServerError(res, "Something went wrong");
-    }
-
-    // If it’s still not handled, send a generic bad request
-    return ApiResponse.badRequest(
-      res,
-      "Something went wrong during reset password"
-    );
-  }
-});
+authRouter.post("/logout", AuthController.logout);
 
 export default authRouter;
+

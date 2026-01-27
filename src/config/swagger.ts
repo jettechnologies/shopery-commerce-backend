@@ -32,7 +32,7 @@ const options: swaggerJsdoc.Options = {
     },
   },
   // 👇 Paths to your route files for auto docs
-  apis: ["./src/routes/*/*.ts"],
+  apis: ["./src/routes/**/*.ts"],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

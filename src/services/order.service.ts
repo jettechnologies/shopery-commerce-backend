@@ -144,7 +144,34 @@ export class OrderService {
 
     return updatedOrder;
   }
+
+  /** ✅ Get all orders (Admin - Paginated) */
+  static async getAllOrders(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const [orders, total] = await prisma.$transaction([
+      prisma.order.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: { user: { select: { email: true, name: true } } },
+      }),
+      prisma.order.count(),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      orders,
+      pagination: {
+        total,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+    };
+  }
 }
+
 
 // import { PrismaClient } from "@prisma/client";
 // import { CreateOrderSchema, CreateOrderSchemaType } from "@/schema/zod-schema";
