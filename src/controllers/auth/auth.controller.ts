@@ -8,6 +8,7 @@ import {
 } from "@/schema/zod-schema";
 import ApiResponse from "@/libs/ApiResponse";
 import { handleError } from "@/libs/misc";
+import { guestCartToken } from "@/utils/misc";
 
 export class AuthController {
   static async register(req: Request, res: Response) {
@@ -20,11 +21,13 @@ export class AuthController {
 
       const result = await AuthService.register({ ...data, guestToken });
 
+      res.clearCookie(guestCartToken, { httpOnly: true, sameSite: "lax" });
+
       return ApiResponse.success(
         res,
         201,
         "User registered successfully",
-        result
+        result,
       );
     } catch (err) {
       handleError(res, err);

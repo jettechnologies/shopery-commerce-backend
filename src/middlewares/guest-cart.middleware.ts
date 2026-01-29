@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import { GuestCartService } from "@/services/guest-cart.service";
 import { GuestCart } from "prisma/generated/prisma";
+import { guestCartToken } from "@/utils/misc";
 
 export interface GuestCartRequest extends Request {
   guestCart?: GuestCart;
@@ -19,7 +20,7 @@ export async function guestCartMiddleware(
       // Create a new guest cart
       const cart = await GuestCartService.createGuestCart(req);
 
-      res.cookie("guestToken", cart.token, {
+      res.cookie(guestCartToken, cart.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

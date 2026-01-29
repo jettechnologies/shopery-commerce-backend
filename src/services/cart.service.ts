@@ -49,7 +49,11 @@ export class CartService {
       });
     }
 
-    return cart;
+    const total = cart.items.reduce((acc, item) => {
+      return acc + item.quantity * item.product.salePrice!;
+    }, 0);
+
+    return { ...cart, total };
   }
 
   /**
@@ -64,7 +68,8 @@ export class CartService {
     });
 
     if (!product) throw new NotFoundError("Product not found");
-    if (!product.isActive) throw new BadRequestError("Product is not available");
+    if (!product.isActive)
+      throw new BadRequestError("Product is not available");
     if (product.stockQuantity < data.quantity) {
       throw new BadRequestError("Insufficient stock");
     }
@@ -153,7 +158,7 @@ export class CartService {
   static async updateCartItem(
     userId: string,
     productId: string,
-    quantity: number
+    quantity: number,
   ) {
     const user = await prisma.user.findUnique({ where: { userId } });
     if (!user) throw new NotFoundError("User not found");

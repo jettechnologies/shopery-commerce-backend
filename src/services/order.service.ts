@@ -5,42 +5,56 @@ import { BadRequestError, NotFoundError } from "@/libs/AppError";
 import { EmailService, EmailTemplate } from "@/libs/EmailService";
 
 export class OrderService {
-  /** ✅ Create a new order (registered or guest) */
   static async createOrder(data: CreateOrderSchemaType) {
     const parsedData = CreateOrderSchema.parse(data);
 
     let cartItems: any[] = [];
+    let cartIdBigInt: bigint | undefined;
+    let guestCartIdBigInt: bigint | undefined;
+    let userIdBigInt: bigint | undefined;
 
     if (parsedData.cartId) {
+      // cartIdBigInt = BigInt(parsedData.cartId);
       const cart = await prisma.cart.findUnique({
-        where: { id: parsedData.cartId },
+        where: { cartId: parsedData.cartId },
         include: { items: { include: { product: true } } },
       });
       if (!cart || cart.items.length === 0)
         throw new NotFoundError("Cart not found or empty");
+      cartIdBigInt = cart.id;
       cartItems = cart.items;
     }
 
     if (parsedData.guestCartId) {
+      guestCartIdBigInt = BigInt(parsedData.guestCartId);
       const guestCart = await prisma.guestCart.findUnique({
-        where: { id: parsedData.guestCartId },
+        where: { id: guestCartIdBigInt },
         include: { items: { include: { product: true } } },
       });
       if (!guestCart || guestCart.items.length === 0)
         throw new NotFoundError("Guest cart not found or empty");
+
       cartItems = guestCart.items;
     }
 
-    // ✅ Transaction ensures atomicity
-    return prisma.$transaction(async (tx) => {
+    if (parsedData.userId) {
+      const user = await prisma.user.findUnique({
+        where: { userId: parsedData.userId },
+      });
+      if (!user) throw new NotFoundError("User not found");
+
+      userIdBigInt = user.id;
+    }
+
+    const order = await prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
-          userId: parsedData.userId,
-          cartId: parsedData.cartId,
-          guestCartId: parsedData.guestCartId,
+          userId: userIdBigInt ?? null,
+          cartId: cartIdBigInt ?? null,
+          guestCartId: guestCartIdBigInt ?? null,
           email: parsedData.email,
           total: parsedData.total,
-          paymentId: parsedData.paymentId,
+          paymentId: parsedData.paymentId ?? null,
           status: OrderStatus.pending,
         },
       });
@@ -56,16 +70,31 @@ export class OrderService {
         });
       }
 
-      // 📨 Send confirmation email
+      if (cartIdBigInt) {
+        await tx.cartItem.deleteMany({ where: { cartId: cartIdBigInt } });
+      }
+
+      if (guestCartIdBigInt) {
+        await tx.guestCart.delete({ where: { id: guestCartIdBigInt } });
+      }
+
+      console.log(order, "order");
+
+      return order;
+    });
+
+    try {
       await EmailService.sendMail({
         to: parsedData.email,
         subject: "Order Confirmation",
         template: EmailTemplate.ORDER_CONFIRMATION,
         context: { orderId: order.id, items: cartItems, total: order.total },
       });
+    } catch (err) {
+      console.warn("Order created but email failed:", err);
+    }
 
-      return order;
-    });
+    return order;
   }
 
   /** ✅ Get single order (by ID) */
@@ -171,75 +200,3 @@ export class OrderService {
     };
   }
 }
-
-
-// import { PrismaClient } from "@prisma/client";
-// import { CreateOrderSchema, CreateOrderSchemaType } from "@/schema/zod-schema";
-// import { BadRequestError, NotFoundError } from "@/libs/AppError";
-// import { EmailService, EmailTemplate } from "@/libs/EmailService";
-// import { OrderStatus } from "@prisma/client";
-
-// const prisma = new PrismaClient();
-
-// export class OrderService {
-//   static async createOrder(data: CreateOrderSchemaType) {
-//     const parsedData = CreateOrderSchema.parse(data);
-
-//     let cartItems: any[] = [];
-
-//     if (parsedData.cartId) {
-//       const cart = await prisma.cart.findUnique({
-//         where: { id: parsedData.cartId },
-//         include: { items: { include: { product: true } } },
-//       });
-//       if (!cart || cart.items.length === 0) {
-//         throw new NotFoundError("Cart not found or empty");
-//       }
-//       cartItems = cart.items;
-//     }
-
-//     if (parsedData.guestCartId) {
-//       const guestCart = await prisma.guestCart.findUnique({
-//         where: { id: parsedData.guestCartId },
-//         include: { items: { include: { product: true } } },
-//       });
-//       if (!guestCart || guestCart.items.length === 0) {
-//         throw new NotFoundError("Guest cart not found or empty");
-//       }
-//       cartItems = guestCart.items;
-//     }
-
-//     // Transaction ensures atomicity
-//     return prisma.$transaction(async (tx) => {
-//       const order = await tx.order.create({
-//         data: {
-//           userId: parsedData.userId,
-//           cartId: parsedData.cartId,
-//           guestCartId: parsedData.guestCartId,
-//           email: parsedData.email,
-//           total: parsedData.total,
-//           paymentId: parsedData.paymentId,
-//           status: OrderStatus.pending,
-//         },
-//       });
-//       for (const item of cartItems) {
-//         await tx.orderItem.create({
-//           data: {
-//             orderId: order.id,
-//             productId: item.productId,
-//             quantity: item.quantity,
-//             unitPrice: item.unitPrice,
-//           },
-//         });
-//       }
-
-//       await EmailService.sendMail({
-//         to: parsedData.email,
-//         subject: "Order Confirmation",
-//         template: EmailTemplate.ORDER_CONFIRMATION,
-//         context: { orderId: order.id, items: cartItems, total: order.total },
-//       });
-//       return order;
-//     });
-//   }
-// }

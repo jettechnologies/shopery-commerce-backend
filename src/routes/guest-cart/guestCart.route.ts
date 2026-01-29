@@ -4,6 +4,7 @@ import ApiResponse from "@/libs/ApiResponse";
 import { BadRequestError } from "@/libs/AppError";
 import { handleError } from "@/libs/misc";
 import { guestCartMiddleware } from "@/middlewares/guest-cart.middleware";
+import { guestCartToken } from "@/utils/misc";
 
 const guestCartRouter = Router();
 guestCartRouter.use(guestCartMiddleware);
@@ -14,6 +15,47 @@ guestCartRouter.use(guestCartMiddleware);
  *   name: GuestCart
  *   description: Guest cart operations (non-authenticated users)
  */
+
+/**
+ * @swagger
+ * /guest-cart/create:
+ *   post:
+ *     summary: Create a new guest cart
+ *     tags: [GuestCart]
+ *     responses:
+ *       201:
+ *         description: Guest cart created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/GuestCartSchema"
+ */
+
+guestCartRouter.post(
+  "/create",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const cart = await GuestCartService.createGuestCart(req);
+
+      // Optionally set cookie
+      res.cookie(guestCartToken, cart.token, {
+        httpOnly: true,
+        sameSite: "lax",
+        expires: cart.expiresAt,
+      });
+
+      return ApiResponse.success(res, 201, "Guest cart created successfully", {
+        id: cart.id,
+        token: cart.token,
+        expiresAt: cart.expiresAt,
+        items: cart.items,
+      });
+    } catch (err) {
+      handleError(res, err);
+      next(err);
+    }
+  },
+);
 
 /**
  * @swagger
@@ -81,7 +123,7 @@ guestCartRouter.use(guestCartMiddleware);
 
 /**
  * @swagger
- * /api/guest-cart/add:
+ * /guest-cart/add:
  *   post:
  *     summary: Add item to guest cart (auto-creates cart if missing)
  *     tags: [GuestCart]
@@ -120,12 +162,12 @@ guestCartRouter.post(
       handleError(res, err);
       next(err);
     }
-  }
+  },
 );
 
 /**
  * @swagger
- * /api/guest-cart:
+ * /guest-cart:
  *   get:
  *     summary: Get current guest cart by token
  *     tags: [GuestCart]
@@ -162,12 +204,12 @@ guestCartRouter.get(
       handleError(res, err);
       next(err);
     }
-  }
+  },
 );
 
 /**
  * @swagger
- * /api/guest-cart/item/{productId}:
+ * /guest-cart/item/{productId}:
  *   delete:
  *     summary: Remove a specific item from the guest cart
  *     tags: [GuestCart]
@@ -205,18 +247,18 @@ guestCartRouter.delete(
         res,
         200,
         "Item removed from guest cart",
-        result
+        result,
       );
     } catch (err) {
       handleError(res, err);
       next(err);
     }
-  }
+  },
 );
 
 /**
  * @swagger
- * /api/guest-cart/clear:
+ * /guest-cart/clear:
  *   delete:
  *     summary: Clear all items from the guest cart
  *     tags: [GuestCart]
@@ -247,12 +289,12 @@ guestCartRouter.delete(
       handleError(res, err);
       next(err);
     }
-  }
+  },
 );
 
 /**
  * @swagger
- * /api/guest-cart/merge:
+ * /guest-cart/merge:
  *   post:
  *     summary: Merge guest cart into logged-in user cart
  *     tags: [GuestCart]
@@ -290,20 +332,20 @@ guestCartRouter.post(
 
       const merged = await GuestCartService.mergeIntoUserCart(
         token,
-        req.body.userId
+        req.body.userId,
       );
 
       return ApiResponse.success(
         res,
         200,
         "Guest cart merged successfully",
-        merged
+        merged,
       );
     } catch (err) {
       handleError(res, err);
       next(err);
     }
-  }
+  },
 );
 
 export default guestCartRouter;

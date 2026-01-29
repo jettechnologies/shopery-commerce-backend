@@ -107,6 +107,13 @@ publicProductRouter.get("/", PublicProductController.getAllProducts);
  *           type: integer
  *           default: 10
  *         description: Number of products to retrieve per request.
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Sorting order based on creation date.
  *     responses:
  *       200:
  *         description: Successfully retrieved products using cursor pagination.
@@ -115,7 +122,7 @@ publicProductRouter.get("/", PublicProductController.getAllProducts);
  *             schema:
  *               type: object
  *               properties:
- *                 data:
+ *                 products:
  *                   type: array
  *                   items:
  *                     type: object
@@ -126,12 +133,54 @@ publicProductRouter.get("/", PublicProductController.getAllProducts);
  *                         type: string
  *                       price:
  *                         type: number
- *                       category:
- *                         type: string
- *                 nextCursor:
- *                   type: string
- *                   example: "eyJpZCI6IjEyMyJ9"
+ *                       images:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             imageUrl:
+ *                               type: string
+ *                             isPrimary:
+ *                               type: boolean
+ *                       categories:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             name:
+ *                               type: string
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             name:
+ *                               type: string
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     nextCursor:
+ *                       type: string
+ *                       nullable: true
+ *                       example: "5"
+ *                     prevCursor:
+ *                       type: string
+ *                       nullable: true
+ *                     hasNextPage:
+ *                       type: boolean
+ *                     hasPreviousPage:
+ *                       type: boolean
+ *                     nextLink:
+ *                       type: string
+ *                       nullable: true
+ *                     prevLink:
+ *                       type: string
+ *                       nullable: true
  */
+
 publicProductRouter.get(
   "/cursor",
   PublicProductController.getAllProductsCursor,

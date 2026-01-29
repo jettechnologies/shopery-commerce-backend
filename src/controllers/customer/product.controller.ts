@@ -12,7 +12,6 @@ export class PublicProductController {
         sortOrder: (sortOrder as "asc" | "desc") || "desc",
       });
 
-      console.log(data, "data");
       res.json(data);
     } catch (err: any) {
       res.status(500).json({ message: err.message });

@@ -3,6 +3,7 @@ import { OrderService } from "@/services/order.service";
 import ApiResponse from "@/libs/ApiResponse";
 import { handleError } from "@/libs/misc";
 import { authGuard, AuthRequest } from "@/middlewares/auth.middleware";
+import { guestCartToken } from "@/utils/misc";
 
 const orderRouter = Router();
 orderRouter.use(authGuard);
@@ -16,6 +17,46 @@ orderRouter.use(authGuard);
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     CreateOrder:
+ *       type: object
+ *       required:
+ *         - email
+ *         - total
+ *       properties:
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *           description: Optional ID of the logged-in user
+ *         cartId:
+ *           type: string
+ *           format: int64
+ *           description: Optional ID of the user's cart
+ *         guestCartId:
+ *           type: string
+ *           format: int64
+ *           description: Optional ID of the guest cart
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: Email address to send the order confirmation
+ *         total:
+ *           type: number
+ *           format: float
+ *           description: Total amount for the order
+ *         paymentId:
+ *           type: string
+ *           nullable: true
+ *           description: Optional payment provider ID
+ *       example:
+ *         userId: "09f3ef2a-2030-409c-9f2a-4c1f61daa9c7"
+ *         cartId: "1"
+ *         guestCartId: null
+ *         email: "john.doe@maildrop.cc"
+ *         total: 120.5
+ *         paymentId: "pay_12345"
+ *
  * /orders/create:
  *   post:
  *     summary: Create a new order
@@ -31,7 +72,41 @@ orderRouter.use(authGuard);
  *     responses:
  *       201:
  *         description: Order created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: Order ID
+ *                 userId:
+ *                   type: string
+ *                   nullable: true
+ *                 cartId:
+ *                   type: string
+ *                   nullable: true
+ *                 guestCartId:
+ *                   type: string
+ *                   nullable: true
+ *                 email:
+ *                   type: string
+ *                 total:
+ *                   type: number
+ *                 paymentId:
+ *                   type: string
+ *                   nullable: true
+ *                 status:
+ *                   type: string
+ *                   enum: [pending, paid, failed, cancelled, shipped, delivered, refunded]
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
  */
+
 orderRouter.post("/create", async (req: AuthRequest, res: Response) => {
   try {
     const payload = {
@@ -39,7 +114,9 @@ orderRouter.post("/create", async (req: AuthRequest, res: Response) => {
       userId: req.user?.userId ?? req.body.userId,
       email: req.user?.email ?? req.body.email,
     };
+
     const order = await OrderService.createOrder(payload);
+    res.clearCookie(guestCartToken, { httpOnly: true, sameSite: "lax" });
     return ApiResponse.success(res, 201, "Order created successfully", order);
   } catch (err) {
     handleError(res, err);

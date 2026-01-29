@@ -30,7 +30,7 @@ export class EmailService {
     const apiInstance = this.brevoClient;
     apiInstance.setApiKey(
       Brevo.TransactionalEmailsApiApiKeys.apiKey,
-      process.env.BREVO_API_KEY!
+      process.env.BREVO_API_KEY!,
     );
   }
 
@@ -39,7 +39,7 @@ export class EmailService {
       __dirname,
       "..",
       "mail-templates",
-      `${templateName}.html`
+      `${templateName}.html`,
     );
 
     if (!fs.existsSync(filePath)) {
@@ -51,17 +51,55 @@ export class EmailService {
     return compiledTemplate(context);
   }
 
-  static async sendMail({ to, subject, template, context }: SendEmailProps) {
-    const htmlContent = this.getTemplate(template, context);
+  // static async sendMail({ to, subject, template, context }: SendEmailProps) {
+  //   const htmlContent = this.getTemplate(template, context);
 
-    const sendSmtpEmail: Brevo.SendSmtpEmail = {
-      sender: { name: "Shopery", email: process.env.SMTP_FROM! },
-      to: [{ email: to }],
-      subject,
-      htmlContent,
-    };
+  //   const sendSmtpEmail: Brevo.SendSmtpEmail = {
+  //     sender: { name: "Shopery", email: process.env.SMTP_FROM! },
+  //     to: [{ email: to }],
+  //     subject,
+  //     htmlContent,
+  //   };
 
-    return await this.brevoClient.sendTransacEmail(sendSmtpEmail);
+  //   return await this.brevoClient.sendTransacEmail(sendSmtpEmail);
+  // }
+
+  static async sendMail({
+    to,
+    subject,
+    template,
+    context,
+  }: SendEmailProps): Promise<{ success: boolean }> {
+    try {
+      if (!process.env.BREVO_API_KEY || !process.env.SMTP_FROM) {
+        console.warn("📭 Email skipped — missing email config");
+        return { success: false };
+      }
+
+      const htmlContent = this.getTemplate(template, context);
+
+      console.log(process.env.BREVO_API_KEY!, "brevo api key");
+
+      const sendSmtpEmail: Brevo.SendSmtpEmail = {
+        sender: { name: "Shopery", email: process.env.SMTP_FROM },
+        to: [{ email: to }],
+        subject,
+        htmlContent,
+      };
+
+      await this.brevoClient.sendTransacEmail(sendSmtpEmail);
+
+      return { success: true };
+    } catch (err: any) {
+      console.error("❌ Email send failed", {
+        to,
+        subject,
+        error: err?.response?.body || err?.message || err,
+      });
+
+      // ❗ DO NOT THROW
+      return { success: false };
+    }
   }
 }
 

@@ -40,12 +40,13 @@ export class AuthService {
     // Merge guest cart if token exists
     if (data.guestToken) {
       try {
-        await GuestCartService.mergeIntoUserCart(
+        const cart = await GuestCartService.mergeIntoUserCart(
           data.guestToken,
           newUser.userId,
         );
       } catch (err) {
         console.error("Failed to merge guest cart:", err);
+        throw err;
       }
     }
 
@@ -61,7 +62,7 @@ export class AuthService {
       newUser.email,
     );
 
-    await prisma.userSession.create({
+    const prismaSession = await prisma.userSession.create({
       data: {
         userId: newUser.id,
         refreshToken,
@@ -69,12 +70,16 @@ export class AuthService {
       },
     });
 
-    await EmailService.sendMail({
-      to: newUser.email,
-      subject: "Welcome to Shopery Organic store 🎉",
-      template: EmailTemplate.WELCOME,
-      context: { name: data.name },
-    });
+    try {
+      await EmailService.sendMail({
+        to: newUser.email,
+        subject: "Welcome to Shopery Organic store 🎉",
+        template: EmailTemplate.WELCOME,
+        context: { name: data.name },
+      });
+    } catch (err) {
+      console.error("Failed to send welcome email:", err);
+    }
 
     return {
       user: { id: newUser.userId, email: newUser.email },

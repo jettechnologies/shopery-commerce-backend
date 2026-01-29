@@ -55,17 +55,18 @@ export class PublicProductService {
     sortOrder = "desc",
   }: ProductCursorQueryParams) {
     const cursorObj = cursor ? { id: BigInt(cursor) } : undefined;
+
     const products = await prisma.product.findMany({
-      where: { isActive: true },
-      take: limit + 1,
-      skip: cursor ? 1 : 0,
-      cursor: cursorObj,
-      orderBy: { id: sortOrder },
-      include: {
-        images: true,
-        categories: { include: { category: true } },
-        tags: { include: { tag: true } },
+      where: {
+        isActive: true,
+        ...(cursor && sortOrder === "desc"
+          ? { id: { lte: BigInt(cursor) } }
+          : cursor
+            ? { id: { gte: BigInt(cursor) } }
+            : {}),
       },
+      take: limit + 1,
+      orderBy: { id: sortOrder },
     });
 
     let nextCursor: string | null = null;
@@ -85,7 +86,7 @@ export class PublicProductService {
       nextLink: nextCursor
         ? `/products/cursor?cursor=${nextCursor}&limit=${limit}`
         : null,
-      prevLink: cursor
+      prevLink: prevCursor
         ? `/products/cursor?cursor=${prevCursor}&limit=${limit}`
         : null,
     };

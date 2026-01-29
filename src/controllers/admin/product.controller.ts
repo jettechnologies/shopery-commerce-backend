@@ -30,8 +30,6 @@ export class AdminProductController {
         }),
       };
 
-      console.log(transformedData, "transformed data");
-
       const data = CreateProductSchema.parse(transformedData);
       const files = req.files as Express.Multer.File[];
       const product = await ProductService.createProduct(data, files);

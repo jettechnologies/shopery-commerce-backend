@@ -56,3 +56,5 @@ export const parseArrayField = <T extends string | number = string | number>(
 
   return [] as T[];
 };
+
+export const guestCartToken = process.env.GUEST_CART_TOKEN as string;

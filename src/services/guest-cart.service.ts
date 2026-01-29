@@ -4,7 +4,7 @@ import {
   AddGuestCartItemSchema,
   type AddGuestCartItemSchemaType,
 } from "@/schema/zod-schema";
-import { CartStatus } from "../../prisma/generated/prisma/client";
+import { CartStatus } from "prisma/generated/prisma";
 import { prisma } from "prisma/client";
 
 export class GuestCartService {
@@ -141,13 +141,13 @@ export class GuestCartService {
     if (!user) return null;
 
     let userCart = await prisma.cart.findFirst({
-      where: { userId: BigInt(user.id), status: CartStatus.active },
+      where: { userId: user.id, status: CartStatus.active },
       include: { items: true },
     });
 
     if (!userCart) {
       userCart = await prisma.cart.create({
-        data: { userId: BigInt(user.id), status: CartStatus.active },
+        data: { userId: user.id, status: CartStatus.active },
         include: { items: true },
       });
     }

@@ -6,4 +6,11 @@ export const AddGuestCartItemSchema = z.object({
   unitPrice: z.number().positive("Unit price must be greater than 0"),
 });
 
+export const GuestCartSchema = z.object({
+  id: z.string(),
+  token: z.string().uuid(),
+  expiresAt: z.string().datetime(),
+  items: z.array(z.unknown()),
+});
+
 export type AddGuestCartItemSchemaType = z.infer<typeof AddGuestCartItemSchema>;
