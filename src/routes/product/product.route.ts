@@ -302,6 +302,8 @@ publicProductRouter.get("/:id", PublicProductController.getProductById);
  *     summary: Get product by slug (public access)
  *     description: Retrieve a single product using its SEO-friendly slug. Publicly accessible endpoint.
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: slug

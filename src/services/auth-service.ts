@@ -40,10 +40,7 @@ export class AuthService {
     // Merge guest cart if token exists
     if (data.guestToken) {
       try {
-        const cart = await GuestCartService.mergeIntoUserCart(
-          data.guestToken,
-          newUser.userId,
-        );
+        await GuestCartService.mergeIntoUserCart(data.guestToken, newUser.id);
       } catch (err) {
         console.error("Failed to merge guest cart:", err);
         throw err;
@@ -62,7 +59,7 @@ export class AuthService {
       newUser.email,
     );
 
-    const prismaSession = await prisma.userSession.create({
+    await prisma.userSession.create({
       data: {
         userId: newUser.id,
         refreshToken,
@@ -87,50 +84,6 @@ export class AuthService {
       refreshToken,
     };
   }
-
-  // static async register(data: CreateUserInput) {
-  //   const existingUser = await prisma.user.findUnique({
-  //     where: { email: data.email },
-  //   });
-  //   // if (existingUser) throw new Error("Email already in use");
-  //   if (existingUser) throw new ConflictError("Email already in use");
-
-  //   const passwordHash = await hashPassword(data.password);
-
-  //   const newUser = await prisma.user.create({
-  //     data: {
-  //       email: data.email,
-  //       passwordHash,
-  //       name: data.name,
-  //     },
-  //   });
-
-  //   // Generate tokens
-  //   const accessToken = generateAccessToken(newUser.userId, newUser.role);
-  //   const refreshToken = generateRefreshToken(newUser.userId, newUser.role);
-
-  //   // Store refresh token in DB
-  //   await prisma.userSession.create({
-  //     data: {
-  //       userId: newUser.id,
-  //       refreshToken,
-  //       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  //     },
-  //   });
-
-  //   await EmailService.sendMail({
-  //     to: newUser.email,
-  //     subject: "Welcome to Shopery Organic store 🎉",
-  //     template: EmailTemplate.WELCOME,
-  //     context: { name: data.name },
-  //   });
-
-  //   return {
-  //     user: { id: newUser.userId, email: newUser.email },
-  //     accessToken,
-  //     refreshToken,
-  //   };
-  // }
 
   static async login(data: LoginUserInput) {
     const user = await prisma.user.findUnique({ where: { email: data.email } });

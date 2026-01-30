@@ -66,18 +66,13 @@ guestCartRouter.post(
  *       required:
  *         - productId
  *         - quantity
- *         - unitPrice
  *       properties:
  *         productId:
- *           type: integer
- *           example: 101
+ *           type: string
+ *           example: b1b07e9e-58c1-4da4-8acc-0e96cf3c16d1
  *         quantity:
  *           type: integer
  *           example: 2
- *         unitPrice:
- *           type: number
- *           format: float
- *           example: 4500.50
  *     GuestCartItemResponse:
  *       type: object
  *       properties:
@@ -97,6 +92,9 @@ guestCartRouter.post(
  *               type: integer
  *               example: 2
  *             unitPrice:
+ *               type: number
+ *               example: 4500.50
+ *             totalPrice:
  *               type: number
  *               example: 4500.50
  *             guestCartId:
@@ -174,10 +172,6 @@ guestCartRouter.post(
  *     parameters:
  *       - in: header
  *         name: x-guest-token
- *         schema:
- *           type: string
- *         required: true
- *         description: Token of the guest cart
  *     responses:
  *       200:
  *         description: Returns guest cart with items
@@ -194,12 +188,20 @@ guestCartRouter.get(
     try {
       const token =
         (req.headers["x-guest-token"] as string) ||
-        (req.cookies?.guestToken as string);
+        (req.cookies?.[guestCartToken] as string);
 
       if (!token) throw new BadRequestError("Guest token missing");
 
       const cart = await GuestCartService.getGuestCart(token);
-      return ApiResponse.success(res, 200, "Guest cart fetched", cart);
+      const strippedCart = {
+        id: cart.id,
+        token: cart.token,
+        createdAt: cart.createdAt,
+        updatedAt: cart.updatedAt,
+        expiresAt: cart.expiresAt,
+        items: cart.items,
+      };
+      return ApiResponse.success(res, 200, "Guest cart fetched", strippedCart);
     } catch (err) {
       handleError(res, err);
       next(err);
@@ -236,7 +238,7 @@ guestCartRouter.delete(
     try {
       const token =
         (req.headers["x-guest-token"] as string) ||
-        (req.cookies?.guestToken as string);
+        (req.cookies?.guestCartToken as string);
 
       if (!token) throw new BadRequestError("Guest token missing");
 
@@ -279,7 +281,7 @@ guestCartRouter.delete(
     try {
       const token =
         (req.headers["x-guest-token"] as string) ||
-        (req.cookies?.guestToken as string);
+        (req.cookies?.[guestCartToken] as string);
 
       if (!token) throw new BadRequestError("Guest token missing");
 
@@ -325,7 +327,7 @@ guestCartRouter.post(
     try {
       const token =
         (req.headers["x-guest-token"] as string) ||
-        (req.cookies?.guestToken as string);
+        (req.cookies?.[guestCartToken] as string);
 
       if (!token) throw new BadRequestError("Guest token missing");
       if (!req.body.userId) throw new BadRequestError("User ID is required");

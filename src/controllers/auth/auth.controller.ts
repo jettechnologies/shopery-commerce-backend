@@ -17,7 +17,7 @@ export class AuthController {
 
       const guestToken =
         (req.headers["x-guest-token"] as string) ||
-        (req.cookies?.guestToken as string);
+        (req.cookies?.[guestCartToken] as string);
 
       const result = await AuthService.register({ ...data, guestToken });
 

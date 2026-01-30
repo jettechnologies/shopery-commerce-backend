@@ -14,7 +14,10 @@ export async function guestCartMiddleware(
   next: NextFunction,
 ) {
   try {
-    let guestToken = req.cookies?.guestToken;
+    let guestToken = req.cookies?.[guestCartToken];
+
+    console.log(guestCartToken, "guestCartToken");
+    console.log(guestToken, "guestToken");
 
     if (!guestToken) {
       // Create a new guest cart

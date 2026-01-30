@@ -1,11 +1,12 @@
 import { Request } from "express";
-import { NotFoundError } from "@/libs/AppError";
+import { BadRequestError, NotFoundError } from "@/libs/AppError";
 import {
   AddGuestCartItemSchema,
   type AddGuestCartItemSchemaType,
 } from "@/schema/zod-schema";
 import { CartStatus } from "prisma/generated/prisma";
 import { prisma } from "prisma/client";
+import { guestCartToken } from "@/utils/misc";
 
 export class GuestCartService {
   // Create a new guest cart (default 7-day expiry)
@@ -37,7 +38,7 @@ export class GuestCartService {
     // Try to find guest cart by token (sent in header or cookie)
     const token =
       (req.headers["x-guest-token"] as string) ||
-      (req.cookies?.guestToken as string) ||
+      (req.cookies?.[guestCartToken] as string) ||
       null;
 
     let cart = token
@@ -47,6 +48,17 @@ export class GuestCartService {
         })
       : null;
 
+    const cartedProduct = await prisma.product.findUnique({
+      where: { productId: parsedData.productId },
+    });
+
+    if (!cartedProduct) throw new NotFoundError("Product not found");
+    if (!cartedProduct.isActive)
+      throw new BadRequestError("Product is not available");
+    if (cartedProduct.stockQuantity < parsedData.quantity) {
+      throw new BadRequestError("Insufficient stock");
+    }
+
     // Automatically create cart if missing
     if (!cart) {
       cart = await GuestCartService.createGuestCart(req);
@@ -55,7 +67,7 @@ export class GuestCartService {
 
     // Check if item already exists
     const existingItem = cart.items.find(
-      (i) => i.productId === parsedData.productId,
+      (i) => i.productId === cartedProduct.id,
     );
 
     if (existingItem) {
@@ -79,15 +91,19 @@ export class GuestCartService {
     const guestCartItem = await prisma.guestCartItem.create({
       data: {
         guestCartId: cart.id,
-        productId: parsedData.productId,
+        productId: cartedProduct.id,
         quantity: parsedData.quantity,
-        unitPrice: parsedData.unitPrice,
+        unitPrice: cartedProduct.salePrice!,
       },
     });
 
     // Return both item + cart token for frontend to save
+
     return {
-      guestCartItem,
+      guestCartItem: {
+        ...guestCartItem,
+        totalPrice: Math.abs(guestCartItem.unitPrice * guestCartItem.quantity),
+      },
       guestCartToken: cart.token,
     };
   }
@@ -125,57 +141,77 @@ export class GuestCartService {
     return { message: "Guest cart cleared successfully" };
   }
 
-  // Merge guest cart into user cart
-  static async mergeIntoUserCart(token: string, userId: string) {
-    const guestCart = await prisma.guestCart.findFirst({
-      where: { token },
-      include: { items: true },
-    });
-
-    if (!guestCart) return null;
-
-    const user = await prisma.user.findUnique({
-      where: { userId },
-    });
-
-    if (!user) return null;
-
-    let userCart = await prisma.cart.findFirst({
-      where: { userId: user.id, status: CartStatus.active },
-      include: { items: true },
-    });
-
-    if (!userCart) {
-      userCart = await prisma.cart.create({
-        data: { userId: user.id, status: CartStatus.active },
+  static async mergeIntoUserCart(token: string, userId: bigint) {
+    return prisma.$transaction(async (tx) => {
+      const guestCart = await tx.guestCart.findFirst({
+        where: { token },
         include: { items: true },
       });
-    }
 
-    for (const item of guestCart.items) {
-      const existing = userCart.items.find(
-        (i) => i.productId === item.productId,
-      );
-      if (existing) {
-        await prisma.cartItem.update({
-          where: { id: existing.id },
-          data: { quantity: existing.quantity + item.quantity },
-        });
-      } else {
-        await prisma.cartItem.create({
+      if (!guestCart || guestCart.items.length === 0) {
+        return null;
+      }
+
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) return null;
+
+      let userCart = await tx.cart.findFirst({
+        where: {
+          userId: user.id,
+          status: CartStatus.active,
+        },
+        include: { items: true },
+      });
+
+      if (!userCart) {
+        userCart = await tx.cart.create({
           data: {
-            cartId: userCart.id,
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
+            userId: user.id,
+            status: CartStatus.active,
           },
+          include: { items: true },
         });
       }
-    }
 
-    await prisma.guestCart.delete({ where: { id: guestCart.id } });
+      for (const item of guestCart.items) {
+        const existingItem = userCart.items.find(
+          (i) => i.productId === item.productId,
+        );
 
-    return userCart;
+        if (existingItem) {
+          await tx.cartItem.update({
+            where: { id: existingItem.id },
+            data: {
+              quantity: {
+                increment: item.quantity,
+              },
+            },
+          });
+        } else {
+          await tx.cartItem.create({
+            data: {
+              cartId: userCart.id,
+              productId: item.productId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            },
+          });
+        }
+      }
+
+      await tx.guestCartItem.deleteMany({
+        where: { guestCartId: guestCart.id },
+      });
+
+      await tx.guestCart.delete({
+        where: { id: guestCart.id },
+      });
+
+      return userCart;
+    });
   }
 
   // Get guest cart by token

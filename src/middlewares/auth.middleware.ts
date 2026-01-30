@@ -10,12 +10,13 @@ export interface AuthRequest extends Request {
 export function authGuard(
   req: AuthRequest,
   _res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const authHeader = req.headers["authorization"];
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return next(
-      new UnauthorizedError("Missing or invalid Authorization header")
+      new UnauthorizedError("Missing or invalid Authorization header"),
     );
   }
 
@@ -44,7 +45,7 @@ export function roleGuard(roles: string[]) {
     // Role check
     if (!roles.includes(req.user.role)) {
       return next(
-        new ForbiddenError("You do not have permission for this action")
+        new ForbiddenError("You do not have permission for this action"),
       );
     }
 
@@ -55,7 +56,7 @@ export function roleGuard(roles: string[]) {
       req.user.userId !== req.params.userId
     ) {
       return next(
-        new ForbiddenError("You cannot modify another user's resource")
+        new ForbiddenError("You cannot modify another user's resource"),
       );
     }
 
