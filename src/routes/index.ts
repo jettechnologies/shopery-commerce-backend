@@ -10,6 +10,8 @@ import categoryRouter from "./category/category.route";
 import publicProductRouter from "./product/product.route";
 import cartRouter from "./cart.route";
 import wishlistRouter from "./wishlist.route";
+import productCommentRouter from "./product.comment.route";
+import reviewRouter from "./review.route";
 
 const router = Router();
 
@@ -24,6 +26,8 @@ router.use("/orders", orderRouter);
 router.use("/tags", tagRouter);
 router.use("/cart", cartRouter);
 router.use("/wishlist", wishlistRouter);
+router.use("/comments", productCommentRouter);
+router.use("/reviews", reviewRouter);
 
 router.get("/", (req, res) => {
   res.send("Welcome to Shopery Organic E-commerce API 🚀");

@@ -191,6 +191,8 @@ exports.Prisma.ProductScalarFieldEnum = {
   stockQuantity: 'stockQuantity',
   weight: 'weight',
   dimensions: 'dimensions',
+  averageRating: 'averageRating',
+  reviewCount: 'reviewCount',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -255,7 +257,19 @@ exports.Prisma.ProductCommentScalarFieldEnum = {
   userId: 'userId',
   parentId: 'parentId',
   body: 'body',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  isDeleted: 'isDeleted',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CommentLikesScalarFieldEnum = {
+  productCommentId: 'productCommentId',
+  userId: 'userId'
+};
+
+exports.Prisma.CommentDislikesScalarFieldEnum = {
+  productCommentId: 'productCommentId',
+  userId: 'userId'
 };
 
 exports.Prisma.PostScalarFieldEnum = {
@@ -426,6 +440,8 @@ exports.Prisma.ModelName = {
   ProductImage: 'ProductImage',
   Review: 'Review',
   ProductComment: 'ProductComment',
+  CommentLikes: 'CommentLikes',
+  CommentDislikes: 'CommentDislikes',
   Post: 'Post',
   PostTag: 'PostTag',
   PostComment: 'PostComment',

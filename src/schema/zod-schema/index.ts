@@ -4,3 +4,8 @@ export * from "./guest-cart.schema";
 export * from "./order.schema";
 export * from "./tags.schema";
 export * from "./category.schema";
+export * from "./review.schema";
+export * from "./product.schema";
+export * from "./product.comment.schema";
+export * from "./cart.schema";
+export * from "./wishlist.schema";
