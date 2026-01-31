@@ -37,6 +37,24 @@ export class ReviewService {
       throw new BadRequestError("You have already reviewed this product");
     }
 
+    const hasPurchased = await prisma.order.findFirst({
+      where: {
+        userId: user.id,
+        status: "paid",
+        OrderItems: {
+          some: {
+            productId: product.id,
+          },
+        },
+      },
+    });
+
+    if (!hasPurchased) {
+      throw new BadRequestError(
+        "You can only review products you have purchased",
+      );
+    }
+
     if (data.rating < 1 || data.rating > 5) {
       throw new BadRequestError("Invalid rating");
     }
