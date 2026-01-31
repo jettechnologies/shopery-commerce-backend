@@ -37,10 +37,10 @@ export class ReviewService {
       throw new BadRequestError("You have already reviewed this product");
     }
 
-    const hasPurchased = await prisma.order.findFirst({
+    const hasDelivered = await prisma.order.findFirst({
       where: {
         userId: user.id,
-        status: "paid",
+        status: "delivered",
         OrderItems: {
           some: {
             productId: product.id,
@@ -49,9 +49,9 @@ export class ReviewService {
       },
     });
 
-    if (!hasPurchased) {
+    if (!hasDelivered) {
       throw new BadRequestError(
-        "You can only review products you have purchased",
+        "You can only review products that has been delivered to ur address",
       );
     }
 
