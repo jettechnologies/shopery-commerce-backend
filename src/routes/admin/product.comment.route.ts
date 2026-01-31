@@ -8,8 +8,8 @@ adminProductCommentRouter.use(authGuard, roleGuard(["admin"]));
 /**
  * @swagger
  * tags:
- *   name: Product Comments
- *   description: Product comments, replies, reactions, and moderation
+ *   name: Product Comments (Admin)
+ *   description: Admin Mangament Product comments, replies, reactions, and moderation
  */
 
 /**
@@ -17,7 +17,7 @@ adminProductCommentRouter.use(authGuard, roleGuard(["admin"]));
  * /admin/comments/{commentId}/:
  *   patch:
  *     summary: Admin update comment body
- *     tags: [Product Comments]
+ *     tags: [Product Comments (Admin)]
  *     security:
  *       - bearerAuth: []
  *     parameters:

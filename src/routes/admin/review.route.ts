@@ -8,6 +8,13 @@ adminReviewRouter.use(authGuard, roleGuard(["admin"]));
 
 /**
  * @swagger
+ * tags:
+ *   name: Reviews (Admin)
+ *   description: Admin Reviews Management
+ */
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     ApproveReviewRequest:
@@ -23,7 +30,7 @@ adminReviewRouter.use(authGuard, roleGuard(["admin"]));
  *   patch:
  *     summary: Approve or reject a review
  *     description: Admin-only endpoint to approve or reject a review.
- *     tags: [Reviews]
+ *     tags: [Reviews (Admin)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -60,7 +67,7 @@ adminReviewRouter.use(authGuard, roleGuard(["admin"]));
  *   patch:
  *     summary: Approve or reject a review
  *     description: Admin-only endpoint to approve or reject a review.
- *     tags: [Reviews]
+ *     tags: [Reviews (Admin)]
  *     security:
  *       - bearerAuth: []
  *     parameters:
