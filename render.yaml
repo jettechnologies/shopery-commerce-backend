@@ -9,7 +9,10 @@ services:
       corepack enable
       corepack prepare pnpm@latest --activate
       pnpm install --frozen-lockfile
+      pnpm run db:generate
       pnpm run build
+      pnpm run db:push
+      pnpm run db:seed
 
     startCommand: pnpm run start
 
