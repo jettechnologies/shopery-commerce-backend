@@ -2,13 +2,13 @@
   "compilerOptions": {
     "target": "ES2021",
     "module": "ESNext",
-    "rootDir": "./",
-    "outDir": "./dist",
+    "moduleResolution": "node",
+    "rootDir": ".",
+    "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "bundler",
 
     "baseUrl": ".",
     "paths": {
@@ -23,6 +23,37 @@
       "@schema/*": ["src/schema/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "prisma"],
   "exclude": ["node_modules", "dist"]
 }
+
+// "start": "node dist/index.js",
+//
+// {
+//   "compilerOptions": {
+//     "target": "ES2021",
+//     "module": "ESNext",
+//     "rootDir": ".",
+//     "outDir": "dist",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "skipLibCheck": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "moduleResolution": "node",
+
+//     "baseUrl": ".",
+//     "paths": {
+//       "@/*": ["src/*"],
+//       "@controllers/*": ["src/controllers/*"],
+//       "@services/*": ["src/services/*"],
+//       "@models/*": ["src/models/*"],
+//       "@middlewares/*": ["src/middlewares/*"],
+//       "@config/*": ["src/config/*"],
+//       "@libs/*": ["src/libs/*"],
+//       "@utils/*": ["src/utils/*"],
+//       "@schema/*": ["src/schema/*"]
+//     }
+//   },
+//   "include": ["src", "prisma"],
+//   "exclude": ["node_modules", "dist"]
+// }
