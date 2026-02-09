@@ -9,7 +9,7 @@ const connectionString = IS_DEV
   : process.env.PROD_DATABASE_URL;
 
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
 });
 
 export const prisma = new PrismaClient({ adapter });
