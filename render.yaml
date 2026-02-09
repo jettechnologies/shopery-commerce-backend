@@ -11,15 +11,14 @@ services:
       pnpm install --frozen-lockfile
       pnpm prisma generate
       pnpm run build
+      pnpm prisma db push
+      pnpm run db:seed
 
     startCommand: pnpm run start
 
     envVars:
       - key: PROD_DATABASE_URL
         sync: false
-
-      - key: NODE_ENV
-        value: production
 
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
