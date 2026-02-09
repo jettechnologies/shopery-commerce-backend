@@ -17,7 +17,7 @@ services:
     startCommand: pnpm run start
 
     envVars:
-      - key: PROD_DATABASE_URL
+      - key: DATABASE_URL
         sync: false
 
       - key: CLOUDINARY_CLOUD_NAME
