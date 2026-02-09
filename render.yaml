@@ -11,8 +11,6 @@ services:
       pnpm install --frozen-lockfile
       pnpm prisma generate
       pnpm run build
-      pnpm prisma db push
-      pnpm run db:seed
 
     startCommand: pnpm run start
 
