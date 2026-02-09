@@ -21,19 +21,6 @@ export class ReviewController {
     }
   }
 
-  //   static async getProductReviews(req: AuthRequest, res: Response) {
-  //     try {
-  //       const { productId } = req.params;
-  //       if (!productId) throw new BadRequestError("Product ID is required");
-
-  //       const reviews = await ReviewService.getProductReviews(productId);
-
-  //       return ApiResponse.success(res, 200, "Reviews fetched", reviews);
-  //     } catch (err) {
-  //       handleError(res, err);
-  //     }
-  //   }
-
   static async getCursorProductReviews(req: AuthRequest, res: Response) {
     try {
       const { productId } = req.params;
