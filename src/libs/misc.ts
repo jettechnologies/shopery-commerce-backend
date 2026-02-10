@@ -1,4 +1,4 @@
-import { AppError } from "./AppError";
+import AppError from "./AppError";
 import { ZodError } from "zod";
 import { Response } from "express";
 import ApiResponse from "./ApiResponse";

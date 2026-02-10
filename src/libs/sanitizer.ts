@@ -24,11 +24,7 @@ const sanitizeValue = (value: unknown): string | unknown => {
 };
 
 // Middleware function
-export const sanitizer = (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-): void => {
+const sanitizer = (req: Request, _res: Response, next: NextFunction): void => {
   if (req.body && typeof req.body === "object") {
     for (const property in req.body) {
       if (Object.prototype.hasOwnProperty.call(req.body, property)) {
@@ -38,3 +34,5 @@ export const sanitizer = (
   }
   next();
 };
+
+export default sanitizer;

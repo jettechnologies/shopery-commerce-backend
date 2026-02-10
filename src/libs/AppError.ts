@@ -7,7 +7,7 @@ export enum ErrorType {
   VALIDATION = "Validation Error",
 }
 
-export class AppError extends Error {
+export default class AppError extends Error {
   public statusCode: number;
   public errorType: ErrorType;
 

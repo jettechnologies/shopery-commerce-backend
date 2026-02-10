@@ -1,9 +1,9 @@
-import { configureExpress } from "./config/express";
+import { configureExpress } from "./config/express.js";
 import express from "express";
 import cors from "cors";
-import { errorHandler } from "@/middlewares/errorHandler";
-import router from "./routes";
-import { setupSwagger } from "./config/swagger";
+import { errorHandler } from "@/middlewares/errorHandler.js";
+import router from "./routes/index.js";
+import { setupSwagger } from "./config/swagger.js";
 
 // universal fix for turning BIGINT to string at the application level
 (BigInt.prototype as any).toJSON = function () {

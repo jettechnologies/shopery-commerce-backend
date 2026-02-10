@@ -19,11 +19,7 @@ declare global {
   }
 }
 
-export const csrfMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const csrfMiddleware = (req: Request, res: Response, next: NextFunction) => {
   if (req.method === "GET") {
     const csrfToken = createCsrfToken();
     const csrfTokenHash = hashToken(csrfToken);
@@ -57,3 +53,5 @@ export const csrfMiddleware = (
 
   return next();
 };
+
+export default csrfMiddleware;

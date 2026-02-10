@@ -1,17 +1,17 @@
 import { Router } from "express";
-import appRouter from "./auth/auth-route";
-import profileRouter from "./profile/profile-route";
-import orderRouter from "./order/order.route";
-import checkoutRouter from "./checkout/checkout.route";
-import guestCartRouter from "./guest-cart/guestCart.route";
-import tagRouter from "./tag/tag.route";
-import adminRouter from "./admin";
-import categoryRouter from "./category/category.route";
-import publicProductRouter from "./product/product.route";
-import cartRouter from "./cart.route";
-import wishlistRouter from "./wishlist.route";
-import productCommentRouter from "./product.comment.route";
-import reviewRouter from "./review.route";
+import appRouter from "./auth/auth-route.js";
+import profileRouter from "./profile/profile-route.js";
+import orderRouter from "./order/order.route.js";
+import checkoutRouter from "./checkout/checkout.route.js";
+import guestCartRouter from "./guest-cart/guestCart.route.js";
+import tagRouter from "./tag/tag.route.js";
+import adminRouter from "./admin/index.js";
+import categoryRouter from "./category/category.route.js";
+import publicProductRouter from "./product/product.route.js";
+import cartRouter from "./cart.route.js";
+import wishlistRouter from "./wishlist.route.js";
+import productCommentRouter from "./product.comment.route.js";
+import reviewRouter from "./review.route.js";
 
 const router = Router();
 

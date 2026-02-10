@@ -1,10 +1,10 @@
 import { Router } from "express";
-import tagRouter from "./tag.route";
-import productRouter from "./product.route";
-import categoryRouter from "./category.route";
-import orderRouter from "./order.route";
-import adminProductCommentRouter from "./product.comment.route";
-import adminReviewRouter from "./review.route";
+import tagRouter from "./tag.route.js";
+import productRouter from "./product.route.js";
+import categoryRouter from "./category.route.js";
+import orderRouter from "./order.route.js";
+import adminProductCommentRouter from "./product.comment.route.js";
+import adminReviewRouter from "./review.route.js";
 
 const adminRouter = Router();
 adminRouter.use("/tags", tagRouter);

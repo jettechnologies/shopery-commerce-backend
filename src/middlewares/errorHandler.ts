@@ -1,13 +1,13 @@
 // middlewares/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
-import ApiResponse from "@/libs/ApiResponse";
-import { AppError } from "@/libs/AppError";
+import ApiResponse from "@/libs/ApiResponse.js";
+import AppError from "@/libs/AppError.js";
 
 export function errorHandler(
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   console.error("🔥 Error:", err);
 
@@ -21,6 +21,6 @@ export function errorHandler(
     res,
     500,
     "Something went wrong",
-    "Internal Server Error"
+    "Internal Server Error",
   );
 }
