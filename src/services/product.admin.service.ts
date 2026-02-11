@@ -10,7 +10,7 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "@/services/cloudinary.service";
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 
 interface ImageUploadResponse {
   imageUrl: string;

@@ -18,7 +18,7 @@ import {
 } from "@/libs/AppError";
 import { EmailService, EmailTemplate } from "@/libs/EmailService";
 import { GuestCartService } from "./guest-cart.service";
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 
 export class AuthService {
   static async register(data: CreateUserInput & { guestToken?: string }) {

@@ -1,5 +1,5 @@
-import { prisma } from "prisma/client";
-import { OrderStatus } from "prisma/generated/prisma";
+import { prisma } from "@/prisma/client.js";
+import { OrderStatus } from "@/prisma/generated/prisma/enums.js";
 import { CreateOrderSchema, CreateOrderSchemaType } from "@/schema/zod-schema";
 import { BadRequestError, NotFoundError } from "@/libs/AppError";
 import { EmailService, EmailTemplate } from "@/libs/EmailService";

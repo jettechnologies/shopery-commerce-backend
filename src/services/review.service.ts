@@ -1,4 +1,4 @@
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 import { NotFoundError, BadRequestError } from "@/libs/AppError";
 import { CreateReviewSchemaType } from "@/schema/zod-schema/review.schema";
 

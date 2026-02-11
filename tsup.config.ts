@@ -1,0 +1,16 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig({
+  entry: ["src/index.ts"],
+  format: ["esm"], // keep ESM (works best with Prisma)
+  outDir: "dist",
+  target: "node18",
+  sourcemap: false,
+  clean: true, // clears dist before each build
+  dts: false, // no type files needed for runtime
+  splitting: false, // keeps a single output file
+  shims: true, // provides __dirname fix automatically
+  minify: false,
+  treeshake: true,
+  platform: "node",
+});

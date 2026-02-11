@@ -7,7 +7,7 @@ import {
   type UpdateTagSchemaType,
 } from "@/schema/zod-schema";
 import { NotFoundError, BadRequestError, ConflictError } from "@/libs/AppError";
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 
 export class TagService {
   // Get all tags (for public/product/post listing)

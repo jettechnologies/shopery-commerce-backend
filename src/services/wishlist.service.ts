@@ -1,4 +1,4 @@
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 import { AddToWishlistSchemaType } from "@/schema/zod-schema/wishlist.schema";
 import { NotFoundError, BadRequestError } from "@/libs/AppError";
 

@@ -1,5 +1,5 @@
 import { SortOrder } from "@/utils/types";
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 
 type ProductQueryParams = {
   page?: number;

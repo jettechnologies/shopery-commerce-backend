@@ -1,5 +1,5 @@
 import { Store } from "express-session";
-import { prisma } from "../../prisma/client.js";
+import { prisma } from "@/prisma/client.js";
 
 export default class PrismaSessionStore extends Store {
   private ttl: number;

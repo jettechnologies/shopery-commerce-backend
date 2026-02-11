@@ -4,10 +4,13 @@
   "description": "",
   "main": "index.js",
   "type": "module",
+  "_moduleAliases": {
+    "@": "dist/src"
+  },
   "scripts": {
     "dev": "nodemon --watch src --ext ts,tsx --exec \"npx tsx src/index.ts\"",
-    "build": "tsc && tsc-alias && tsc-esm-fix --target='dist' --ext='.js'",
-    "start": "node dist/src/index.js",
+    "build": "tsup",
+    "start": "node dist/index.js",
     "lint": "eslint . --ext .ts,.tsx",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

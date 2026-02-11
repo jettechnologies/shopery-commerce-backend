@@ -1,7 +1,7 @@
 // middleware/guestCart.ts
 import { Request, Response, NextFunction } from "express";
 import { GuestCartService } from "@/services/guest-cart.service";
-import { GuestCart } from "prisma/generated/prisma";
+import { GuestCart } from "@/prisma/generated/prisma/client";
 import { guestCartToken } from "@/utils/misc";
 
 export interface GuestCartRequest extends Request {

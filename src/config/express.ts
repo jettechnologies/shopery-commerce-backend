@@ -3,7 +3,7 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import session from "express-session";
 import PrismaSessionStore from "@/libs/prisma-session-store.js";
-import sanitizer from "@/libs/sanitizer.js";
+import sanitizer from "@/libs/sanitizer";
 import csrfMiddleware from "@/middlewares/csrf-middlewares.js";
 import dotenv from "dotenv";
 

@@ -8,7 +8,7 @@ import {
   type UpdateProfileSchemaType,
   type CreateAddressSchemaType,
 } from "@/schema/zod-schema/profile.schema";
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 
 export class ProfileService {
   // Get a user profile by uuid (include relations)

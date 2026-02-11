@@ -1,12 +1,11 @@
-import { prisma } from "prisma/client";
+import { prisma } from "@/prisma/client.js";
 import {
   AddToCartSchema,
   AddToCartSchemaType,
   UpdateCartItemSchemaType,
 } from "@/schema/zod-schema/cart.schema";
 import { NotFoundError, BadRequestError } from "@/libs/AppError";
-import { CartStatus } from "prisma/generated/prisma";
-
+import { CartStatus } from "@/prisma/generated/prisma/enums.js";
 export class CartService {
   /**
    * Get or create active cart for user

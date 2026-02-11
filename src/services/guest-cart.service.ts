@@ -4,8 +4,8 @@ import {
   AddGuestCartItemSchema,
   type AddGuestCartItemSchemaType,
 } from "@/schema/zod-schema";
-import { CartStatus } from "prisma/generated/prisma";
-import { prisma } from "prisma/client";
+import { CartStatus } from "@/prisma/generated/prisma/enums.js";
+import { prisma } from "@/prisma/client.js";
 import { guestCartToken } from "@/utils/misc";
 
 export class GuestCartService {

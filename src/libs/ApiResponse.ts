@@ -1,5 +1,4 @@
 import { Response as ExpressResponse } from "express";
-import { json } from "zod";
 
 class ApiResponse {
   // static success<T>(
@@ -64,13 +63,13 @@ class ApiResponse {
     status = 200,
     message = "Success",
     data?: T,
-    pagination?: Record<string, any>
+    pagination?: Record<string, any>,
   ) {
     const serializedData = data
       ? JSON.parse(
           JSON.stringify(data, (_, value) =>
-            typeof value === "bigint" ? value.toString() : value
-          )
+            typeof value === "bigint" ? value.toString() : value,
+          ),
         )
       : null;
 
@@ -91,7 +90,7 @@ class ApiResponse {
     res: ExpressResponse,
     status: number,
     message: string,
-    errorType: string
+    errorType: string,
   ) {
     return res.status(status).json({
       status,
