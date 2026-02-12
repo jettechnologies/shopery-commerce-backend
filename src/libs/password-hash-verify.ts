@@ -6,14 +6,30 @@ const REFRESH_TOKEN_SECRET =
   process.env.REFRESH_TOKEN_SECRET || "refreshsecret";
 
 // Hash password
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+// export async function bcryptHash(password: string): Promise<string> {
+//   return bcrypt.hash(password, 10);
+// }
+
+// // Compare password
+// export async function bcryptCompare(
+//   password: string,
+//   hash: string
+// ): Promise<boolean> {
+//   return bcrypt.compare(password, hash);
+// }
+
+const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
+
+// Hash password
+export async function bcryptHash(password: string): Promise<string> {
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  return bcrypt.hash(password, salt);
 }
 
 // Compare password
-export async function comparePassword(
+export async function bcryptCompare(
   password: string,
-  hash: string
+  hash: string,
 ): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
@@ -22,7 +38,7 @@ export async function comparePassword(
 export function generateAccessToken(
   userId: string,
   role: string,
-  email: string
+  email: string,
 ) {
   return jwt.sign({ userId, role, email }, ACCESS_TOKEN_SECRET, {
     expiresIn: "1d",
@@ -33,7 +49,7 @@ export function generateAccessToken(
 export function generateRefreshToken(
   userId: string,
   role: string,
-  email: string
+  email: string,
 ) {
   return jwt.sign({ userId, role, email }, REFRESH_TOKEN_SECRET, {
     expiresIn: "7d",

@@ -1,0 +1,26 @@
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333">
+    <h2>Order Status Update - #{{orderId}}</h2>
+    <p>Your order status has been updated to:</p>
+
+    <p style="font-size: 18px; font-weight: bold; color: #0275d8">{{status}}</p>
+
+    <h3>Order Items</h3>
+    <ul style="list-style: none; padding: 0">
+      {{#each items}}
+      <li style="margin-bottom: 6px">
+        {{this.name}} — {{this.qty}} × ${{this.price}}
+      </li>
+      {{/each}}
+    </ul>
+
+    <p><strong>Total: ${{total}}</strong></p>
+
+    <hr />
+    <p>
+      If you have any questions, feel free to reply to this email or contact
+      support.
+    </p>
+    <p><em>Thank you for choosing SetupSuites!</em></p>
+  </body>
+</html>

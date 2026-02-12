@@ -1,12 +1,12 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-// import { fileURLToPath } from "url";
+import { fileURLToPath } from "url";
 import { BadRequestError } from "@/libs/AppError";
 
 // ✅ Recreate __dirname in ES Module scope
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ✅ Create the uploads directory path
 const uploadDir = path.join(__dirname, "../../uploads");

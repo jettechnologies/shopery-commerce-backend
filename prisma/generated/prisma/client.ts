@@ -60,6 +60,11 @@ export type PasswordReset = Prisma.PasswordResetModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model EmailVerification
+ * 
+ */
+export type EmailVerification = Prisma.EmailVerificationModel
+/**
  * Model Admin
  * 
  */

@@ -18,7 +18,7 @@ export const CreateUserSchema = z.object({
         message:
           "Password must contain at least one uppercase letter, one lowercase letter, and one number",
         path: ["password"],
-      }
+      },
     ),
   name: z.string().optional(),
 });
@@ -43,7 +43,7 @@ export const LoginUserSchema = z.object({
         message:
           "Password must contain at least one uppercase letter, one lowercase letter, and one number",
         path: ["password"],
-      }
+      },
     ),
 });
 
@@ -71,9 +71,26 @@ export const ResetPasswordSchema = z.object({
         message:
           "Password must contain at least one uppercase letter, one lowercase letter, and one number",
         path: ["password"],
-      }
+      },
     ),
 });
 
 export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
+
+export const VerifyEmailSchema = z.object({
+  otp: z.string().length(4),
+  email: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, {
+    message: "Invalid email address",
+  }),
+});
+export const ResendVerificationEmailSchema = z.object({
+  email: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, {
+    message: "Invalid email address",
+  }),
+});
+
+export type ResendVerificationEmailInput = z.infer<
+  typeof ResendVerificationEmailSchema
+>;
+export type VerifyEmailInput = z.infer<typeof VerifyEmailSchema>;

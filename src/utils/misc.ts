@@ -58,3 +58,6 @@ export const parseArrayField = <T extends string | number = string | number>(
 };
 
 export const guestCartToken = process.env.GUEST_CART_TOKEN as string;
+export const OTP_TIMER = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
+export const generateOTP = () =>
+  Math.floor(1000 + Math.random() * 9000).toString();

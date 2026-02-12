@@ -1,0 +1,12 @@
+<html>
+  <body>
+    <h2>Order Confirmation - #{{orderId}}</h2>
+    <p>Thank you for shopping with us! Here are your order details:</p>
+    <ul>
+      {{#each items}}
+      <li>{{this.name}} - {{this.qty}} × {{this.price}}</li>
+      {{/each}}
+    </ul>
+    <p><strong>Total: ${{total}}</strong></p>
+  </body>
+</html>

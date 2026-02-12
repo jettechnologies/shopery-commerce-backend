@@ -5,6 +5,8 @@ import {
   LoginUserSchema,
   ForgotPasswordSchema,
   ResetPasswordSchema,
+  VerifyEmailSchema,
+  ResendVerificationEmailSchema,
 } from "@/schema/zod-schema";
 import ApiResponse from "@/libs/ApiResponse";
 import { handleError } from "@/libs/misc";
@@ -39,6 +41,30 @@ export class AuthController {
       const data = LoginUserSchema.parse(req.body);
       const result = await AuthService.login(data);
       return ApiResponse.success(res, 200, "Login successful", result);
+    } catch (err) {
+      handleError(res, err);
+    }
+  }
+
+  static async verifyEmail(req: Request, res: Response) {
+    try {
+      const { otp, email } = VerifyEmailSchema.parse(req.body);
+      const result = await AuthService.verifyEmail({ otp, email });
+      return ApiResponse.success(res, 200, "Email verified", result);
+    } catch (err) {
+      handleError(res, err);
+    }
+  }
+
+  static async resendOTP(req: Request, res: Response) {
+    try {
+      const { email } = ResendVerificationEmailSchema.parse(req.body);
+
+      const result = await AuthService.resendEmailVerification({
+        email,
+      });
+
+      return res.status(200).json(result);
     } catch (err) {
       handleError(res, err);
     }

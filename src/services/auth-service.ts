@@ -1,6 +1,6 @@
 import {
-  hashPassword,
-  comparePassword,
+  bcryptHash,
+  bcryptCompare,
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
@@ -10,6 +10,8 @@ import {
   LoginUserInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  VerifyEmailInput,
+  ResendVerificationEmailInput,
 } from "@/schema/zod-schema";
 import {
   ConflictError,
@@ -19,6 +21,7 @@ import {
 import { EmailService, EmailTemplate } from "@/libs/EmailService";
 import { GuestCartService } from "./guest-cart.service";
 import { prisma } from "@/prisma/client.js";
+import { generateOTP, OTP_TIMER } from "@/utils/misc";
 
 export class AuthService {
   static async register(data: CreateUserInput & { guestToken?: string }) {
@@ -27,7 +30,7 @@ export class AuthService {
     });
     if (existingUser) throw new ConflictError("Email already in use");
 
-    const passwordHash = await hashPassword(data.password);
+    const passwordHash = await bcryptHash(data.password);
 
     const newUser = await prisma.user.create({
       data: {
@@ -47,6 +50,9 @@ export class AuthService {
       }
     }
 
+    const otp = generateOTP();
+    const otpHash = await bcryptHash(otp);
+
     // Generate tokens
     const accessToken = generateAccessToken(
       newUser.userId,
@@ -59,23 +65,37 @@ export class AuthService {
       newUser.email,
     );
 
-    await prisma.userSession.create({
-      data: {
-        userId: newUser.id,
-        refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    });
+    await prisma.$transaction([
+      prisma.userSession.create({
+        data: {
+          userId: newUser.id,
+          refreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      }),
+      prisma.emailVerification.create({
+        data: {
+          userId: newUser.id,
+          otpHash,
+          expiresAt: OTP_TIMER,
+        },
+      }),
+    ]);
 
     try {
       await EmailService.sendMail({
         to: newUser.email,
         subject: "Welcome to Shopery Organic store 🎉",
-        template: EmailTemplate.WELCOME,
-        context: { name: data.name },
+        template: EmailTemplate.OTP_VERIFICATION,
+        context: {
+          name: data.name,
+          otp,
+          expiry_time: "2 mintues",
+        },
       });
     } catch (err) {
       console.error("Failed to send welcome email:", err);
+      throw err;
     }
 
     return {
@@ -89,7 +109,7 @@ export class AuthService {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user) throw new NotFoundError("Unregistered email");
 
-    const isValid = await comparePassword(data.password, user.passwordHash!);
+    const isValid = await bcryptCompare(data.password, user.passwordHash!);
     if (!isValid) throw new UnauthorizedError("Invalid password");
 
     // Generate tokens
@@ -116,11 +136,136 @@ export class AuthService {
     };
   }
 
+  static async verifyEmail({ otp, email }: VerifyEmailInput) {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedError("Invalid or expired OTP");
+    }
+
+    if (user.isEmailVerified) {
+      throw new ConflictError("Email already verified");
+    }
+
+    const record = await prisma.emailVerification.findFirst({
+      where: {
+        userId: user.id,
+        used: false,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!record) {
+      throw new UnauthorizedError("Invalid or expired OTP");
+    }
+
+    if (record.expiresAt < new Date()) {
+      throw new UnauthorizedError("OTP expired");
+    }
+
+    const isValid = await bcryptCompare(otp, record.otpHash);
+
+    if (!isValid) {
+      throw new UnauthorizedError("Invalid or expired OTP");
+    }
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { isEmailVerified: true },
+      }),
+      prisma.emailVerification.update({
+        where: { id: record.id },
+        data: { used: true },
+      }),
+    ]);
+
+    try {
+      await EmailService.sendMail({
+        to: user.email,
+        subject: "Email Verification Successful",
+        template: EmailTemplate.WELCOME,
+        context: {
+          name: user.name,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to send OTP email:", err);
+      throw err;
+    }
+
+    return { message: "Email verified successfully" };
+  }
+
+  static async resendEmailVerification({
+    email,
+  }: ResendVerificationEmailInput) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new NotFoundError("User not found");
+
+    if (user.isEmailVerified) {
+      throw new ConflictError("Email already verified");
+    }
+
+    const latestOtp = await prisma.emailVerification.findFirst({
+      where: {
+        userId: user.id,
+        used: false,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (latestOtp) {
+      const secondsSinceLastOtp =
+        (Date.now() - latestOtp.createdAt.getTime()) / 1000;
+
+      if (secondsSinceLastOtp < 60) {
+        throw new ConflictError(
+          `Please wait ${Math.ceil(60 - secondsSinceLastOtp)} seconds before requesting another OTP`,
+        );
+      }
+    }
+
+    const rawOtp = generateOTP();
+    const hashedOtp = await bcryptHash(rawOtp);
+
+    await prisma.emailVerification.create({
+      data: {
+        userId: user.id,
+        otpHash: hashedOtp,
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000),
+      },
+    });
+
+    try {
+      await EmailService.sendMail({
+        to: user.email,
+        subject: "OTP Verification Resend",
+        template: EmailTemplate.OTP_VERIFICATION,
+        context: {
+          name: user.name,
+          otp: rawOtp,
+          expiry_time: "2 minutes",
+        },
+      });
+    } catch (err) {
+      console.error("Failed to send OTP email:", err);
+      throw err;
+    }
+
+    return { message: "OTP re-sent successfully" };
+  }
+
   static async forgotPassword(data: ForgotPasswordInput) {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user) throw new NotFoundError("User not found");
 
-    // Generate OTP (6-digit numeric code)
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Save reset request
@@ -128,7 +273,7 @@ export class AuthService {
       data: {
         userId: user.id,
         otp,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 mins
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
       },
     });
 
@@ -144,7 +289,6 @@ export class AuthService {
 
   //   reset password service
   static async resetPassword(data: ResetPasswordInput) {
-    // Find password reset request by OTP and ensure it's not used yet
     const resetRequest = await prisma.passwordReset.findFirst({
       where: {
         otp: data.otp,
@@ -157,28 +301,23 @@ export class AuthService {
       throw new UnauthorizedError("Invalid or expired OTP");
     }
 
-    // Check expiry
     if (resetRequest.expiresAt < new Date()) {
       throw new UnauthorizedError("OTP expired");
     }
 
-    // Hash the new password
-    const newHash = await hashPassword(data.password);
+    const newHash = await bcryptHash(data.password);
 
-    // Update user password and mark reset request as used
     await prisma.$transaction([
       prisma.user.update({
         where: { id: resetRequest.userId },
         data: { passwordHash: newHash },
       }),
 
-      // Mark reset request as used
       prisma.passwordReset.update({
         where: { id: resetRequest.id },
         data: { used: true },
       }),
 
-      // Invalidate all refresh tokens / sessions
       prisma.userSession.deleteMany({
         where: { userId: resetRequest.userId },
       }),

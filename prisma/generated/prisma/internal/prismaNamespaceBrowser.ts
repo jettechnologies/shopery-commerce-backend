@@ -55,6 +55,7 @@ export const ModelName = {
   UserSession: 'UserSession',
   PasswordReset: 'PasswordReset',
   User: 'User',
+  EmailVerification: 'EmailVerification',
   Admin: 'Admin',
   Address: 'Address',
   Product: 'Product',
@@ -140,10 +141,23 @@ export const UserScalarFieldEnum = {
   role: 'role',
   isActive: 'isActive',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  isEmailVerified: 'isEmailVerified'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const EmailVerificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  otpHash: 'otpHash',
+  expiresAt: 'expiresAt',
+  used: 'used',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailVerificationScalarFieldEnum = (typeof EmailVerificationScalarFieldEnum)[keyof typeof EmailVerificationScalarFieldEnum]
 
 
 export const AdminScalarFieldEnum = {

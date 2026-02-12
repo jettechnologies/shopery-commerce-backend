@@ -2,14 +2,15 @@ import * as Brevo from "@getbrevo/brevo";
 import handlebars from "handlebars";
 import fs from "fs";
 import path from "path";
-// import { fileURLToPath } from "url";
+import { fileURLToPath } from "url";
 
 // Add these at the top of your file (outside the class)
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export enum EmailTemplate {
   WELCOME = "welcome",
+  OTP_VERIFICATION = "otp-verification",
   PASSWORD_RESET = "password-reset",
   ORDER_CONFIRMATION = "order-confirmation",
   ORDER_CANCELLED = "order-cancelled",
@@ -51,19 +52,6 @@ export class EmailService {
     return compiledTemplate(context);
   }
 
-  // static async sendMail({ to, subject, template, context }: SendEmailProps) {
-  //   const htmlContent = this.getTemplate(template, context);
-
-  //   const sendSmtpEmail: Brevo.SendSmtpEmail = {
-  //     sender: { name: "Shopery", email: process.env.SMTP_FROM! },
-  //     to: [{ email: to }],
-  //     subject,
-  //     htmlContent,
-  //   };
-
-  //   return await this.brevoClient.sendTransacEmail(sendSmtpEmail);
-  // }
-
   static async sendMail({
     to,
     subject,
@@ -78,8 +66,6 @@ export class EmailService {
 
       const htmlContent = this.getTemplate(template, context);
 
-      console.log(process.env.BREVO_API_KEY!, "brevo api key");
-
       const sendSmtpEmail: Brevo.SendSmtpEmail = {
         sender: { name: "Shopery", email: process.env.SMTP_FROM },
         to: [{ email: to }],
@@ -87,7 +73,12 @@ export class EmailService {
         htmlContent,
       };
 
-      await this.brevoClient.sendTransacEmail(sendSmtpEmail);
+      await Promise.race([
+        this.brevoClient.sendTransacEmail(sendSmtpEmail),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Email timeout after 10s")), 10000),
+        ),
+      ]);
 
       return { success: true };
     } catch (err: any) {

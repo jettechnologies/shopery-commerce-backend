@@ -31,6 +31,28 @@ const authRouter = Router();
  *           type: string
  *           example: "John Doe"
  *
+ *     VerifyEmail:
+ *       type: object
+ *       required:
+ *         - otp
+ *         - email
+ *       properties:
+ *         otp:
+ *           type: string
+ *           example: "1234"
+ *         email:
+ *           type: string
+ *           example: "john@example.com"
+ *
+ *     ResendVerification:
+ *       type: object
+ *       required:
+ *         - email
+ *       properties:
+ *         email:
+ *           type: string
+ *           example: "john@example.com"
+ *
  *     LoginUser:
  *       type: object
  *       required:
@@ -65,6 +87,7 @@ const authRouter = Router();
  *         password:
  *           type: string
  *           example: "NewPassword123"
+ *
  *     RegisterUserResponse:
  *       type: object
  *       properties:
@@ -126,6 +149,48 @@ const authRouter = Router();
  *         description: Internal server error
  */
 authRouter.post("/register", AuthController.register);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     summary: Verify user email using OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/VerifyEmail'
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       401:
+ *         description: Invalid or expired OTP
+ */
+authRouter.post("/verify-email", AuthController.verifyEmail);
+
+/**
+ * @swagger
+ * /auth/resend-verification:
+ *   post:
+ *     summary: Resend email verification OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ResendVerification'
+ *     responses:
+ *       200:
+ *         description: OTP resent successfully
+ *       404:
+ *         description: User not found
+ *       409:
+ *         description: Maximum resend attempts reached
+ */
+authRouter.post("/resend-verification", AuthController.resendOTP);
 
 /**
  * @swagger
@@ -234,4 +299,3 @@ authRouter.post("/refresh", AuthController.refreshToken);
 authRouter.post("/logout", AuthController.logout);
 
 export default authRouter;
-
