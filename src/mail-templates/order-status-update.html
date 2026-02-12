@@ -1,26 +1,66 @@
+<!doctype html>
 <html>
-  <body style="font-family: Arial, sans-serif; color: #333">
-    <h2>Order Status Update - #{{orderId}}</h2>
-    <p>Your order status has been updated to:</p>
+  <body
+    style="
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <div
+      style="
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+      "
+    >
+      <h2 style="color: #8e6cef">Order Update - #{{orderId}}</h2>
 
-    <p style="font-size: 18px; font-weight: bold; color: #0275d8">{{status}}</p>
+      <p>Your order status is now:</p>
 
-    <h3>Order Items</h3>
-    <ul style="list-style: none; padding: 0">
-      {{#each items}}
-      <li style="margin-bottom: 6px">
-        {{this.name}} — {{this.qty}} × ${{this.price}}
-      </li>
-      {{/each}}
-    </ul>
+      <p style="font-size: 18px; font-weight: bold; color: #8e6cef">
+        {{status}}
+      </p>
 
-    <p><strong>Total: ${{total}}</strong></p>
+      <table
+        width="100%"
+        cellpadding="8"
+        cellspacing="0"
+        style="border-collapse: collapse; margin-top: 20px"
+      >
+        <thead>
+          <tr style="background-color: #f4f4f4">
+            <th align="left">Product</th>
+            <th align="center">Qty</th>
+            <th align="right">Price</th>
+            <th align="right">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each items}}
+          <tr style="border-bottom: 1px solid #eee">
+            <td>{{this.name}}</td>
+            <td align="center">{{this.quantity}}</td>
+            <td align="right">${{this.unitPrice}}</td>
+            <td align="right">${{this.subtotal}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
 
-    <hr />
-    <p>
-      If you have any questions, feel free to reply to this email or contact
-      support.
-    </p>
-    <p><em>Thank you for choosing SetupSuites!</em></p>
+      <p style="text-align: right; font-weight: bold; margin-top: 20px">
+        Total: ${{total}}
+      </p>
+
+      <p style="margin-top: 30px">
+        If you have questions, reply to this email.
+      </p>
+
+      <p><strong>Shopery Team</strong></p>
+    </div>
   </body>
 </html>

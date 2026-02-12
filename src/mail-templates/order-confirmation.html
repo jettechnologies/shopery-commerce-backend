@@ -1,12 +1,67 @@
+<!doctype html>
 <html>
-  <body>
-    <h2>Order Confirmation - #{{orderId}}</h2>
-    <p>Thank you for shopping with us! Here are your order details:</p>
-    <ul>
-      {{#each items}}
-      <li>{{this.name}} - {{this.qty}} × {{this.price}}</li>
-      {{/each}}
-    </ul>
-    <p><strong>Total: ${{total}}</strong></p>
+  <body
+    style="
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <div
+      style="
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+      "
+    >
+      <h2 style="color: #8e6cef">Order Confirmation - #{{orderId}} 🧾</h2>
+
+      <p>Thank you for shopping with <strong>Shopery Organic</strong>!</p>
+
+      <table
+        width="100%"
+        cellpadding="8"
+        cellspacing="0"
+        style="border-collapse: collapse; margin-top: 20px"
+      >
+        <thead>
+          <tr style="background-color: #f4f4f4">
+            <th align="left">Product</th>
+            <th align="center">Qty</th>
+            <th align="right">Price</th>
+            <th align="right">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each items}}
+          <tr style="border-bottom: 1px solid #eee">
+            <td>{{this.name}}</td>
+            <td align="center">{{this.quantity}}</td>
+            <td align="right">${{this.unitPrice}}</td>
+            <td align="right">${{this.subtotal}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+
+      <p
+        style="
+          text-align: right;
+          font-size: 18px;
+          font-weight: bold;
+          margin-top: 20px;
+        "
+      >
+        Total: ${{total}}
+      </p>
+
+      <p style="margin-top: 30px">Happy shopping! 🌿</p>
+      <p><strong>Shopery Team</strong></p>
+    </div>
   </body>
 </html>

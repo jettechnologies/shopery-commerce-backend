@@ -83,12 +83,29 @@ export class OrderService {
       return order;
     });
 
+    const formattedItems = cartItems.map((item) => {
+      const unitPrice = Number(item.unitPrice ?? item.product.price);
+      const quantity = item.quantity;
+      const subtotal = unitPrice * quantity;
+
+      return {
+        name: item.product.name,
+        quantity,
+        unitPrice: unitPrice.toFixed(2),
+        subtotal: subtotal.toFixed(2),
+      };
+    });
+
     try {
       await EmailService.sendMail({
         to: parsedData.email,
         subject: "Order Confirmation",
         template: EmailTemplate.ORDER_CONFIRMATION,
-        context: { orderId: order.id, items: cartItems, total: order.total },
+        context: {
+          orderId: order.orderId,
+          items: formattedItems,
+          total: Number(order.total).toFixed(2),
+        },
       });
     } catch (err) {
       console.warn("Order created but email failed:", err);
@@ -134,12 +151,36 @@ export class OrderService {
       data: { status },
     });
 
+    const orderItems = await prisma.orderItem.findMany({
+      where: { orderId: order.id },
+      include: { product: true },
+    });
+
+    if (!order) throw new NotFoundError("Order not found");
+
+    const formattedItems = orderItems.map((item) => {
+      const unitPrice = Number(item.unitPrice ?? item.product.price);
+      const quantity = item.quantity;
+      const subtotal = unitPrice * quantity;
+
+      return {
+        name: item.product.name,
+        quantity,
+        unitPrice: unitPrice.toFixed(2),
+        subtotal: subtotal.toFixed(2),
+      };
+    });
+
     // Optional: Send email notification on status change
     await EmailService.sendMail({
       to: order.email,
       subject: `Order ${status}`,
       template: EmailTemplate.ORDER_STATUS_UPDATE,
-      context: { orderId: order.id, status },
+      context: {
+        orderId: order.orderId,
+        items: formattedItems,
+        total: Number(order.total).toFixed(2),
+      },
     });
 
     return order;
@@ -164,11 +205,35 @@ export class OrderService {
       data: { status: OrderStatus.cancelled },
     });
 
+    const orderItems = await prisma.orderItem.findMany({
+      where: { orderId: updatedOrder.id },
+      include: { product: true },
+    });
+
+    if (!order) throw new NotFoundError("Order not found");
+
+    const formattedItems = orderItems.map((item) => {
+      const unitPrice = Number(item.unitPrice ?? item.product.price);
+      const quantity = item.quantity;
+      const subtotal = unitPrice * quantity;
+
+      return {
+        name: item.product.name,
+        quantity,
+        unitPrice: unitPrice.toFixed(2),
+        subtotal: subtotal.toFixed(2),
+      };
+    });
+
     await EmailService.sendMail({
-      to: order.email,
+      to: updatedOrder.email,
       subject: "Order Cancelled",
       template: EmailTemplate.ORDER_CANCELLED,
-      context: { orderId: order.id },
+      context: {
+        orderId: updatedOrder.orderId,
+        items: formattedItems,
+        total: Number(updatedOrder.total).toFixed(2),
+      },
     });
 
     return updatedOrder;
