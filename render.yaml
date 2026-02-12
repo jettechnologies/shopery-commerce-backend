@@ -52,3 +52,6 @@ services:
 
       - key: PORT
         value: 10000
+
+      - key: BCRYPT_SALT_ROUNDS
+        value: "20"
