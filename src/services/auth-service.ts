@@ -104,8 +104,11 @@ export class AuthService {
   }
 
   static async login(data: LoginUserInput) {
-    const user = await prisma.user.findUnique({ where: { email: data.email } });
-    if (!user) throw new NotFoundError("Unregistered email");
+    const user = await prisma.user.findUnique({
+      where: { email: data.email, isEmailVerified: true },
+    });
+    if (!user)
+      throw new NotFoundError("Unauthorized user, Please verify your email");
 
     const isValid = await bcryptCompare(data.password, user.passwordHash!);
     if (!isValid) throw new UnauthorizedError("Invalid password");
