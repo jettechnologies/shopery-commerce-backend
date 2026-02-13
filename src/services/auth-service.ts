@@ -108,7 +108,9 @@ export class AuthService {
       where: { email: data.email, isEmailVerified: true },
     });
     if (!user)
-      throw new NotFoundError("Unauthorized user, Please verify your email");
+      throw new UnauthorizedError(
+        "Unauthorized user, Please verify your email",
+      );
 
     const isValid = await bcryptCompare(data.password, user.passwordHash!);
     if (!isValid) throw new UnauthorizedError("Invalid password");
