@@ -7,3 +7,5 @@ priv_key.pem
 pub_key.pem
 .vscode/
 *node_modules/*
+**uploads/
+*dist

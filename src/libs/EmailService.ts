@@ -38,7 +38,6 @@ export class EmailService {
   private static getTemplate(templateName: EmailTemplate, context: any) {
     const filePath = path.join(
       __dirname,
-      "..",
       "mail-templates",
       `${templateName}.html`,
     );
