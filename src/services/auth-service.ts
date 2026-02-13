@@ -46,7 +46,6 @@ export class AuthService {
         await GuestCartService.mergeIntoUserCart(data.guestToken, newUser.id);
       } catch (err) {
         console.error("Failed to merge guest cart:", err);
-        throw err;
       }
     }
 
@@ -95,7 +94,6 @@ export class AuthService {
       });
     } catch (err) {
       console.error("Failed to send welcome email:", err);
-      throw err;
     }
 
     return {
@@ -195,7 +193,6 @@ export class AuthService {
       });
     } catch (err) {
       console.error("Failed to send OTP email:", err);
-      throw err;
     }
 
     return { message: "Email verified successfully" };
@@ -256,7 +253,6 @@ export class AuthService {
       });
     } catch (err) {
       console.error("Failed to send OTP email:", err);
-      throw err;
     }
 
     return { message: "OTP re-sent successfully" };
