@@ -55,3 +55,8 @@ services:
 
       - key: BCRYPT_SALT_ROUNDS
         value: "12"
+
+      - key: EMAIL_WORKER_URL
+        sync: false
+      - key: EMAIL_PROVIDER
+        sync: false
