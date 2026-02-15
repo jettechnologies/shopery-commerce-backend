@@ -13,6 +13,7 @@ export default defineConfig({
   shims: true, // provides __dirname fix automatically
   minify: false,
   treeshake: true,
-  onSuccess: "cp -r mail-templates dist/",
+  onSuccess:
+    "echo 'Copying mail templates...' && cp -r mail-templates dist/ && echo 'Templates copied successfully'",
   platform: "node",
 });

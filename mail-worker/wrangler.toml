@@ -1,0 +1,8 @@
+name = "email-worker"
+main = "src/index.ts"
+compatibility_date = "2026-02-13"
+
+workers_dev = true
+
+[observability]
+enabled = true

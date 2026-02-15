@@ -81,20 +81,32 @@ export class AuthService {
       }),
     ]);
 
-    try {
-      await EmailService.sendMail({
-        to: newUser.email,
-        subject: "Welcome to Shopery Organic store 🎉",
-        template: EmailTemplate.OTP_VERIFICATION,
-        context: {
-          name: data.name,
-          otp,
-          expiry_time: "2 mintues",
-        },
-      });
-    } catch (err) {
+    // try {
+    //   await EmailService.sendMail({
+    //     to: newUser.email,
+    //     subject: "Welcome to Shopery Organic store 🎉",
+    //     template: EmailTemplate.OTP_VERIFICATION,
+    //     context: {
+    //       name: data.name,
+    //       otp,
+    //       expiry_time: "2 mintues",
+    //     },
+    //   });
+    // } catch (err) {
+    //   console.error("Failed to send welcome email:", err);
+    // }
+    EmailService.sendMail({
+      to: newUser.email,
+      subject: "Welcome to Shopery Organic store 🎉",
+      template: EmailTemplate.OTP_VERIFICATION,
+      context: {
+        name: data.name,
+        otp,
+        expiry_time: "2 mintues",
+      },
+    }).catch((err) => {
       console.error("Failed to send welcome email:", err);
-    }
+    });
 
     return {
       user: { id: newUser.userId, email: newUser.email },

@@ -1,11 +1,27 @@
+# Mac system files
 .DS_Store
 ._.DS_Store
 **/.DS_Store
 **/._.DS_Store
+
+# Environment
 .env
+
+# Keys
 priv_key.pem
 pub_key.pem
+
+# VSCode
 .vscode/
-*node_modules/*
-**uploads/
-*dist
+
+# Node
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+
+# Uploads
+uploads/
+**/uploads/
