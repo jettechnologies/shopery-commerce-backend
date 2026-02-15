@@ -1,4 +1,4 @@
-name = "email-worker"
+name = "mail-worker"
 main = "src/index.ts"
 compatibility_date = "2026-02-13"
 
