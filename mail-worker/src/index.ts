@@ -1,4 +1,4 @@
-import templates from "./templates-js";
+import templates from "./template";
 
 export interface Env {
   BREVO_API_KEY: string;
