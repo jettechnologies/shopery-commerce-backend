@@ -1,6 +1,8 @@
-(function() {
-  var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
-templates['order-cancelled'] = template({"1":function(container,depth0,helpers,partials,data) {
+import Handlebars from "handlebars/runtime";
+
+const templates = {};
+
+templates["order-cancelled"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -33,7 +35,8 @@ templates['order-cancelled'] = template({"1":function(container,depth0,helpers,p
     + alias4(((helper = (helper = lookupProperty(helpers,"total") || (depth0 != null ? lookupProperty(depth0,"total") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"total","hash":{},"data":data,"loc":{"start":{"line":52,"column":25},"end":{"line":52,"column":34}}}) : helper)))
     + "\r\n      </p>\r\n\r\n      <p style=\"margin-top: 30px\">\r\n        If you did not request this, please contact support immediately.\r\n      </p>\r\n\r\n      <p><strong>Shopery Team</strong></p>\r\n    </div>\r\n  </body>\r\n</html>\r\n";
 },"useData":true});
-templates['order-confirmation'] = template({"1":function(container,depth0,helpers,partials,data) {
+
+templates["order-confirmation"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -66,7 +69,8 @@ templates['order-confirmation'] = template({"1":function(container,depth0,helper
     + alias4(((helper = (helper = lookupProperty(helpers,"total") || (depth0 != null ? lookupProperty(depth0,"total") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"total","hash":{},"data":data,"loc":{"start":{"line":60,"column":16},"end":{"line":60,"column":25}}}) : helper)))
     + "\r\n      </p>\r\n\r\n      <p style=\"margin-top: 30px\">Happy shopping! 🌿</p>\r\n      <p><strong>Shopery Team</strong></p>\r\n    </div>\r\n  </body>\r\n</html>\r\n";
 },"useData":true});
-templates['order-status-update'] = template({"1":function(container,depth0,helpers,partials,data) {
+
+templates["order-status-update"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -101,7 +105,8 @@ templates['order-status-update'] = template({"1":function(container,depth0,helpe
     + alias4(((helper = (helper = lookupProperty(helpers,"total") || (depth0 != null ? lookupProperty(depth0,"total") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"total","hash":{},"data":data,"loc":{"start":{"line":56,"column":16},"end":{"line":56,"column":25}}}) : helper)))
     + "\r\n      </p>\r\n\r\n      <p style=\"margin-top: 30px\">\r\n        If you have questions, reply to this email.\r\n      </p>\r\n\r\n      <p><strong>Shopery Team</strong></p>\r\n    </div>\r\n  </body>\r\n</html>\r\n";
 },"useData":true});
-templates['otp-verification'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+
+templates["otp-verification"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -117,7 +122,8 @@ templates['otp-verification'] = template({"compiler":[8,">= 4.3.0"],"main":funct
     + alias4(((helper = (helper = lookupProperty(helpers,"expiry_time") || (depth0 != null ? lookupProperty(depth0,"expiry_time") : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"expiry_time","hash":{},"data":data,"loc":{"start":{"line":59,"column":8},"end":{"line":59,"column":23}}}) : helper)))
     + ".\n      </p>\n\n      <p style=\"font-size: 14px; color: #555555; margin-top: 30px\">\n        Happy shopping!<br />\n        <strong>Shopery Team</strong>\n      </p>\n    </div>\n  </body>\n</html>\n";
 },"useData":true});
-templates['password-reset'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+
+templates["password-reset"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -129,7 +135,8 @@ templates['password-reset'] = template({"compiler":[8,">= 4.3.0"],"main":functio
     + container.escapeExpression(((helper = (helper = lookupProperty(helpers,"otp") || (depth0 != null ? lookupProperty(depth0,"otp") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"otp","hash":{},"data":data,"loc":{"start":{"line":41,"column":8},"end":{"line":41,"column":15}}}) : helper)))
     + "\r\n      </div>\r\n\r\n      <p style=\"font-size: 14px; color: #555; margin-top: 20px\">\r\n        If you didn’t request this, please ignore this email.\r\n      </p>\r\n\r\n      <p style=\"margin-top: 30px\">— <strong>Shopery Team</strong></p>\r\n    </div>\r\n  </body>\r\n</html>\r\n";
 },"useData":true});
-templates['welcome'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+
+templates["welcome"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -141,4 +148,5 @@ templates['welcome'] = template({"compiler":[8,">= 4.3.0"],"main":function(conta
     + container.escapeExpression(((helper = (helper = lookupProperty(helpers,"name") || (depth0 != null ? lookupProperty(depth0,"name") : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"name","hash":{},"data":data,"loc":{"start":{"line":24,"column":63},"end":{"line":24,"column":71}}}) : helper)))
     + " 🎉</h2>\r\n\r\n      <p style=\"font-size: 16px; color: #222222\">\r\n        Your email has been successfully verified. We're thrilled to have you as\r\n        part of <strong>Shopery Organic</strong>!\r\n      </p>\r\n\r\n      <p style=\"font-size: 16px; color: #222222; margin: 20px 0 10px 0\">\r\n        You can now explore our products and enjoy a seamless shopping\r\n        experience.\r\n      </p>\r\n\r\n      <p style=\"font-size: 14px; color: #555555; margin-top: 30px\">\r\n        Happy shopping!<br />\r\n        <strong>Shopery Team</strong>\r\n      </p>\r\n    </div>\r\n  </body>\r\n</html>\r\n";
 },"useData":true});
-})();
+
+export default templates;

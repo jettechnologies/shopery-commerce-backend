@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "type": "wrangler types",
     "type-check": "wrangler types && tsc --noEmit",
-    "mail-template:precompile": "npx handlebars ../mail-templates -e html -f src/templates.js"
+    "mail-template:precompile": "npx handlebars ../mail-templates -e html -f src/templates.js",
+    "mail:precompile": "node script/precompile-templates.js"
   },
   "keywords": [],
   "author": "",
