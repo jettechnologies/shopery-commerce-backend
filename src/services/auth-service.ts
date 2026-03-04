@@ -22,6 +22,7 @@ import { EmailService, EmailTemplate } from "@/libs/EmailService";
 import { GuestCartService } from "./guest-cart.service";
 import { prisma } from "@/prisma/client.js";
 import { generateOTP, OTP_TIMER } from "@/utils/misc";
+import { raw } from "express";
 
 export class AuthService {
   static async register(data: CreateUserInput & { guestToken?: string }) {
@@ -279,13 +280,14 @@ export class AuthService {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user) throw new NotFoundError("User not found");
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const rawOtp = generateOTP();
+    const hashedOtp = await bcryptHash(rawOtp);
 
     // Save reset request
     await prisma.passwordReset.create({
       data: {
         userId: user.id,
-        otp,
+        otpHash: hashedOtp,
         expiresAt: new Date(Date.now() + 15 * 60 * 1000),
       },
     });
@@ -294,7 +296,7 @@ export class AuthService {
       to: user.email,
       subject: "Password Reset Request",
       template: EmailTemplate.PASSWORD_RESET,
-      context: { otp },
+      context: { rawOtp },
     });
 
     return { message: "Password reset OTP sent to your email" };
@@ -302,12 +304,22 @@ export class AuthService {
 
   //   reset password service
   static async resetPassword(data: ResetPasswordInput) {
+    const user = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedError("Invalid or expired OTP");
+    }
+
     const resetRequest = await prisma.passwordReset.findFirst({
       where: {
-        otp: data.otp,
+        userId: user.id,
         used: false,
       },
-      include: { user: true },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     if (!resetRequest) {
@@ -316,6 +328,12 @@ export class AuthService {
 
     if (resetRequest.expiresAt < new Date()) {
       throw new UnauthorizedError("OTP expired");
+    }
+
+    const isValid = await bcryptCompare(data.otp, resetRequest.otpHash);
+
+    if (!isValid) {
+      throw new UnauthorizedError("Invalid or expired OTP");
     }
 
     const newHash = await bcryptHash(data.password);

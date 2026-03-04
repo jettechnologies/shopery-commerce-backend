@@ -123,7 +123,7 @@ export type UserSessionScalarFieldEnum = (typeof UserSessionScalarFieldEnum)[key
 export const PasswordResetScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  otp: 'otp',
+  otpHash: 'otpHash',
   expiresAt: 'expiresAt',
   used: 'used',
   createdAt: 'createdAt'

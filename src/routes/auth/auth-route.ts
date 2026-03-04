@@ -80,10 +80,14 @@ const authRouter = Router();
  *       required:
  *         - otp
  *         - password
+ *         - email
  *       properties:
  *         otp:
  *           type: string
- *           example: "123456"
+ *           example: "1234"
+ *         email:
+ *           type: string
+ *           example: "john@example.com"
  *         password:
  *           type: string
  *           example: "NewPassword123"

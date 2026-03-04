@@ -56,7 +56,10 @@ export const ForgotPasswordSchema = z.object({
 });
 
 export const ResetPasswordSchema = z.object({
-  otp: z.string().max(6),
+  email: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, {
+    message: "Invalid email address",
+  }),
+  otp: z.string().max(4),
   password: z
     .string()
     .min(6)

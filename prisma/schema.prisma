@@ -66,7 +66,7 @@ model PasswordReset {
   id        BigInt   @id @default(autoincrement())
   userId    BigInt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  otp       String
+  otpHash   String   @map("otp_hash")
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
