@@ -1,7 +1,7 @@
 services:
   - type: web
+    runtime: node
     name: shopery-backend
-    env: node
     plan: free
     region: oregon
 
@@ -11,14 +11,14 @@ services:
       pnpm install --frozen-lockfile
       pnpm run db:generate
       pnpm run build
-      pnpm run db:push
+      if [ "$NODE_ENV" = "production" ]; then pnpm run db:push; fi
       pnpm run db:seed
 
     startCommand: pnpm run start
 
     envVars:
       - key: DATABASE_URL
-        sync: false
+        sync: true
 
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
@@ -58,5 +58,6 @@ services:
 
       - key: EMAIL_WORKER_URL
         sync: false
+
       - key: EMAIL_PROVIDER
         sync: false
