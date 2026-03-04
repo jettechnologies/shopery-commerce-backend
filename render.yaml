@@ -11,7 +11,7 @@ services:
       pnpm install --frozen-lockfile
       pnpm run db:generate
       pnpm run build
-      if [ "$NODE_ENV" = "production" ]; then pnpm run db:push --force-reset; fi
+      if [ "$NODE_ENV" = "production" ]; then pnpm run db:push; fi
       pnpm run db:seed
 
     startCommand: pnpm run start
