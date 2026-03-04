@@ -296,7 +296,7 @@ export class AuthService {
       to: user.email,
       subject: "Password Reset Request",
       template: EmailTemplate.PASSWORD_RESET,
-      context: { rawOtp },
+      context: { otp: rawOtp },
     });
 
     return { message: "Password reset OTP sent to your email" };
