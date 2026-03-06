@@ -20,11 +20,12 @@ export class GuestCartService {
       null;
 
     const macAddress = (req.headers["x-mac-address"] as string) || null;
+    const platformOS = (req.headers["x-platform"] as string) || null;
 
     const userAgent = req.headers["user-agent"] || null;
 
     const cart = await prisma.guestCart.create({
-      data: { ipAddress, macAddress, userAgent, expiresAt },
+      data: { ipAddress, macAddress, userAgent, platformOS, expiresAt },
       include: { items: true },
     });
 

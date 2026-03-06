@@ -40,6 +40,7 @@ export type GuestCartMinAggregateOutputType = {
   ipAddress: string | null
   macAddress: string | null
   userAgent: string | null
+  platformOS: string | null
   createdAt: Date | null
   updatedAt: Date | null
   expiresAt: Date | null
@@ -51,6 +52,7 @@ export type GuestCartMaxAggregateOutputType = {
   ipAddress: string | null
   macAddress: string | null
   userAgent: string | null
+  platformOS: string | null
   createdAt: Date | null
   updatedAt: Date | null
   expiresAt: Date | null
@@ -62,6 +64,7 @@ export type GuestCartCountAggregateOutputType = {
   ipAddress: number
   macAddress: number
   userAgent: number
+  platformOS: number
   createdAt: number
   updatedAt: number
   expiresAt: number
@@ -83,6 +86,7 @@ export type GuestCartMinAggregateInputType = {
   ipAddress?: true
   macAddress?: true
   userAgent?: true
+  platformOS?: true
   createdAt?: true
   updatedAt?: true
   expiresAt?: true
@@ -94,6 +98,7 @@ export type GuestCartMaxAggregateInputType = {
   ipAddress?: true
   macAddress?: true
   userAgent?: true
+  platformOS?: true
   createdAt?: true
   updatedAt?: true
   expiresAt?: true
@@ -105,6 +110,7 @@ export type GuestCartCountAggregateInputType = {
   ipAddress?: true
   macAddress?: true
   userAgent?: true
+  platformOS?: true
   createdAt?: true
   updatedAt?: true
   expiresAt?: true
@@ -203,6 +209,7 @@ export type GuestCartGroupByOutputType = {
   ipAddress: string | null
   macAddress: string | null
   userAgent: string | null
+  platformOS: string | null
   createdAt: Date
   updatedAt: Date
   expiresAt: Date
@@ -237,6 +244,7 @@ export type GuestCartWhereInput = {
   ipAddress?: Prisma.StringNullableFilter<"GuestCart"> | string | null
   macAddress?: Prisma.StringNullableFilter<"GuestCart"> | string | null
   userAgent?: Prisma.StringNullableFilter<"GuestCart"> | string | null
+  platformOS?: Prisma.StringNullableFilter<"GuestCart"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GuestCart"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GuestCart"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"GuestCart"> | Date | string
@@ -250,6 +258,7 @@ export type GuestCartOrderByWithRelationInput = {
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
+  platformOS?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -266,6 +275,7 @@ export type GuestCartWhereUniqueInput = Prisma.AtLeast<{
   ipAddress?: Prisma.StringNullableFilter<"GuestCart"> | string | null
   macAddress?: Prisma.StringNullableFilter<"GuestCart"> | string | null
   userAgent?: Prisma.StringNullableFilter<"GuestCart"> | string | null
+  platformOS?: Prisma.StringNullableFilter<"GuestCart"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GuestCart"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GuestCart"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"GuestCart"> | Date | string
@@ -279,6 +289,7 @@ export type GuestCartOrderByWithAggregationInput = {
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
+  platformOS?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -298,6 +309,7 @@ export type GuestCartScalarWhereWithAggregatesInput = {
   ipAddress?: Prisma.StringNullableWithAggregatesFilter<"GuestCart"> | string | null
   macAddress?: Prisma.StringNullableWithAggregatesFilter<"GuestCart"> | string | null
   userAgent?: Prisma.StringNullableWithAggregatesFilter<"GuestCart"> | string | null
+  platformOS?: Prisma.StringNullableWithAggregatesFilter<"GuestCart"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"GuestCart"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"GuestCart"> | Date | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"GuestCart"> | Date | string
@@ -309,6 +321,7 @@ export type GuestCartCreateInput = {
   ipAddress?: string | null
   macAddress?: string | null
   userAgent?: string | null
+  platformOS?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
@@ -322,6 +335,7 @@ export type GuestCartUncheckedCreateInput = {
   ipAddress?: string | null
   macAddress?: string | null
   userAgent?: string | null
+  platformOS?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
@@ -335,6 +349,7 @@ export type GuestCartUpdateInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -348,6 +363,7 @@ export type GuestCartUncheckedUpdateInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -361,6 +377,7 @@ export type GuestCartCreateManyInput = {
   ipAddress?: string | null
   macAddress?: string | null
   userAgent?: string | null
+  platformOS?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
@@ -372,6 +389,7 @@ export type GuestCartUpdateManyMutationInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -383,6 +401,7 @@ export type GuestCartUncheckedUpdateManyInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -394,6 +413,7 @@ export type GuestCartCountOrderByAggregateInput = {
   ipAddress?: Prisma.SortOrder
   macAddress?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
+  platformOS?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -409,6 +429,7 @@ export type GuestCartMaxOrderByAggregateInput = {
   ipAddress?: Prisma.SortOrder
   macAddress?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
+  platformOS?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -420,6 +441,7 @@ export type GuestCartMinOrderByAggregateInput = {
   ipAddress?: Prisma.SortOrder
   macAddress?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
+  platformOS?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -475,6 +497,7 @@ export type GuestCartCreateWithoutItemsInput = {
   ipAddress?: string | null
   macAddress?: string | null
   userAgent?: string | null
+  platformOS?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
@@ -487,6 +510,7 @@ export type GuestCartUncheckedCreateWithoutItemsInput = {
   ipAddress?: string | null
   macAddress?: string | null
   userAgent?: string | null
+  platformOS?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
@@ -515,6 +539,7 @@ export type GuestCartUpdateWithoutItemsInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -527,6 +552,7 @@ export type GuestCartUncheckedUpdateWithoutItemsInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -539,6 +565,7 @@ export type GuestCartCreateWithoutOrderInput = {
   ipAddress?: string | null
   macAddress?: string | null
   userAgent?: string | null
+  platformOS?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
@@ -551,6 +578,7 @@ export type GuestCartUncheckedCreateWithoutOrderInput = {
   ipAddress?: string | null
   macAddress?: string | null
   userAgent?: string | null
+  platformOS?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
@@ -579,6 +607,7 @@ export type GuestCartUpdateWithoutOrderInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -591,6 +620,7 @@ export type GuestCartUncheckedUpdateWithoutOrderInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformOS?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -643,6 +673,7 @@ export type GuestCartSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   ipAddress?: boolean
   macAddress?: boolean
   userAgent?: boolean
+  platformOS?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
@@ -657,6 +688,7 @@ export type GuestCartSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ipAddress?: boolean
   macAddress?: boolean
   userAgent?: boolean
+  platformOS?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
@@ -668,6 +700,7 @@ export type GuestCartSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ipAddress?: boolean
   macAddress?: boolean
   userAgent?: boolean
+  platformOS?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
@@ -679,12 +712,13 @@ export type GuestCartSelectScalar = {
   ipAddress?: boolean
   macAddress?: boolean
   userAgent?: boolean
+  platformOS?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
 }
 
-export type GuestCartOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "ipAddress" | "macAddress" | "userAgent" | "createdAt" | "updatedAt" | "expiresAt", ExtArgs["result"]["guestCart"]>
+export type GuestCartOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "ipAddress" | "macAddress" | "userAgent" | "platformOS" | "createdAt" | "updatedAt" | "expiresAt", ExtArgs["result"]["guestCart"]>
 export type GuestCartInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | Prisma.GuestCart$itemsArgs<ExtArgs>
   Order?: boolean | Prisma.GuestCart$OrderArgs<ExtArgs>
@@ -705,6 +739,7 @@ export type $GuestCartPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     ipAddress: string | null
     macAddress: string | null
     userAgent: string | null
+    platformOS: string | null
     createdAt: Date
     updatedAt: Date
     expiresAt: Date
@@ -1138,6 +1173,7 @@ export interface GuestCartFieldRefs {
   readonly ipAddress: Prisma.FieldRef<"GuestCart", 'String'>
   readonly macAddress: Prisma.FieldRef<"GuestCart", 'String'>
   readonly userAgent: Prisma.FieldRef<"GuestCart", 'String'>
+  readonly platformOS: Prisma.FieldRef<"GuestCart", 'String'>
   readonly createdAt: Prisma.FieldRef<"GuestCart", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"GuestCart", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"GuestCart", 'DateTime'>

@@ -364,6 +364,7 @@ model GuestCart {
   ipAddress  String?
   macAddress String?
   userAgent  String?
+  platformOS String?
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
   expiresAt  DateTime

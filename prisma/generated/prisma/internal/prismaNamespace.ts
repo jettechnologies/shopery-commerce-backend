@@ -2843,6 +2843,7 @@ export const GuestCartScalarFieldEnum = {
   ipAddress: 'ipAddress',
   macAddress: 'macAddress',
   userAgent: 'userAgent',
+  platformOS: 'platformOS',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   expiresAt: 'expiresAt'
