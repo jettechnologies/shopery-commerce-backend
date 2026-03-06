@@ -100,7 +100,7 @@ export class AuthService {
     });
 
     return {
-      user: { id: newUser.userId, email: newUser.email },
+      user: { id: newUser.userId, email: newUser.email, name: newUser.name },
       accessToken,
       refreshToken,
     };
@@ -162,7 +162,7 @@ export class AuthService {
     });
 
     return {
-      user: { id: user.userId, email: user.email },
+      user: { id: user.userId, email: user.email, name: user.name },
       accessToken,
       refreshToken,
     };
