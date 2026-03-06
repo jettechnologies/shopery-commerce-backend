@@ -34,13 +34,21 @@ export async function bcryptCompare(
   return bcrypt.compare(password, hash);
 }
 
+interface AccessTokenParams {
+  userId: string;
+  role: string;
+  email: string;
+  sessionId: string;
+}
+
 // Generate Access Token
-export function generateAccessToken(
-  userId: string,
-  role: string,
-  email: string,
-) {
-  return jwt.sign({ userId, role, email }, ACCESS_TOKEN_SECRET, {
+export function generateAccessToken({
+  userId,
+  role,
+  email,
+  sessionId,
+}: AccessTokenParams) {
+  return jwt.sign({ userId, role, email, sessionId }, ACCESS_TOKEN_SECRET, {
     expiresIn: "1d",
   });
 }
@@ -67,9 +75,5 @@ export function verifyRefreshToken(token: string) {
 
 //  verify access token
 export function verifyAccessToken(token: string) {
-  return jwt.verify(token, ACCESS_TOKEN_SECRET) as {
-    userId: string;
-    role: string;
-    email: string;
-  };
+  return jwt.verify(token, ACCESS_TOKEN_SECRET) as AccessTokenParams;
 }

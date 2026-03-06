@@ -11,6 +11,8 @@ import {
 import ApiResponse from "@/libs/ApiResponse";
 import { handleError } from "@/libs/misc";
 import { guestCartToken } from "@/utils/misc";
+import { UnauthorizedError } from "@/libs/AppError";
+import { AuthRequest } from "@/middlewares/auth.middleware";
 
 export class AuthController {
   static async register(req: Request, res: Response) {
@@ -100,10 +102,16 @@ export class AuthController {
     }
   }
 
-  static async logout(req: Request, res: Response) {
+  static async logout(req: AuthRequest, res: Response) {
     try {
-      const { refreshToken } = req.body;
-      const result = await AuthService.logout(refreshToken);
+      if (!req.user) {
+        throw new UnauthorizedError("Unauthorized");
+      }
+
+      const { sessionId } = req.user;
+
+      const result = await AuthService.logout(sessionId);
+
       return ApiResponse.success(res, 200, "Logged out successfully", result);
     } catch (err) {
       handleError(res, err);

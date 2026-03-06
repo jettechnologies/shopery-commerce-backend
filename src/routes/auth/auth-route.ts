@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "@/controllers/auth/auth.controller";
+import { authGuard } from "@/middlewares/auth.middleware";
 
 const authRouter = Router();
 
@@ -286,20 +287,12 @@ authRouter.post("/refresh", AuthController.refreshToken);
  *   post:
  *     summary: Logout a user (invalidate refresh token)
  *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 example: "your-refresh-token"
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Logged out successfully
  */
-authRouter.post("/logout", AuthController.logout);
+authRouter.post("/logout", AuthController.logout, authGuard);
 
 export default authRouter;

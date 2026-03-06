@@ -111,10 +111,12 @@ export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeo
 
 export const UserSessionScalarFieldEnum = {
   id: 'id',
+  sessionId: 'sessionId',
   userId: 'userId',
-  refreshToken: 'refreshToken',
+  refreshTokenHash: 'refreshTokenHash',
   createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  revoked: 'revoked'
 } as const
 
 export type UserSessionScalarFieldEnum = (typeof UserSessionScalarFieldEnum)[keyof typeof UserSessionScalarFieldEnum]

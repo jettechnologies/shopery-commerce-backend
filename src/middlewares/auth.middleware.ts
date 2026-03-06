@@ -2,37 +2,94 @@
 import { Request, Response, NextFunction } from "express";
 import { UnauthorizedError, ForbiddenError } from "@/libs/AppError";
 import { verifyAccessToken } from "@/libs/password-hash-verify";
+import { prisma } from "@/prisma/client.js";
+
+// export interface AuthRequest extends Request {
+//   user?: { userId: string; role: string; email: string };
+// }
+
+// export function authGuard(
+//   req: AuthRequest,
+//   _res: Response,
+//   next: NextFunction,
+// ) {
+//   const authHeader = req.headers["authorization"];
+
+//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+//     return next(
+//       new UnauthorizedError("Missing or invalid Authorization header"),
+//     );
+//   }
+
+//   const token = authHeader.split(" ")[1];
+//   const decoded = verifyAccessToken(token);
+
+//   if (!decoded) {
+//     return next(new UnauthorizedError("Invalid or expired token"));
+//   }
+
+//   req.user = {
+//     userId: decoded.userId,
+//     role: decoded.role,
+//     email: decoded.email,
+//   };
+//   next();
+// }
 
 export interface AuthRequest extends Request {
-  user?: { userId: string; role: string; email: string };
+  user?: {
+    userId: string;
+    role: string;
+    email: string;
+    sessionId: string;
+  };
 }
 
-export function authGuard(
+export async function authGuard(
   req: AuthRequest,
   _res: Response,
   next: NextFunction,
 ) {
-  const authHeader = req.headers["authorization"];
+  try {
+    const authHeader = req.headers["authorization"];
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return next(
-      new UnauthorizedError("Missing or invalid Authorization header"),
-    );
-  }
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return next(
+        new UnauthorizedError("Missing or invalid Authorization header"),
+      );
+    }
 
-  const token = authHeader.split(" ")[1];
-  const decoded = verifyAccessToken(token);
+    const token = authHeader.split(" ")[1];
 
-  if (!decoded) {
+    const decoded = verifyAccessToken(token);
+
+    if (!decoded) {
+      return next(new UnauthorizedError("Invalid or expired token"));
+    }
+
+    const session = await prisma.userSession.findUnique({
+      where: { sessionId: decoded.sessionId },
+    });
+
+    if (!session || session.revoked) {
+      return next(new UnauthorizedError("Session revoked"));
+    }
+
+    if (session.expiresAt < new Date()) {
+      return next(new UnauthorizedError("Session expired"));
+    }
+
+    req.user = {
+      userId: decoded.userId,
+      role: decoded.role,
+      email: decoded.email,
+      sessionId: decoded.sessionId,
+    };
+
+    next();
+  } catch {
     return next(new UnauthorizedError("Invalid or expired token"));
   }
-
-  req.user = {
-    userId: decoded.userId,
-    role: decoded.role,
-    email: decoded.email,
-  };
-  next();
 }
 
 // Role-based + ownership guard

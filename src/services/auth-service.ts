@@ -22,7 +22,6 @@ import { EmailService, EmailTemplate } from "@/libs/EmailService";
 import { GuestCartService } from "./guest-cart.service";
 import { prisma } from "@/prisma/client.js";
 import { generateOTP, OTP_TIMER } from "@/utils/misc";
-import { raw } from "express";
 
 export class AuthService {
   static async register(data: CreateUserInput & { guestToken?: string }) {
@@ -41,6 +40,8 @@ export class AuthService {
       },
     });
 
+    console.log(newUser, "new user");
+
     // Merge guest cart if token exists
     if (data.guestToken) {
       try {
@@ -53,23 +54,20 @@ export class AuthService {
     const otp = generateOTP();
     const otpHash = await bcryptHash(otp);
 
-    // Generate tokens
-    const accessToken = generateAccessToken(
-      newUser.userId,
-      newUser.role,
-      newUser.email,
-    );
+    // Generate refreshToken
     const refreshToken = generateRefreshToken(
       newUser.userId,
       newUser.role,
       newUser.email,
     );
 
-    await prisma.$transaction([
+    const refreshTokenHash = await bcryptHash(refreshToken);
+
+    const session = await prisma.$transaction([
       prisma.userSession.create({
         data: {
           userId: newUser.id,
-          refreshToken,
+          refreshTokenHash,
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
       }),
@@ -82,20 +80,14 @@ export class AuthService {
       }),
     ]);
 
-    // try {
-    //   await EmailService.sendMail({
-    //     to: newUser.email,
-    //     subject: "Welcome to Shopery Organic store 🎉",
-    //     template: EmailTemplate.OTP_VERIFICATION,
-    //     context: {
-    //       name: data.name,
-    //       otp,
-    //       expiry_time: "2 mintues",
-    //     },
-    //   });
-    // } catch (err) {
-    //   console.error("Failed to send welcome email:", err);
-    // }
+    // Generate accessToken
+    const accessToken = generateAccessToken({
+      userId: newUser.userId,
+      role: newUser.role,
+      email: newUser.email,
+      sessionId: session[0].sessionId,
+    });
+
     EmailService.sendMail({
       to: newUser.email,
       subject: "Welcome to Shopery Organic store 🎉",
@@ -129,20 +121,46 @@ export class AuthService {
     if (!isValid) throw new UnauthorizedError("Invalid password");
 
     // Generate tokens
-    const accessToken = generateAccessToken(user.userId, user.role, user.email);
     const refreshToken = generateRefreshToken(
       user.userId,
       user.role,
       user.email,
     );
 
+    const refreshTokenHash = await bcryptHash(refreshToken);
+
+    const existingSession = await prisma.userSession.findFirst({
+      where: {
+        userId: user.id,
+        revoked: false,
+      },
+    });
+
+    if (existingSession) {
+      await prisma.userSession.update({
+        where: {
+          sessionId: existingSession.sessionId,
+        },
+        data: {
+          revoked: true,
+        },
+      });
+    }
+
     // Store refresh token
-    await prisma.userSession.create({
+    const session = await prisma.userSession.create({
       data: {
         userId: user.id,
-        refreshToken,
+        refreshTokenHash,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
+    });
+
+    const accessToken = generateAccessToken({
+      userId: user.userId,
+      role: user.role,
+      email: user.email,
+      sessionId: session.sessionId,
     });
 
     return {
@@ -359,33 +377,113 @@ export class AuthService {
     };
   }
 
-  static async refreshToken(token: string) {
-    const payload = verifyRefreshToken(token);
+  // static async refreshToken(token: string) {
+  //   const payload = verifyRefreshToken(token);
 
-    const session = await prisma.userSession.findUnique({
-      where: { refreshToken: token },
+  //   const existing
+
+  //   const session = await prisma.userSession.findUnique({
+  //     where: { refreshToken: token },
+  //   });
+  //   if (!session) throw new UnauthorizedError("Invalid refresh token");
+
+  //   const sessionId = String(session.id);
+
+  //   // If expired
+  //   if (session.expiresAt < new Date()) {
+  //     await prisma.session.delete({ where: { id: sessionId } });
+  //     throw new Error("Refresh token expired");
+  //   }
+
+  //   // Issue new access token
+  //   const accessToken = generateAccessToken(
+  //     payload.userId,
+  //     payload.role,
+  //     payload.email,
+  //   );
+  //   return { accessToken };
+  // }
+
+  static async refreshToken(refreshToken: string) {
+    const payload = verifyRefreshToken(refreshToken);
+
+    const sessions = await prisma.userSession.findMany({
+      where: {
+        user: {
+          userId: payload.userId,
+        },
+        revoked: false,
+      },
     });
-    if (!session) throw new UnauthorizedError("Invalid refresh token");
 
-    const sessionId = String(session.id);
-
-    // If expired
-    if (session.expiresAt < new Date()) {
-      await prisma.session.delete({ where: { id: sessionId } });
-      throw new Error("Refresh token expired");
+    if (!sessions.length) {
+      throw new UnauthorizedError("Invalid refresh token");
     }
 
-    // Issue new access token
-    const accessToken = generateAccessToken(
+    let matchedSession = null;
+
+    for (const session of sessions) {
+      const isMatch = await bcryptCompare(
+        refreshToken,
+        session.refreshTokenHash,
+      );
+
+      if (isMatch) {
+        matchedSession = session;
+        break;
+      }
+    }
+
+    if (!matchedSession) {
+      throw new UnauthorizedError("Invalid refresh token");
+    }
+
+    if (matchedSession.expiresAt < new Date()) {
+      await prisma.userSession.update({
+        where: { sessionId: matchedSession.sessionId },
+        data: { revoked: true },
+      });
+
+      throw new UnauthorizedError("Refresh token expired");
+    }
+
+    // ROTATE refresh token
+    const newRefreshToken = generateRefreshToken(
       payload.userId,
       payload.role,
       payload.email,
     );
-    return { accessToken };
+
+    const newRefreshTokenHash = await bcryptHash(newRefreshToken);
+
+    await prisma.userSession.update({
+      where: { sessionId: matchedSession.sessionId },
+      data: {
+        refreshTokenHash: newRefreshTokenHash,
+      },
+    });
+
+    const accessToken = generateAccessToken({
+      userId: payload.userId,
+      role: payload.role,
+      email: payload.email,
+      sessionId: matchedSession.sessionId,
+    });
+
+    return {
+      accessToken,
+      refreshToken: newRefreshToken,
+    };
   }
 
-  static async logout(refreshToken: string) {
-    await prisma.userSession.deleteMany({ where: { refreshToken } });
+  static async logout(sessionId: string) {
+    await prisma.userSession.update({
+      where: { sessionId },
+      data: {
+        revoked: true,
+      },
+    });
+
     return { message: "Logged out successfully" };
   }
 }
