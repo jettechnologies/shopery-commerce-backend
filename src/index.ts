@@ -24,10 +24,11 @@ app.use(cors());
 
 configureExpress(app);
 
-// for error handling
-app.use(errorHandler);
 // importing the routes
 app.use("/shopery", router);
+
+// for error handling
+app.use(errorHandler);
 
 setupSwagger(app);
 

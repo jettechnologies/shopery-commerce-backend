@@ -72,7 +72,7 @@ profileRouter.use(authGuard);
  *       404:
  *         description: Profile not found
  */
-profileRouter.get("/get-profile", async (req: AuthRequest, res) => {
+profileRouter.get("/get-profile", async (req: AuthRequest, res, _next) => {
   try {
     const { user } = req;
     if (!user) {
