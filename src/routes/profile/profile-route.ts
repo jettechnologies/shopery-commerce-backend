@@ -85,7 +85,7 @@ profileRouter.get("/get-profile", async (req: AuthRequest, res) => {
       res,
       200,
       "Profile fetched successfully",
-      profile
+      profile,
     );
   } catch (err) {
     handleError(res, err);
@@ -125,7 +125,7 @@ profileRouter.patch("/update-profile", async (req: AuthRequest, res) => {
       res,
       200,
       "Profile updated successfully",
-      updated
+      updated,
     );
   } catch (err) {
     handleError(res, err);
@@ -161,7 +161,7 @@ profileRouter.post("/address/create", async (req: AuthRequest, res) => {
       res,
       201,
       "Address created successfully",
-      address
+      address,
     );
   } catch (err) {
     handleError(res, err);
@@ -202,7 +202,7 @@ profileRouter.patch("/address/edit-address/:id", async (req, res) => {
       res,
       200,
       "Address updated successfully",
-      updated
+      updated,
     );
   } catch (err) {
     handleError(res, err);
