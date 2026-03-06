@@ -365,8 +365,14 @@ export class AuthService {
         data: { used: true },
       }),
 
-      prisma.userSession.deleteMany({
-        where: { userId: resetRequest.userId },
+      prisma.userSession.updateMany({
+        where: {
+          userId: resetRequest.userId,
+          revoked: false,
+        },
+        data: {
+          revoked: true,
+        },
       }),
     ]);
 
