@@ -293,6 +293,6 @@ authRouter.post("/refresh", AuthController.refreshToken);
  *       200:
  *         description: Logged out successfully
  */
-authRouter.post("/logout", AuthController.logout, authGuard);
+authRouter.post("/logout", authGuard, AuthController.logout);
 
 export default authRouter;
