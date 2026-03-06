@@ -40,8 +40,6 @@ export class AuthService {
       },
     });
 
-    console.log(newUser, "new user");
-
     // Merge guest cart if token exists
     if (data.guestToken) {
       try {
