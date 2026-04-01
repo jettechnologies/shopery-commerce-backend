@@ -30,6 +30,7 @@ export type GuestCartItemAvgAggregateOutputType = {
   id: number | null
   guestCartId: number | null
   productId: number | null
+  variantId: number | null
   quantity: number | null
   unitPrice: number | null
 }
@@ -38,6 +39,7 @@ export type GuestCartItemSumAggregateOutputType = {
   id: bigint | null
   guestCartId: bigint | null
   productId: bigint | null
+  variantId: bigint | null
   quantity: number | null
   unitPrice: number | null
 }
@@ -46,6 +48,7 @@ export type GuestCartItemMinAggregateOutputType = {
   id: bigint | null
   guestCartId: bigint | null
   productId: bigint | null
+  variantId: bigint | null
   quantity: number | null
   unitPrice: number | null
 }
@@ -54,6 +57,7 @@ export type GuestCartItemMaxAggregateOutputType = {
   id: bigint | null
   guestCartId: bigint | null
   productId: bigint | null
+  variantId: bigint | null
   quantity: number | null
   unitPrice: number | null
 }
@@ -62,6 +66,7 @@ export type GuestCartItemCountAggregateOutputType = {
   id: number
   guestCartId: number
   productId: number
+  variantId: number
   quantity: number
   unitPrice: number
   _all: number
@@ -72,6 +77,7 @@ export type GuestCartItemAvgAggregateInputType = {
   id?: true
   guestCartId?: true
   productId?: true
+  variantId?: true
   quantity?: true
   unitPrice?: true
 }
@@ -80,6 +86,7 @@ export type GuestCartItemSumAggregateInputType = {
   id?: true
   guestCartId?: true
   productId?: true
+  variantId?: true
   quantity?: true
   unitPrice?: true
 }
@@ -88,6 +95,7 @@ export type GuestCartItemMinAggregateInputType = {
   id?: true
   guestCartId?: true
   productId?: true
+  variantId?: true
   quantity?: true
   unitPrice?: true
 }
@@ -96,6 +104,7 @@ export type GuestCartItemMaxAggregateInputType = {
   id?: true
   guestCartId?: true
   productId?: true
+  variantId?: true
   quantity?: true
   unitPrice?: true
 }
@@ -104,6 +113,7 @@ export type GuestCartItemCountAggregateInputType = {
   id?: true
   guestCartId?: true
   productId?: true
+  variantId?: true
   quantity?: true
   unitPrice?: true
   _all?: true
@@ -199,6 +209,7 @@ export type GuestCartItemGroupByOutputType = {
   id: bigint
   guestCartId: bigint
   productId: bigint
+  variantId: bigint | null
   quantity: number
   unitPrice: number
   _count: GuestCartItemCountAggregateOutputType | null
@@ -230,40 +241,46 @@ export type GuestCartItemWhereInput = {
   id?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
   guestCartId?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
   productId?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
+  variantId?: Prisma.BigIntNullableFilter<"GuestCartItem"> | bigint | number | null
   quantity?: Prisma.IntFilter<"GuestCartItem"> | number
   unitPrice?: Prisma.FloatFilter<"GuestCartItem"> | number
   guestCart?: Prisma.XOR<Prisma.GuestCartScalarRelationFilter, Prisma.GuestCartWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  variant?: Prisma.XOR<Prisma.ProductVariantNullableScalarRelationFilter, Prisma.ProductVariantWhereInput> | null
 }
 
 export type GuestCartItemOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   guestCartId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
+  variantId?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
   guestCart?: Prisma.GuestCartOrderByWithRelationInput
   product?: Prisma.ProductOrderByWithRelationInput
+  variant?: Prisma.ProductVariantOrderByWithRelationInput
 }
 
 export type GuestCartItemWhereUniqueInput = Prisma.AtLeast<{
   id?: bigint | number
-  guestCartId_productId?: Prisma.GuestCartItemGuestCartIdProductIdCompoundUniqueInput
   AND?: Prisma.GuestCartItemWhereInput | Prisma.GuestCartItemWhereInput[]
   OR?: Prisma.GuestCartItemWhereInput[]
   NOT?: Prisma.GuestCartItemWhereInput | Prisma.GuestCartItemWhereInput[]
   guestCartId?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
   productId?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
+  variantId?: Prisma.BigIntNullableFilter<"GuestCartItem"> | bigint | number | null
   quantity?: Prisma.IntFilter<"GuestCartItem"> | number
   unitPrice?: Prisma.FloatFilter<"GuestCartItem"> | number
   guestCart?: Prisma.XOR<Prisma.GuestCartScalarRelationFilter, Prisma.GuestCartWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
-}, "id" | "guestCartId_productId">
+  variant?: Prisma.XOR<Prisma.ProductVariantNullableScalarRelationFilter, Prisma.ProductVariantWhereInput> | null
+}, "id">
 
 export type GuestCartItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   guestCartId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
+  variantId?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
   _count?: Prisma.GuestCartItemCountOrderByAggregateInput
@@ -280,6 +297,7 @@ export type GuestCartItemScalarWhereWithAggregatesInput = {
   id?: Prisma.BigIntWithAggregatesFilter<"GuestCartItem"> | bigint | number
   guestCartId?: Prisma.BigIntWithAggregatesFilter<"GuestCartItem"> | bigint | number
   productId?: Prisma.BigIntWithAggregatesFilter<"GuestCartItem"> | bigint | number
+  variantId?: Prisma.BigIntNullableWithAggregatesFilter<"GuestCartItem"> | bigint | number | null
   quantity?: Prisma.IntWithAggregatesFilter<"GuestCartItem"> | number
   unitPrice?: Prisma.FloatWithAggregatesFilter<"GuestCartItem"> | number
 }
@@ -290,12 +308,14 @@ export type GuestCartItemCreateInput = {
   unitPrice: number
   guestCart: Prisma.GuestCartCreateNestedOneWithoutItemsInput
   product: Prisma.ProductCreateNestedOneWithoutGuestCartItemsInput
+  variant?: Prisma.ProductVariantCreateNestedOneWithoutGuestCartItemsInput
 }
 
 export type GuestCartItemUncheckedCreateInput = {
   id?: bigint | number
   guestCartId: bigint | number
   productId: bigint | number
+  variantId?: bigint | number | null
   quantity: number
   unitPrice: number
 }
@@ -306,12 +326,14 @@ export type GuestCartItemUpdateInput = {
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   guestCart?: Prisma.GuestCartUpdateOneRequiredWithoutItemsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutGuestCartItemsNestedInput
+  variant?: Prisma.ProductVariantUpdateOneWithoutGuestCartItemsNestedInput
 }
 
 export type GuestCartItemUncheckedUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   guestCartId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   productId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  variantId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
 }
@@ -320,6 +342,7 @@ export type GuestCartItemCreateManyInput = {
   id?: bigint | number
   guestCartId: bigint | number
   productId: bigint | number
+  variantId?: bigint | number | null
   quantity: number
   unitPrice: number
 }
@@ -334,6 +357,7 @@ export type GuestCartItemUncheckedUpdateManyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   guestCartId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   productId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  variantId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
 }
@@ -348,15 +372,11 @@ export type GuestCartItemOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type GuestCartItemGuestCartIdProductIdCompoundUniqueInput = {
-  guestCartId: bigint | number
-  productId: bigint | number
-}
-
 export type GuestCartItemCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   guestCartId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
+  variantId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
 }
@@ -365,6 +385,7 @@ export type GuestCartItemAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   guestCartId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
+  variantId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
 }
@@ -373,6 +394,7 @@ export type GuestCartItemMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   guestCartId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
+  variantId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
 }
@@ -381,6 +403,7 @@ export type GuestCartItemMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   guestCartId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
+  variantId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
 }
@@ -389,6 +412,7 @@ export type GuestCartItemSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   guestCartId?: Prisma.SortOrder
   productId?: Prisma.SortOrder
+  variantId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
 }
@@ -432,6 +456,48 @@ export type GuestCartItemUncheckedUpdateManyWithoutProductNestedInput = {
   connect?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
   update?: Prisma.GuestCartItemUpdateWithWhereUniqueWithoutProductInput | Prisma.GuestCartItemUpdateWithWhereUniqueWithoutProductInput[]
   updateMany?: Prisma.GuestCartItemUpdateManyWithWhereWithoutProductInput | Prisma.GuestCartItemUpdateManyWithWhereWithoutProductInput[]
+  deleteMany?: Prisma.GuestCartItemScalarWhereInput | Prisma.GuestCartItemScalarWhereInput[]
+}
+
+export type GuestCartItemCreateNestedManyWithoutVariantInput = {
+  create?: Prisma.XOR<Prisma.GuestCartItemCreateWithoutVariantInput, Prisma.GuestCartItemUncheckedCreateWithoutVariantInput> | Prisma.GuestCartItemCreateWithoutVariantInput[] | Prisma.GuestCartItemUncheckedCreateWithoutVariantInput[]
+  connectOrCreate?: Prisma.GuestCartItemCreateOrConnectWithoutVariantInput | Prisma.GuestCartItemCreateOrConnectWithoutVariantInput[]
+  createMany?: Prisma.GuestCartItemCreateManyVariantInputEnvelope
+  connect?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+}
+
+export type GuestCartItemUncheckedCreateNestedManyWithoutVariantInput = {
+  create?: Prisma.XOR<Prisma.GuestCartItemCreateWithoutVariantInput, Prisma.GuestCartItemUncheckedCreateWithoutVariantInput> | Prisma.GuestCartItemCreateWithoutVariantInput[] | Prisma.GuestCartItemUncheckedCreateWithoutVariantInput[]
+  connectOrCreate?: Prisma.GuestCartItemCreateOrConnectWithoutVariantInput | Prisma.GuestCartItemCreateOrConnectWithoutVariantInput[]
+  createMany?: Prisma.GuestCartItemCreateManyVariantInputEnvelope
+  connect?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+}
+
+export type GuestCartItemUpdateManyWithoutVariantNestedInput = {
+  create?: Prisma.XOR<Prisma.GuestCartItemCreateWithoutVariantInput, Prisma.GuestCartItemUncheckedCreateWithoutVariantInput> | Prisma.GuestCartItemCreateWithoutVariantInput[] | Prisma.GuestCartItemUncheckedCreateWithoutVariantInput[]
+  connectOrCreate?: Prisma.GuestCartItemCreateOrConnectWithoutVariantInput | Prisma.GuestCartItemCreateOrConnectWithoutVariantInput[]
+  upsert?: Prisma.GuestCartItemUpsertWithWhereUniqueWithoutVariantInput | Prisma.GuestCartItemUpsertWithWhereUniqueWithoutVariantInput[]
+  createMany?: Prisma.GuestCartItemCreateManyVariantInputEnvelope
+  set?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  disconnect?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  delete?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  connect?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  update?: Prisma.GuestCartItemUpdateWithWhereUniqueWithoutVariantInput | Prisma.GuestCartItemUpdateWithWhereUniqueWithoutVariantInput[]
+  updateMany?: Prisma.GuestCartItemUpdateManyWithWhereWithoutVariantInput | Prisma.GuestCartItemUpdateManyWithWhereWithoutVariantInput[]
+  deleteMany?: Prisma.GuestCartItemScalarWhereInput | Prisma.GuestCartItemScalarWhereInput[]
+}
+
+export type GuestCartItemUncheckedUpdateManyWithoutVariantNestedInput = {
+  create?: Prisma.XOR<Prisma.GuestCartItemCreateWithoutVariantInput, Prisma.GuestCartItemUncheckedCreateWithoutVariantInput> | Prisma.GuestCartItemCreateWithoutVariantInput[] | Prisma.GuestCartItemUncheckedCreateWithoutVariantInput[]
+  connectOrCreate?: Prisma.GuestCartItemCreateOrConnectWithoutVariantInput | Prisma.GuestCartItemCreateOrConnectWithoutVariantInput[]
+  upsert?: Prisma.GuestCartItemUpsertWithWhereUniqueWithoutVariantInput | Prisma.GuestCartItemUpsertWithWhereUniqueWithoutVariantInput[]
+  createMany?: Prisma.GuestCartItemCreateManyVariantInputEnvelope
+  set?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  disconnect?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  delete?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  connect?: Prisma.GuestCartItemWhereUniqueInput | Prisma.GuestCartItemWhereUniqueInput[]
+  update?: Prisma.GuestCartItemUpdateWithWhereUniqueWithoutVariantInput | Prisma.GuestCartItemUpdateWithWhereUniqueWithoutVariantInput[]
+  updateMany?: Prisma.GuestCartItemUpdateManyWithWhereWithoutVariantInput | Prisma.GuestCartItemUpdateManyWithWhereWithoutVariantInput[]
   deleteMany?: Prisma.GuestCartItemScalarWhereInput | Prisma.GuestCartItemScalarWhereInput[]
 }
 
@@ -482,11 +548,13 @@ export type GuestCartItemCreateWithoutProductInput = {
   quantity: number
   unitPrice: number
   guestCart: Prisma.GuestCartCreateNestedOneWithoutItemsInput
+  variant?: Prisma.ProductVariantCreateNestedOneWithoutGuestCartItemsInput
 }
 
 export type GuestCartItemUncheckedCreateWithoutProductInput = {
   id?: bigint | number
   guestCartId: bigint | number
+  variantId?: bigint | number | null
   quantity: number
   unitPrice: number
 }
@@ -524,8 +592,51 @@ export type GuestCartItemScalarWhereInput = {
   id?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
   guestCartId?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
   productId?: Prisma.BigIntFilter<"GuestCartItem"> | bigint | number
+  variantId?: Prisma.BigIntNullableFilter<"GuestCartItem"> | bigint | number | null
   quantity?: Prisma.IntFilter<"GuestCartItem"> | number
   unitPrice?: Prisma.FloatFilter<"GuestCartItem"> | number
+}
+
+export type GuestCartItemCreateWithoutVariantInput = {
+  id?: bigint | number
+  quantity: number
+  unitPrice: number
+  guestCart: Prisma.GuestCartCreateNestedOneWithoutItemsInput
+  product: Prisma.ProductCreateNestedOneWithoutGuestCartItemsInput
+}
+
+export type GuestCartItemUncheckedCreateWithoutVariantInput = {
+  id?: bigint | number
+  guestCartId: bigint | number
+  productId: bigint | number
+  quantity: number
+  unitPrice: number
+}
+
+export type GuestCartItemCreateOrConnectWithoutVariantInput = {
+  where: Prisma.GuestCartItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.GuestCartItemCreateWithoutVariantInput, Prisma.GuestCartItemUncheckedCreateWithoutVariantInput>
+}
+
+export type GuestCartItemCreateManyVariantInputEnvelope = {
+  data: Prisma.GuestCartItemCreateManyVariantInput | Prisma.GuestCartItemCreateManyVariantInput[]
+  skipDuplicates?: boolean
+}
+
+export type GuestCartItemUpsertWithWhereUniqueWithoutVariantInput = {
+  where: Prisma.GuestCartItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.GuestCartItemUpdateWithoutVariantInput, Prisma.GuestCartItemUncheckedUpdateWithoutVariantInput>
+  create: Prisma.XOR<Prisma.GuestCartItemCreateWithoutVariantInput, Prisma.GuestCartItemUncheckedCreateWithoutVariantInput>
+}
+
+export type GuestCartItemUpdateWithWhereUniqueWithoutVariantInput = {
+  where: Prisma.GuestCartItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.GuestCartItemUpdateWithoutVariantInput, Prisma.GuestCartItemUncheckedUpdateWithoutVariantInput>
+}
+
+export type GuestCartItemUpdateManyWithWhereWithoutVariantInput = {
+  where: Prisma.GuestCartItemScalarWhereInput
+  data: Prisma.XOR<Prisma.GuestCartItemUpdateManyMutationInput, Prisma.GuestCartItemUncheckedUpdateManyWithoutVariantInput>
 }
 
 export type GuestCartItemCreateWithoutGuestCartInput = {
@@ -533,11 +644,13 @@ export type GuestCartItemCreateWithoutGuestCartInput = {
   quantity: number
   unitPrice: number
   product: Prisma.ProductCreateNestedOneWithoutGuestCartItemsInput
+  variant?: Prisma.ProductVariantCreateNestedOneWithoutGuestCartItemsInput
 }
 
 export type GuestCartItemUncheckedCreateWithoutGuestCartInput = {
   id?: bigint | number
   productId: bigint | number
+  variantId?: bigint | number | null
   quantity: number
   unitPrice: number
 }
@@ -571,6 +684,7 @@ export type GuestCartItemUpdateManyWithWhereWithoutGuestCartInput = {
 export type GuestCartItemCreateManyProductInput = {
   id?: bigint | number
   guestCartId: bigint | number
+  variantId?: bigint | number | null
   quantity: number
   unitPrice: number
 }
@@ -580,11 +694,13 @@ export type GuestCartItemUpdateWithoutProductInput = {
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   guestCart?: Prisma.GuestCartUpdateOneRequiredWithoutItemsNestedInput
+  variant?: Prisma.ProductVariantUpdateOneWithoutGuestCartItemsNestedInput
 }
 
 export type GuestCartItemUncheckedUpdateWithoutProductInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   guestCartId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  variantId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
 }
@@ -592,6 +708,39 @@ export type GuestCartItemUncheckedUpdateWithoutProductInput = {
 export type GuestCartItemUncheckedUpdateManyWithoutProductInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   guestCartId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  variantId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
+}
+
+export type GuestCartItemCreateManyVariantInput = {
+  id?: bigint | number
+  guestCartId: bigint | number
+  productId: bigint | number
+  quantity: number
+  unitPrice: number
+}
+
+export type GuestCartItemUpdateWithoutVariantInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
+  guestCart?: Prisma.GuestCartUpdateOneRequiredWithoutItemsNestedInput
+  product?: Prisma.ProductUpdateOneRequiredWithoutGuestCartItemsNestedInput
+}
+
+export type GuestCartItemUncheckedUpdateWithoutVariantInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  guestCartId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  productId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
+}
+
+export type GuestCartItemUncheckedUpdateManyWithoutVariantInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  guestCartId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  productId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
 }
@@ -599,6 +748,7 @@ export type GuestCartItemUncheckedUpdateManyWithoutProductInput = {
 export type GuestCartItemCreateManyGuestCartInput = {
   id?: bigint | number
   productId: bigint | number
+  variantId?: bigint | number | null
   quantity: number
   unitPrice: number
 }
@@ -608,11 +758,13 @@ export type GuestCartItemUpdateWithoutGuestCartInput = {
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
   product?: Prisma.ProductUpdateOneRequiredWithoutGuestCartItemsNestedInput
+  variant?: Prisma.ProductVariantUpdateOneWithoutGuestCartItemsNestedInput
 }
 
 export type GuestCartItemUncheckedUpdateWithoutGuestCartInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   productId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  variantId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
 }
@@ -620,6 +772,7 @@ export type GuestCartItemUncheckedUpdateWithoutGuestCartInput = {
 export type GuestCartItemUncheckedUpdateManyWithoutGuestCartInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   productId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  variantId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   unitPrice?: Prisma.FloatFieldUpdateOperationsInput | number
 }
@@ -630,52 +783,62 @@ export type GuestCartItemSelect<ExtArgs extends runtime.Types.Extensions.Interna
   id?: boolean
   guestCartId?: boolean
   productId?: boolean
+  variantId?: boolean
   quantity?: boolean
   unitPrice?: boolean
   guestCart?: boolean | Prisma.GuestCartDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  variant?: boolean | Prisma.GuestCartItem$variantArgs<ExtArgs>
 }, ExtArgs["result"]["guestCartItem"]>
 
 export type GuestCartItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   guestCartId?: boolean
   productId?: boolean
+  variantId?: boolean
   quantity?: boolean
   unitPrice?: boolean
   guestCart?: boolean | Prisma.GuestCartDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  variant?: boolean | Prisma.GuestCartItem$variantArgs<ExtArgs>
 }, ExtArgs["result"]["guestCartItem"]>
 
 export type GuestCartItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   guestCartId?: boolean
   productId?: boolean
+  variantId?: boolean
   quantity?: boolean
   unitPrice?: boolean
   guestCart?: boolean | Prisma.GuestCartDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  variant?: boolean | Prisma.GuestCartItem$variantArgs<ExtArgs>
 }, ExtArgs["result"]["guestCartItem"]>
 
 export type GuestCartItemSelectScalar = {
   id?: boolean
   guestCartId?: boolean
   productId?: boolean
+  variantId?: boolean
   quantity?: boolean
   unitPrice?: boolean
 }
 
-export type GuestCartItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guestCartId" | "productId" | "quantity" | "unitPrice", ExtArgs["result"]["guestCartItem"]>
+export type GuestCartItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guestCartId" | "productId" | "variantId" | "quantity" | "unitPrice", ExtArgs["result"]["guestCartItem"]>
 export type GuestCartItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   guestCart?: boolean | Prisma.GuestCartDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  variant?: boolean | Prisma.GuestCartItem$variantArgs<ExtArgs>
 }
 export type GuestCartItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   guestCart?: boolean | Prisma.GuestCartDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  variant?: boolean | Prisma.GuestCartItem$variantArgs<ExtArgs>
 }
 export type GuestCartItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   guestCart?: boolean | Prisma.GuestCartDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  variant?: boolean | Prisma.GuestCartItem$variantArgs<ExtArgs>
 }
 
 export type $GuestCartItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -683,11 +846,13 @@ export type $GuestCartItemPayload<ExtArgs extends runtime.Types.Extensions.Inter
   objects: {
     guestCart: Prisma.$GuestCartPayload<ExtArgs>
     product: Prisma.$ProductPayload<ExtArgs>
+    variant: Prisma.$ProductVariantPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
     guestCartId: bigint
     productId: bigint
+    variantId: bigint | null
     quantity: number
     unitPrice: number
   }, ExtArgs["result"]["guestCartItem"]>
@@ -1086,6 +1251,7 @@ export interface Prisma__GuestCartItemClient<T, Null = never, ExtArgs extends ru
   readonly [Symbol.toStringTag]: "PrismaPromise"
   guestCart<T extends Prisma.GuestCartDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GuestCartDefaultArgs<ExtArgs>>): Prisma.Prisma__GuestCartClient<runtime.Types.Result.GetResult<Prisma.$GuestCartPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  variant<T extends Prisma.GuestCartItem$variantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GuestCartItem$variantArgs<ExtArgs>>): Prisma.Prisma__ProductVariantClient<runtime.Types.Result.GetResult<Prisma.$ProductVariantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1118,6 +1284,7 @@ export interface GuestCartItemFieldRefs {
   readonly id: Prisma.FieldRef<"GuestCartItem", 'BigInt'>
   readonly guestCartId: Prisma.FieldRef<"GuestCartItem", 'BigInt'>
   readonly productId: Prisma.FieldRef<"GuestCartItem", 'BigInt'>
+  readonly variantId: Prisma.FieldRef<"GuestCartItem", 'BigInt'>
   readonly quantity: Prisma.FieldRef<"GuestCartItem", 'Int'>
   readonly unitPrice: Prisma.FieldRef<"GuestCartItem", 'Float'>
 }
@@ -1513,6 +1680,25 @@ export type GuestCartItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many GuestCartItems to delete.
    */
   limit?: number
+}
+
+/**
+ * GuestCartItem.variant
+ */
+export type GuestCartItem$variantArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProductVariant
+   */
+  select?: Prisma.ProductVariantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProductVariant
+   */
+  omit?: Prisma.ProductVariantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductVariantInclude<ExtArgs> | null
+  where?: Prisma.ProductVariantWhereInput
 }
 
 /**

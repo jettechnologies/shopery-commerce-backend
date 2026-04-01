@@ -26,7 +26,7 @@ export class GuestCartService {
 
     const cart = await prisma.guestCart.create({
       data: { ipAddress, macAddress, userAgent, platformOS, expiresAt },
-      include: { items: true },
+      include: { items: { include: { product: true, variant: true } } },
     });
 
     return cart;
@@ -45,7 +45,7 @@ export class GuestCartService {
     let cart = token
       ? await prisma.guestCart.findFirst({
           where: { token },
-          include: { items: true },
+          include: { items: { include: { product: true, variant: true } } },
         })
       : null;
 
@@ -56,8 +56,16 @@ export class GuestCartService {
     if (!cartedProduct) throw new NotFoundError("Product not found");
     if (!cartedProduct.isActive)
       throw new BadRequestError("Product is not available");
-    if (cartedProduct.stockQuantity < parsedData.quantity) {
-      throw new BadRequestError("Insufficient stock");
+
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: BigInt(parsedData.variantId) }
+    });
+    if (!variant || variant.productId !== cartedProduct.id) {
+       throw new NotFoundError("Variant not found for this product");
+    }
+
+    if (variant.stockQuantity < parsedData.quantity) {
+      throw new BadRequestError("Insufficient stock for this specific variant");
     }
 
     // Automatically create cart if missing
@@ -68,13 +76,17 @@ export class GuestCartService {
 
     // Check if item already exists
     const existingItem = cart.items.find(
-      (i) => i.productId === cartedProduct.id,
+      (i) => i.productId === cartedProduct.id && i.variantId === variant.id,
     );
 
     if (existingItem) {
+      const newQuantity = existingItem.quantity + parsedData.quantity;
+      if (variant.stockQuantity < newQuantity) {
+        throw new BadRequestError("Insufficient stock for requested variant quantity");
+      }
       return prisma.guestCartItem.update({
         where: { id: existingItem.id },
-        data: { quantity: existingItem.quantity + parsedData.quantity },
+        data: { quantity: newQuantity },
       });
     }
 
@@ -93,8 +105,9 @@ export class GuestCartService {
       data: {
         guestCartId: cart.id,
         productId: cartedProduct.id,
+        variantId: variant.id,
         quantity: parsedData.quantity,
-        unitPrice: cartedProduct.salePrice!,
+        unitPrice: variant.salePrice ?? variant.price,
       },
     });
 
@@ -110,7 +123,7 @@ export class GuestCartService {
   }
 
   // Remove a specific item from the guest cart
-  static async removeItem(token: string, productId: bigint) {
+  static async removeItem(token: string, guestCartItemId: bigint) {
     const cart = await prisma.guestCart.findFirst({
       where: { token },
       include: { items: true },
@@ -118,7 +131,7 @@ export class GuestCartService {
 
     if (!cart) throw new NotFoundError("Guest cart not found");
 
-    const item = cart.items.find((i) => i.productId === productId);
+    const item = cart.items.find((i) => i.id === guestCartItemId);
     if (!item) throw new NotFoundError("Item not found in cart");
 
     await prisma.guestCartItem.delete({ where: { id: item.id } });
@@ -179,7 +192,7 @@ export class GuestCartService {
 
       for (const item of guestCart.items) {
         const existingItem = userCart.items.find(
-          (i) => i.productId === item.productId,
+          (i) => i.productId === item.productId && i.variantId === item.variantId,
         );
 
         if (existingItem) {
@@ -196,6 +209,7 @@ export class GuestCartService {
             data: {
               cartId: userCart.id,
               productId: item.productId,
+              variantId: item.variantId,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
             },
@@ -219,7 +233,7 @@ export class GuestCartService {
   static async getGuestCart(token: string) {
     const cart = await prisma.guestCart.findFirst({
       where: { token },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: true, variant: true } } },
     });
 
     if (!cart) throw new NotFoundError("Guest cart not found");

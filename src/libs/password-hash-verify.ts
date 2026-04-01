@@ -18,7 +18,7 @@ const REFRESH_TOKEN_SECRET =
 //   return bcrypt.compare(password, hash);
 // }
 
-const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
+const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "12", 10);
 
 // Hash password
 export async function bcryptHash(password: string): Promise<string> {

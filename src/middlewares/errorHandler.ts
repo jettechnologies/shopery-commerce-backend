@@ -1,9 +1,9 @@
-// // middlewares/errorHandler.ts
 // middlewares/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import ApiResponse from "@/libs/ApiResponse.js";
 import AppError, { ErrorType } from "@/libs/AppError.js";
+import logger from "@/libs/logger.js";
 
 export function errorHandler(
   err: any,
@@ -11,7 +11,12 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
-  console.error("🔥 Error:", err);
+  // Always log the full error server-side
+  logger.error("Unhandled error", {
+    message: err?.message,
+    stack: err?.stack,
+    type: err?.constructor?.name,
+  });
 
   // Zod validation
   if (err instanceof ZodError) {
@@ -21,7 +26,7 @@ export function errorHandler(
     );
   }
 
-  // App errors
+  // App errors (operational, safe to surface)
   if (err instanceof AppError) {
     switch (err.errorType) {
       case ErrorType.NOT_FOUND:
@@ -36,6 +41,9 @@ export function errorHandler(
       case ErrorType.UNAUTHORIZED:
         return ApiResponse.unauthorized(res, err.message);
 
+      case ErrorType.FORBIDDEN:
+        return ApiResponse.error(res, 403, err.message, "Authorization Error");
+
       default:
         return ApiResponse.error(
           res,
@@ -46,12 +54,10 @@ export function errorHandler(
     }
   }
 
-  // Unknown errors
-  return ApiResponse.internalServerError(
-    res,
-    err?.message || "Unexpected error occurred",
-  );
+  // Unknown/unexpected errors — never leak internals to the client
+  return ApiResponse.internalServerError(res, "An unexpected error occurred");
 }
+
 
 // import { Request, Response, NextFunction } from "express";
 // import ApiResponse from "@/libs/ApiResponse.js";

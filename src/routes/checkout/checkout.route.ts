@@ -35,6 +35,14 @@ const checkoutRouter = Router();
  *                 type: string
  *                 nullable: true
  *                 example: "razorpay_123456"
+ *               couponCode:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "WINTER15"
+ *               addressId:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 2
  *     responses:
  *       201:
  *         description: Checkout initiated successfully — pending order created
@@ -84,12 +92,26 @@ checkoutRouter.post(
       }
 
       // ✅ 2. Compute total cost
-      const total = cart.items.reduce(
+      let total = cart.items.reduce(
         (sum: number, item: any) => sum + item.quantity * item.unitPrice,
         0,
       );
 
-      // ✅ 3. Create "intermediate" (pending) order
+      // ✅ 3. Apply Coupon calculation natively if code exists
+      let couponId: bigint | null = null;
+      if (req.body.couponCode) {
+        const coupon = await prisma.coupon.findUnique({
+          where: { code: req.body.couponCode }
+        });
+        if (coupon && coupon.isActive && (!coupon.expiresAt || coupon.expiresAt > new Date())) {
+          total = total - (total * (coupon.discountPercent / 100)); // Apply % discount
+          couponId = coupon.id;
+        } else {
+          throw new BadRequestError("Invalid or expired coupon code");
+        }
+      }
+
+      // ✅ 4. Create "intermediate" (pending) order
       const order = await OrderService.createOrder({
         userId: req.user ? req.user.userId : null,
         cartId: req.user ? cart.id : null,
@@ -97,9 +119,11 @@ checkoutRouter.post(
         email: req.user?.email ?? req.body.email,
         total,
         paymentId: req.body.paymentId ?? null,
+        addressId: req.body.addressId ? Number(req.body.addressId) : null,
+        couponId: couponId,
       });
 
-      // ✅ 4. Clear cart after initiating checkout
+      // ✅ 5. Clear cart after initiating checkout
       if (req.user) {
         await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
       } else if (req.guestCart) {
@@ -108,7 +132,7 @@ checkoutRouter.post(
         });
       }
 
-      // ✅ 5. Respond with pending order info
+      // ✅ 6. Respond with pending order info
       return ApiResponse.success(
         res,
         201,

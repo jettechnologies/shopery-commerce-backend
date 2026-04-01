@@ -1,11 +1,35 @@
 import { Router } from "express";
 import { AuthController } from "@/controllers/auth/auth.controller";
 import { authGuard } from "@/middlewares/auth.middleware";
+import rateLimit from "express-rate-limit";
 
 const authRouter = Router();
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 max attempts per 15 mins for login
+  max: 15,
+  message: "Too many login attempts. Please try again after 15 minutes.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 5 max attempts per hour for registration
+  max: 5,
+  message: "Too many registration attempts. Please try again after an hour.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const otpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 5 requests per 10 mins for OTP
+  max: 5,
+  message: "Too many OTP requests. Please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 /**
- * @swagger
  * tags:
  *   name: Auth
  *   description: Authentication and user management
@@ -153,7 +177,7 @@ const authRouter = Router();
  *       500:
  *         description: Internal server error
  */
-authRouter.post("/register", AuthController.register);
+authRouter.post("/register", registerLimiter, AuthController.register);
 
 /**
  * @swagger
@@ -173,7 +197,7 @@ authRouter.post("/register", AuthController.register);
  *       401:
  *         description: Invalid or expired OTP
  */
-authRouter.post("/verify-email", AuthController.verifyEmail);
+authRouter.post("/verify-email", otpLimiter, AuthController.verifyEmail);
 
 /**
  * @swagger
@@ -195,7 +219,7 @@ authRouter.post("/verify-email", AuthController.verifyEmail);
  *       409:
  *         description: Maximum resend attempts reached
  */
-authRouter.post("/resend-verification", AuthController.resendOTP);
+authRouter.post("/resend-verification", otpLimiter, AuthController.resendOTP);
 
 /**
  * @swagger
@@ -215,7 +239,7 @@ authRouter.post("/resend-verification", AuthController.resendOTP);
  *       401:
  *         description: Invalid email or password
  */
-authRouter.post("/login", AuthController.login);
+authRouter.post("/login", loginLimiter, AuthController.login);
 
 /**
  * @swagger
@@ -235,7 +259,7 @@ authRouter.post("/login", AuthController.login);
  *       404:
  *         description: User not found
  */
-authRouter.post("/forgot-password", AuthController.forgotPassword);
+authRouter.post("/forgot-password", otpLimiter, AuthController.forgotPassword);
 
 /**
  * @swagger
@@ -255,7 +279,7 @@ authRouter.post("/forgot-password", AuthController.forgotPassword);
  *       400:
  *         description: Invalid OTP or expired
  */
-authRouter.post("/reset-password", AuthController.resetPassword);
+authRouter.post("/reset-password", otpLimiter, AuthController.resetPassword);
 
 /**
  * @swagger

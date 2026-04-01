@@ -27,12 +27,20 @@ const storage = multer.diskStorage({
 const fileFilter = (_req: any, file: Express.Multer.File, cb: any) => {
   const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
   const allowedVideoTypes = /mp4|mov|avi|mkv/;
-  const extname = path.extname(file.originalname).toLowerCase().substring(1);
 
-  if (allowedImageTypes.test(extname) || allowedVideoTypes.test(extname)) {
+  const allowedImageMimeTypes = /image\/(jpeg|jpg|png|gif|webp)/;
+  const allowedVideoMimeTypes = /video\/(mp4|quicktime|x-msvideo|x-matroska)/;
+
+  const extname = path.extname(file.originalname).toLowerCase().substring(1);
+  const mimetype = file.mimetype;
+
+  const isExtValid = allowedImageTypes.test(extname) || allowedVideoTypes.test(extname);
+  const isMimeValid = allowedImageMimeTypes.test(mimetype) || allowedVideoMimeTypes.test(mimetype);
+
+  if (isExtValid && isMimeValid) {
     cb(null, true);
   } else {
-    cb(new BadRequestError("Only image and video files are allowed."));
+    cb(new BadRequestError("Only image and video files are allowed with valid mime types."));
   }
 };
 

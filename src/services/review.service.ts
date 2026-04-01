@@ -79,8 +79,6 @@ export class ReviewService {
         _count: true,
       });
 
-      console.log(stats, "stats");
-
       await tx.product.update({
         where: { id: product.id },
         data: {

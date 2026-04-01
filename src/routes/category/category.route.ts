@@ -149,4 +149,38 @@ categoryRouter.get("/cursor", AdminCategoryController.getAllCategoriesCursor);
  */
 categoryRouter.get("/:id", AdminCategoryController.getCategoryById);
 
+/**
+ * @swagger
+ * /categories/{slug}/products:
+ *   get:
+ *     summary: Get products for a specific category
+ *     description: Retrieve all related products linked to a Category's slug (or name) identifier.
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category slug or name
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Pagination page
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Results per page
+ *     responses:
+ *       200:
+ *         description: Products retrieved successfully
+ *       404:
+ *         description: Category not found
+ */
+categoryRouter.get("/:slug/products", AdminCategoryController.getProductsByCategorySlug);
+
 export default categoryRouter;

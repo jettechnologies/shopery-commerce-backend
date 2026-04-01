@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const AddGuestCartItemSchema = z.object({
   productId: z.string("ProductId is required"),
+  variantId: z.string().or(z.number()),
   quantity: z.number().int().positive("Quantity must be greater than 0"),
 });
 

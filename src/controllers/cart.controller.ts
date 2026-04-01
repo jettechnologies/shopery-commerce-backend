@@ -34,8 +34,8 @@ export class CartController {
   static async removeFromCart(req: AuthRequest, res: Response) {
     try {
       if (!req.user) throw new BadRequestError("User not authenticated");
-      const { productId } = req.params;
-      const cart = await CartService.removeFromCart(req.user.userId, productId);
+      const { cartItemId } = req.params;
+      const cart = await CartService.removeFromCart(req.user.userId, cartItemId);
       return ApiResponse.success(res, 200, "Item removed from cart", cart);
     } catch (err) {
       handleError(res, err);
@@ -45,11 +45,11 @@ export class CartController {
   static async updateCartItem(req: AuthRequest, res: Response) {
     try {
       if (!req.user) throw new BadRequestError("User not authenticated");
-      const { productId } = req.params;
+      const { cartItemId } = req.params;
       const data = UpdateCartItemSchema.parse(req.body);
       const cart = await CartService.updateCartItem(
         req.user.userId,
-        productId,
+        cartItemId,
         data.quantity
       );
       return ApiResponse.success(res, 200, "Cart item updated", cart);

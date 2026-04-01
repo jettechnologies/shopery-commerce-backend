@@ -10,6 +10,8 @@ export const CreateOrderSchema = z
     }),
     total: z.number().positive("Total must be greater than 0"),
     paymentId: z.string().optional().nullable(),
+    addressId: z.number().int().optional().nullable(),
+    couponId: z.bigint().optional().nullable(),
   })
   .refine((data) => data.cartId || data.guestCartId, {
     message: "Either cartId or guestCartId is required",

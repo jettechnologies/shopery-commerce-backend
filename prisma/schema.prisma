@@ -137,6 +137,8 @@ model Address {
   country  String   @map("country")
   created  DateTime @default(now()) @map("created")
   modified DateTime @updatedAt @map("modified")
+
+  orders   Order[]
 }
 
 model Product {
@@ -146,8 +148,8 @@ model Product {
   slug             String   @unique
   description      String?
   shortDescription String?  @map("short_description")
-  price            Float
-  salePrice        Float?   @map("sale_price")
+  minPrice         Float?   @map("min_price")
+  maxPrice         Float?   @map("max_price")
   sku              String?  @unique
   stockQuantity    Int      @default(0) @map("stock_quantity")
   weight           Float?
@@ -161,12 +163,43 @@ model Product {
   images         ProductImage[]
   categories     ProductCategory[]
   tags           ProductTag[]
+  variants       ProductVariant[]
   reviews        Review[]
   comments       ProductComment[]
   cartItems      CartItem[]
   guestCartItems GuestCartItem[]
   wishlistItems  WishlistItem[]
   OrderItem      OrderItem[]
+}
+
+model ProductVariant {
+  id            BigInt   @id @default(autoincrement())
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     BigInt
+  sku           String?  @unique
+  size          String?
+  color         String[]
+  stockQuantity Int      @default(0) @map("stock_quantity")
+  price         Float
+  salePrice     Float?   @map("sale_price")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  cartItems      CartItem[]
+  guestCartItems GuestCartItem[]
+  orderItems     OrderItem[]
+}
+
+model Coupon {
+  id              BigInt   @id @default(autoincrement())
+  code            String   @unique
+  discountPercent Float    @map("discount_percent")
+  isActive        Boolean  @default(true) @map("is_active")
+  expiresAt       DateTime? @map("expires_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  orders          Order[]
 }
 
 model Category {
@@ -351,11 +384,13 @@ model CartItem {
   cartId    BigInt
   product   Product  @relation(fields: [productId], references: [id])
   productId BigInt
+
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  variantId BigInt?
+
   quantity  Int
   unitPrice Float    @map("unit_price")
   addedAt   DateTime @default(now()) @map("added_at")
-
-  @@unique([cartId, productId])
 }
 
 model GuestCart {
@@ -379,10 +414,12 @@ model GuestCartItem {
   guestCartId BigInt
   product     Product   @relation(fields: [productId], references: [id])
   productId   BigInt
+
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  variantId   BigInt?
+
   quantity    Int
   unitPrice   Float     @map("unit_price")
-
-  @@unique([guestCartId, productId])
 }
 
 model Order {
@@ -401,6 +438,13 @@ model Order {
   status     OrderStatus @default(pending)
   total      Decimal
   paymentId  String?
+
+  shippingAddressId BigInt?
+  shippingAddress   Address? @relation(fields: [shippingAddressId], references: [id])
+
+  couponId BigInt?
+  coupon   Coupon? @relation(fields: [couponId], references: [id])
+
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   OrderItems OrderItem[]
@@ -412,6 +456,10 @@ model OrderItem {
   orderId   BigInt
   product   Product @relation(fields: [productId], references: [id])
   productId BigInt
+
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  variantId BigInt?
+
   quantity  Int
   unitPrice Decimal @map("unit_price")
 }

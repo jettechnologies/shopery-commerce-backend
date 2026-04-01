@@ -84,7 +84,7 @@ cartRouter.post("/", CartController.addToCart);
 
 /**
  * @swagger
- * /cart/{productId}:
+ * /cart/{cartItemId}:
  *   patch:
  *     summary: Update cart item quantity
  *     tags: [Cart]
@@ -92,12 +92,11 @@ cartRouter.post("/", CartController.addToCart);
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: productId
+ *         name: cartItemId
  *         required: true
  *         schema:
  *           type: string
- *           format: uuid
- *         description: Product ID
+ *         description: Explicit Cart Item ID resolving accurate variant groupings
  *     requestBody:
  *       required: true
  *       content:
@@ -108,33 +107,32 @@ cartRouter.post("/", CartController.addToCart);
  *       200:
  *         description: Cart item updated
  *       404:
- *         description: Item or product not found
+ *         description: Item not found
  */
-cartRouter.patch("/:productId", CartController.updateCartItem);
+cartRouter.patch("/:cartItemId", CartController.updateCartItem);
 
 /**
  * @swagger
- * /cart/{productId}:
+ * /cart/{cartItemId}:
  *   delete:
- *     summary: Remove item from cart
+ *     summary: Remove explicitly isolated item from cart
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: productId
+ *         name: cartItemId
  *         required: true
  *         schema:
  *           type: string
- *           format: uuid
- *         description: Product ID
+ *         description: Explicit Cart Item ID mapped to exact variant bounds
  *     responses:
  *       200:
  *         description: Item removed from cart
  *       404:
- *         description: Item or product not found
+ *         description: Item not found
  */
-cartRouter.delete("/:productId", CartController.removeFromCart);
+cartRouter.delete("/:cartItemId", CartController.removeFromCart);
 
 /**
  * @swagger

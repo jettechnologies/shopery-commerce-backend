@@ -59,6 +59,8 @@ export const ModelName = {
   Admin: 'Admin',
   Address: 'Address',
   Product: 'Product',
+  ProductVariant: 'ProductVariant',
+  Coupon: 'Coupon',
   Category: 'Category',
   ProductCategory: 'ProductCategory',
   Tag: 'Tag',
@@ -195,8 +197,8 @@ export const ProductScalarFieldEnum = {
   slug: 'slug',
   description: 'description',
   shortDescription: 'shortDescription',
-  price: 'price',
-  salePrice: 'salePrice',
+  minPrice: 'minPrice',
+  maxPrice: 'maxPrice',
   sku: 'sku',
   stockQuantity: 'stockQuantity',
   weight: 'weight',
@@ -209,6 +211,35 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ProductVariantScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  sku: 'sku',
+  size: 'size',
+  color: 'color',
+  stockQuantity: 'stockQuantity',
+  price: 'price',
+  salePrice: 'salePrice',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductVariantScalarFieldEnum = (typeof ProductVariantScalarFieldEnum)[keyof typeof ProductVariantScalarFieldEnum]
+
+
+export const CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  discountPercent: 'discountPercent',
+  isActive: 'isActive',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
 
 
 export const CategoryScalarFieldEnum = {
@@ -384,6 +415,7 @@ export const CartItemScalarFieldEnum = {
   id: 'id',
   cartId: 'cartId',
   productId: 'productId',
+  variantId: 'variantId',
   quantity: 'quantity',
   unitPrice: 'unitPrice',
   addedAt: 'addedAt'
@@ -411,6 +443,7 @@ export const GuestCartItemScalarFieldEnum = {
   id: 'id',
   guestCartId: 'guestCartId',
   productId: 'productId',
+  variantId: 'variantId',
   quantity: 'quantity',
   unitPrice: 'unitPrice'
 } as const
@@ -428,6 +461,8 @@ export const OrderScalarFieldEnum = {
   status: 'status',
   total: 'total',
   paymentId: 'paymentId',
+  shippingAddressId: 'shippingAddressId',
+  couponId: 'couponId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -439,6 +474,7 @@ export const OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
   productId: 'productId',
+  variantId: 'variantId',
   quantity: 'quantity',
   unitPrice: 'unitPrice'
 } as const

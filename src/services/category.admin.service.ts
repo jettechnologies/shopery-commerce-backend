@@ -234,4 +234,46 @@ export class CategoryService {
     if (!category) throw new NotFoundError("Category not found");
     return category;
   }
+
+  /**
+   * Get products functionally tied to a category slug/name
+   */
+  static async getProductsByCategorySlug(slug: string, page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+
+    // Use findFirst to match either exactly the slug or case-insensitive name
+    const category = await prisma.category.findFirst({
+      where: {
+        OR: [
+          { slug: slug },
+          { name: { equals: slug, mode: "insensitive" } }
+        ]
+      }
+    });
+
+    if (!category) throw new NotFoundError(`Category '${slug}' not found`);
+
+    const [productLinks, total] = await prisma.$transaction([
+      prisma.productCategory.findMany({
+        where: { categoryId: category.id },
+        skip,
+        take: limit,
+        include: { product: { include: { images: true, variants: true } } },
+      }),
+      prisma.productCategory.count({ where: { categoryId: category.id } }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      category,
+      products: productLinks.map(pc => pc.product),
+      pagination: {
+        total,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+    };
+  }
 }

@@ -55,16 +55,26 @@ export class ProductService {
       imageData = uploads;
     }
 
+    let calculatedStock = 0;
+    let computedMinPrice: number | undefined = undefined;
+    let computedMaxPrice: number | undefined = undefined;
+
+    if (data.variants && data.variants.length > 0) {
+      calculatedStock = data.variants.reduce((sum, variant) => sum + variant.stockQuantity, 0);
+      computedMinPrice = Math.min(...data.variants.map(v => v.salePrice ?? v.price));
+      computedMaxPrice = Math.max(...data.variants.map(v => v.price));
+    }
+
     const newProduct = await prisma.product.create({
       data: {
         name: data.name,
         slug,
         description: data.description,
         shortDescription: data.shortDescription,
-        price: data.price,
-        salePrice: data.salePrice,
         sku: data.sku,
-        stockQuantity: data.stockQuantity,
+        minPrice: computedMinPrice,
+        maxPrice: computedMaxPrice,
+        stockQuantity: calculatedStock,
         weight: data.weight,
         dimensions: data.dimensions,
         categories: data.categoryIds
@@ -80,8 +90,19 @@ export class ProductService {
           ? { create: data.tagIds.map((tagId) => ({ tagId })) }
           : undefined,
         images: imageData.length ? { create: imageData } : undefined,
+        variants: data.variants && data.variants.length > 0
+          ? { create: data.variants.map(v => ({
+              sku: v.sku ?? null,
+              size: v.size ?? null,
+              color: v.color ?? [],
+              stockQuantity: v.stockQuantity,
+              price: v.price,
+              salePrice: v.salePrice ?? null,
+              isActive: v.isActive ?? true
+            }))}
+          : undefined,
       },
-      include: { images: true, categories: true, tags: true },
+      include: { images: true, categories: true, tags: true, variants: true },
     });
 
     return newProduct;
@@ -136,6 +157,20 @@ export class ProductService {
 
     // Start a transaction so we update everything atomically
     const updated = await prisma.$transaction(async (tx) => {
+      let calculatedStock = undefined;
+      let computedMinPrice: number | undefined = undefined;
+      let computedMaxPrice: number | undefined = undefined;
+
+      // Only alter root stock/bounds dynamically if user updates variants.
+      // E.g if variants are passed, replace completely & re-sum.
+      if (data.variants && data.variants.length > 0) {
+         calculatedStock = data.variants.reduce((sum, v) => sum + (v.stockQuantity ?? 0), 0);
+         computedMinPrice = Math.min(...data.variants.map(v => v.salePrice ?? v.price));
+         computedMaxPrice = Math.max(...data.variants.map(v => v.price));
+      } else if (data.variants && data.variants.length === 0) {
+         calculatedStock = 0;
+      }
+
       // 1️⃣ Update product scalars & images
       const updatedProduct = await tx.product.update({
         where: { productId },
@@ -146,10 +181,10 @@ export class ProductService {
             : undefined,
           description: data.description ?? undefined,
           shortDescription: data.shortDescription ?? undefined,
-          price: data.price ?? undefined,
-          salePrice: data.salePrice ?? undefined,
           sku: data.sku ?? undefined,
-          stockQuantity: data.stockQuantity ?? undefined,
+          minPrice: computedMinPrice !== undefined ? computedMinPrice : undefined,
+          maxPrice: computedMaxPrice !== undefined ? computedMaxPrice : undefined,
+          stockQuantity: calculatedStock !== undefined ? calculatedStock : undefined,
           weight: data.weight ?? undefined,
           dimensions: data.dimensions ?? undefined,
           images: imageData ? { create: imageData } : undefined,
@@ -194,10 +229,32 @@ export class ProductService {
         }
       }
 
-      // 4️⃣ Return product with joins
+      // 4️⃣ Update variants
+      if (data.variants) {
+        await tx.productVariant.deleteMany({
+          where: { productId: existing.id },
+        });
+
+        if (data.variants.length > 0) {
+          await tx.productVariant.createMany({
+            data: data.variants.map((v) => ({
+              productId: existing.id,
+              sku: v.sku ?? null,
+              size: v.size ?? null,
+              color: v.color ?? [],
+              stockQuantity: v.stockQuantity,
+              price: v.price,
+              salePrice: v.salePrice ?? null,
+              isActive: v.isActive ?? true
+            })),
+          });
+        }
+      }
+
+      // 5️⃣ Return product with joins
       return tx.product.findUnique({
         where: { productId },
-        include: { images: true, categories: true, tags: true },
+        include: { images: true, categories: true, tags: true, variants: true },
       });
     });
 
@@ -245,5 +302,160 @@ export class ProductService {
 
     await prisma.product.delete({ where: { productId } });
     return { message: "Product deleted successfully" };
+  }
+
+  /**
+   * Helper: Recalculate full product stock, minPrice, and maxPrice dynamically
+   */
+  private static async recomputeProductTotals(productId: bigint, tx: any) {
+    const allVariants = await tx.productVariant.findMany({
+      where: { productId, isActive: true },
+    });
+    
+    const totalStock = allVariants.reduce((sum: number, v: any) => sum + v.stockQuantity, 0);
+    const minPrice = allVariants.length > 0 ? Math.min(...allVariants.map((v: any) => Number(v.salePrice ?? v.price))) : null;
+    const maxPrice = allVariants.length > 0 ? Math.max(...allVariants.map((v: any) => Number(v.price))) : null;
+
+    await tx.product.update({
+      where: { id: productId },
+      data: { stockQuantity: totalStock, minPrice, maxPrice },
+    });
+  }
+
+  /**
+   * Adjust a specific variant's stock quantity gracefully (increment/decrement)
+   */
+  static async adjustVariantInventory(
+    productId: string,
+    variantId: string,
+    change: number
+  ) {
+    const existingProduct = await prisma.product.findUnique({
+      where: { productId },
+    });
+    if (!existingProduct) throw new NotFoundError("Product not found");
+
+    const existingVariant = await prisma.productVariant.findFirst({
+      where: { id: BigInt(variantId), productId: existingProduct.id },
+    });
+    if (!existingVariant) throw new NotFoundError("Product Variant not found");
+
+    if (existingVariant.stockQuantity + change < 0) {
+      throw new ConflictError("Variant stock cannot be less than zero");
+    }
+
+    const updatedVariant = await prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.update({
+        where: { id: existingVariant.id },
+        data: { stockQuantity: { increment: change } },
+      });
+
+      await this.recomputeProductTotals(existingProduct.id, tx);
+      return variant;
+    });
+
+    return {
+      message: "Variant stock updated successfully",
+      variant: updatedVariant,
+    };
+  }
+
+  /**
+   * Update Variant specific fields independently (price, size, color array)
+   */
+  static async updateVariantDetails(
+    productId: string,
+    variantId: string,
+    data: any
+  ) {
+    const existingProduct = await prisma.product.findUnique({
+      where: { productId },
+    });
+    if (!existingProduct) throw new NotFoundError("Product not found");
+
+    const existingVariant = await prisma.productVariant.findFirst({
+      where: { id: BigInt(variantId), productId: existingProduct.id },
+    });
+    if (!existingVariant) throw new NotFoundError("Product Variant not found");
+
+    const updatedVariant = await prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.update({
+        where: { id: existingVariant.id },
+        data: {
+          sku: data.sku !== undefined ? data.sku : existingVariant.sku,
+          size: data.size !== undefined ? data.size : existingVariant.size,
+          color: data.color !== undefined ? data.color : existingVariant.color,
+          price: data.price !== undefined ? data.price : existingVariant.price,
+          salePrice: data.salePrice !== undefined ? data.salePrice : existingVariant.salePrice,
+        },
+      });
+
+      await this.recomputeProductTotals(existingProduct.id, tx);
+      return variant;
+    });
+
+    return {
+      message: "Variant updated successfully",
+      variant: updatedVariant,
+    };
+  }
+
+  /**
+   * Toggle variant soft delete (isActive) state
+   */
+  static async toggleVariantActive(
+    productId: string,
+    variantId: string
+  ) {
+    const existingProduct = await prisma.product.findUnique({
+      where: { productId },
+    });
+    if (!existingProduct) throw new NotFoundError("Product not found");
+
+    const existingVariant = await prisma.productVariant.findFirst({
+      where: { id: BigInt(variantId), productId: existingProduct.id },
+    });
+    if (!existingVariant) throw new NotFoundError("Product Variant not found");
+
+    const updatedVariant = await prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.update({
+        where: { id: existingVariant.id },
+        data: { isActive: !existingVariant.isActive },
+      });
+
+      // Hiding a variant adjusts root stock logic mappings natively
+      await this.recomputeProductTotals(existingProduct.id, tx);
+      return variant;
+    });
+
+    return {
+      message: `Variant successfully ${updatedVariant.isActive ? "activated" : "deactivated"}`,
+      variant: updatedVariant,
+    };
+  }
+
+  /**
+   * Hard Delete a specific variant
+   */
+  static async deleteVariant(
+    productId: string,
+    variantId: string
+  ) {
+    const existingProduct = await prisma.product.findUnique({
+      where: { productId },
+    });
+    if (!existingProduct) throw new NotFoundError("Product not found");
+
+    const existingVariant = await prisma.productVariant.findFirst({
+      where: { id: BigInt(variantId), productId: existingProduct.id },
+    });
+    if (!existingVariant) throw new NotFoundError("Product Variant not found");
+
+    await prisma.$transaction(async (tx) => {
+      await tx.productVariant.delete({ where: { id: existingVariant.id } });
+      await this.recomputeProductTotals(existingProduct.id, tx);
+    });
+
+    return { message: "Variant deleted from system completely" };
   }
 }

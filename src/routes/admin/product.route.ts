@@ -217,4 +217,145 @@ productRouter.delete(
   AdminProductController.deleteProduct,
 );
 
+/**
+ * @swagger
+ * /admin/products/{productId}/variants/{variantId}/inventory:
+ *   patch:
+ *     summary: Adjust the inventory stock of a specific product variant
+ *     tags: [Products (Admin)]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *       - in: path
+ *         name: variantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Variant ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - change
+ *             properties:
+ *               change:
+ *                 type: integer
+ *                 example: -2
+ *     responses:
+ *       200:
+ *         description: Variant stock updated successfully
+ *       400:
+ *         description: Invalid request data
+ *       404:
+ *         description: Product or Variant not found
+ *       401:
+ *         description: Unauthorized
+ */
+productRouter.patch(
+  "/:productId/variants/:variantId/inventory",
+  roleGuard(["admin"]),
+  AdminProductController.adjustVariantInventory,
+);
+
+/**
+ * @swagger
+ * /admin/products/{productId}/variants/{variantId}:
+ *   patch:
+ *     summary: Update specific product variant details (price, color array, size)
+ *     tags: [Products (Admin)]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *       - in: path
+ *         name: variantId
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               price:
+ *                 type: number
+ *               salePrice:
+ *                 type: number
+ *               size:
+ *                 type: string
+ *               color:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Variant updated successfully
+ */
+productRouter.patch(
+  "/:productId/variants/:variantId",
+  roleGuard(["admin"]),
+  AdminProductController.updateVariantDetails,
+);
+
+/**
+ * @swagger
+ * /admin/products/{productId}/variants/{variantId}/toggle:
+ *   patch:
+ *     summary: Visually toggle variant availability independently (soft-delete mapping)
+ *     tags: [Products (Admin)]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *       - in: path
+ *         name: variantId
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Variant toggled successfully
+ */
+productRouter.patch(
+  "/:productId/variants/:variantId/toggle",
+  roleGuard(["admin"]),
+  AdminProductController.toggleVariantActive,
+);
+
+/**
+ * @swagger
+ * /admin/products/{productId}/variants/{variantId}:
+ *   delete:
+ *     summary: Permanently delete an isolated product variant
+ *     tags: [Products (Admin)]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *       - in: path
+ *         name: variantId
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Variant permanently deleted
+ */
+productRouter.delete(
+  "/:productId/variants/:variantId",
+  roleGuard(["admin"]),
+  AdminProductController.deleteVariant,
+);
+
 export default productRouter;

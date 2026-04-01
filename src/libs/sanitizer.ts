@@ -2,35 +2,41 @@ import { Request, Response, NextFunction } from "express";
 import validator from "validator";
 
 /**
- * Custom sanitizer middleware to sanitize and escape inputs.
- * Helps protect against XSS attacks.
+ * Recursive sanitizer middleware — protects against XSS by escaping
+ * HTML entities in all string fields, including nested objects and arrays.
  */
 
-// Helper function to sanitize each value
-const sanitizeValue = (value: unknown): string | unknown => {
-  if (value !== null && typeof value === "string") {
-    // Trim excess spaces
+function sanitizeValue(value: unknown): unknown {
+  if (value === null || value === undefined) return value;
+
+  if (typeof value === "string") {
     let sanitized = validator.trim(value);
-
-    // Strip low ASCII chars (non-printable characters)
     sanitized = validator.stripLow(sanitized);
-
-    // Escape HTML entities (<, >, &, ', ", /)
     sanitized = validator.escape(sanitized);
-
     return sanitized;
   }
-  return value;
-};
 
-// Middleware function
+  if (Array.isArray(value)) {
+    return value.map(sanitizeValue);
+  }
+
+  if (typeof value === "object") {
+    const sanitizedObj: Record<string, unknown> = {};
+    for (const key of Object.keys(value as Record<string, unknown>)) {
+      sanitizedObj[key] = sanitizeValue(
+        (value as Record<string, unknown>)[key],
+      );
+    }
+    return sanitizedObj;
+  }
+
+  // numbers, booleans — pass through unchanged
+  return value;
+}
+
 const sanitizer = (req: Request, _res: Response, next: NextFunction): void => {
   if (req.body && typeof req.body === "object") {
-    for (const property in req.body) {
-      if (Object.prototype.hasOwnProperty.call(req.body, property)) {
-        req.body[property] = sanitizeValue(req.body[property]);
-      }
-    }
+    req.body = sanitizeValue(req.body);
   }
   next();
 };

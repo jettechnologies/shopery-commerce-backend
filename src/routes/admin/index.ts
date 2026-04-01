@@ -5,6 +5,7 @@ import categoryRouter from "./category.route.js";
 import orderRouter from "./order.route.js";
 import adminProductCommentRouter from "./product.comment.route.js";
 import adminReviewRouter from "./review.route.js";
+import logRouter from "./log.route.js";
 
 const adminRouter = Router();
 adminRouter.use("/tags", tagRouter);
@@ -13,5 +14,6 @@ adminRouter.use("/categories", categoryRouter);
 adminRouter.use("/orders", orderRouter);
 adminRouter.use("/comments", adminProductCommentRouter);
 adminRouter.use("/reviews", adminReviewRouter);
+adminRouter.use("/logs", logRouter);
 
 export default adminRouter;

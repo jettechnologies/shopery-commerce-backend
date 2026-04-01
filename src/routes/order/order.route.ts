@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { OrderService } from "@/services/order.service";
 import ApiResponse from "@/libs/ApiResponse";
 import { handleError } from "@/libs/misc";
+import { BadRequestError } from "@/libs/AppError";
 import { authGuard, AuthRequest } from "@/middlewares/auth.middleware";
 import { guestCartToken } from "@/utils/misc";
 
@@ -141,9 +142,12 @@ orderRouter.post("/create", async (req: AuthRequest, res: Response) => {
  *       200:
  *         description: Order details
  */
-orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
+ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
   try {
     const order = await OrderService.getOrderById(req.params.id);
+    if (req.user?.role !== "admin" && order.userId !== BigInt(req.user!.userId)) {
+      return ApiResponse.error(res, 403, "Forbidden: you do not own this order", "Authorization Error");
+    }
     return ApiResponse.success(res, 200, "Order fetched successfully", order);
   } catch (err) {
     handleError(res, err);
@@ -170,6 +174,9 @@ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
  */
 orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
   try {
+    if (req.user?.role !== "admin" && req.user?.userId !== req.params.userId) {
+       return ApiResponse.error(res, 403, "Forbidden: cannot read another user's orders", "Authorization Error");
+    }
     const orders = await OrderService.getOrdersByUser(req.params.userId);
     return ApiResponse.success(res, 200, "Orders fetched successfully", orders);
   } catch (err) {
@@ -201,9 +208,55 @@ orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
  */
 orderRouter.patch("/:id/status", async (req: AuthRequest, res: Response) => {
   try {
+    if (req.user?.role !== "admin") {
+      return ApiResponse.error(res, 403, "Forbidden: only admins can update order status", "Authorization Error");
+    }
     const { status } = req.body;
     const order = await OrderService.updateOrderStatus(req.params.id, status);
     return ApiResponse.success(res, 200, "Order status updated", order);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+/**
+ * @swagger
+ * /orders/{id}/address:
+ *   patch:
+ *     summary: Update order shipping address
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               addressId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Order address updated
+ *       400:
+ *         description: Forbidden or invalid status
+ *       404:
+ *         description: Order or address not found
+ */
+orderRouter.patch("/:id/address", async (req: AuthRequest, res: Response) => {
+  try {
+    const { addressId } = req.body;
+    if (!addressId) throw new BadRequestError("addressId is required");
+    const isAdmin = req.user?.role === "admin";
+    const order = await OrderService.updateOrderAddress(req.params.id, addressId, req.user!.userId, isAdmin);
+    return ApiResponse.success(res, 200, "Order address updated", order);
   } catch (err) {
     handleError(res, err);
   }

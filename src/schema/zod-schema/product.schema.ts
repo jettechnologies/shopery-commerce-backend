@@ -5,14 +5,24 @@ export const CreateProductSchema = z.object({
   slug: z.string().min(3, "Slug is required").optional(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
-  price: z.number().positive("Price must be positive"),
-  salePrice: z.number().optional(),
   sku: z.string().optional(),
-  stockQuantity: z.number().int().nonnegative().default(0),
   weight: z.number().optional(),
   dimensions: z.string().optional(),
   categoryIds: z.array(z.string()).optional(),
   tagIds: z.array(z.number().int()).optional(),
+  variants: z
+    .array(
+      z.object({
+        sku: z.string().optional(),
+        size: z.string().optional(),
+        color: z.array(z.string()).optional(),
+        stockQuantity: z.number().int().nonnegative().default(0),
+        price: z.number().positive("Variant price must be strictly positive"),
+        salePrice: z.number().optional(),
+        isActive: z.boolean().default(true),
+      })
+    )
+    .optional(),
   images: z
     .array(
       z.object({

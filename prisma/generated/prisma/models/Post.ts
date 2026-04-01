@@ -560,10 +560,6 @@ export type PostUncheckedUpdateManyWithoutAuthorNestedInput = {
   deleteMany?: Prisma.PostScalarWhereInput | Prisma.PostScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type PostCreateNestedOneWithoutPostTagsInput = {
   create?: Prisma.XOR<Prisma.PostCreateWithoutPostTagsInput, Prisma.PostUncheckedCreateWithoutPostTagsInput>
   connectOrCreate?: Prisma.PostCreateOrConnectWithoutPostTagsInput

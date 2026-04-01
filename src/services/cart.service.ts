@@ -24,6 +24,7 @@ export class CartService {
                 images: true,
               },
             },
+            variant: true,
           },
           orderBy: { addedAt: "desc" },
         },
@@ -41,6 +42,7 @@ export class CartService {
                   images: true,
                 },
               },
+              variant: true,
             },
             orderBy: { addedAt: "desc" },
           },
@@ -49,7 +51,8 @@ export class CartService {
     }
 
     const total = cart.items.reduce((acc, item) => {
-      return acc + item.quantity * item.product.salePrice!;
+      const price = item.variant ? (item.variant.salePrice ?? item.variant.price) : 0;
+      return acc + item.quantity * price;
     }, 0);
 
     return { ...cart, total };
@@ -69,8 +72,16 @@ export class CartService {
     if (!product) throw new NotFoundError("Product not found");
     if (!product.isActive)
       throw new BadRequestError("Product is not available");
-    if (product.stockQuantity < data.quantity) {
-      throw new BadRequestError("Insufficient stock");
+
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: BigInt(data.variantId) }
+    });
+    if (!variant || variant.productId !== product.id) {
+       throw new NotFoundError("Variant not found for this product");
+    }
+
+    if (variant.stockQuantity < data.quantity) {
+      throw new BadRequestError("Insufficient stock for this specific variant");
     }
 
     let cart = await prisma.cart.findFirst({
@@ -83,19 +94,18 @@ export class CartService {
       });
     }
 
-    const existingItem = await prisma.cartItem.findUnique({
+    const existingItem = await prisma.cartItem.findFirst({
       where: {
-        cartId_productId: {
-          cartId: cart.id,
-          productId: product.id,
-        },
+        cartId: cart.id,
+        productId: product.id,
+        variantId: variant.id,
       },
     });
 
     if (existingItem) {
       const newQuantity = existingItem.quantity + data.quantity;
-      if (product.stockQuantity < newQuantity) {
-        throw new BadRequestError("Insufficient stock for requested quantity");
+      if (variant.stockQuantity < newQuantity) {
+        throw new BadRequestError("Insufficient stock for requested variant quantity");
       }
 
       await prisma.cartItem.update({
@@ -107,8 +117,9 @@ export class CartService {
         data: {
           cartId: cart.id,
           productId: product.id,
+          variantId: variant.id,
           quantity: data.quantity,
-          unitPrice: product.salePrice || product.price,
+          unitPrice: variant.salePrice ?? variant.price,
         },
       });
     }
@@ -119,7 +130,7 @@ export class CartService {
   /**
    * Remove item from cart
    */
-  static async removeFromCart(userId: string, productId: string) {
+  static async removeFromCart(userId: string, cartItemId: string) {
     const user = await prisma.user.findUnique({ where: { userId } });
     if (!user) throw new NotFoundError("User not found");
 
@@ -129,18 +140,10 @@ export class CartService {
 
     if (!cart) throw new NotFoundError("Cart not found");
 
-    const product = await prisma.product.findUnique({
-      where: { productId },
-    });
-
-    if (!product) throw new NotFoundError("Product not found");
-
-    const item = await prisma.cartItem.findUnique({
+    const item = await prisma.cartItem.findFirst({
       where: {
-        cartId_productId: {
-          cartId: cart.id,
-          productId: product.id,
-        },
+        id: BigInt(cartItemId),
+        cartId: cart.id,
       },
     });
 
@@ -156,7 +159,7 @@ export class CartService {
    */
   static async updateCartItem(
     userId: string,
-    productId: string,
+    cartItemId: string,
     quantity: number,
   ) {
     const user = await prisma.user.findUnique({ where: { userId } });
@@ -168,26 +171,19 @@ export class CartService {
 
     if (!cart) throw new NotFoundError("Cart not found");
 
-    const product = await prisma.product.findUnique({
-      where: { productId },
-    });
-
-    if (!product) throw new NotFoundError("Product not found");
-
-    if (product.stockQuantity < quantity) {
-      throw new BadRequestError("Insufficient stock");
-    }
-
-    const item = await prisma.cartItem.findUnique({
+    const item = await prisma.cartItem.findFirst({
       where: {
-        cartId_productId: {
-          cartId: cart.id,
-          productId: product.id,
-        },
+        id: BigInt(cartItemId),
+        cartId: cart.id,
       },
+      include: { variant: true }
     });
 
     if (!item) throw new NotFoundError("Item not found in cart");
+
+    if (item.variant && item.variant.stockQuantity < quantity) {
+      throw new BadRequestError("Insufficient stock for this specific variant");
+    }
 
     await prisma.cartItem.update({
       where: { id: item.id },

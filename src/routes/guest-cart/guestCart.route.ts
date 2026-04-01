@@ -211,9 +211,9 @@ guestCartRouter.get(
 
 /**
  * @swagger
- * /guest-cart/item/{productId}:
+ * /guest-cart/item/{guestCartItemId}:
  *   delete:
- *     summary: Remove a specific item from the guest cart
+ *     summary: Remove an exact item from the guest cart securely preventing sibling variation deletions
  *     tags: [GuestCart]
  *     parameters:
  *       - in: header
@@ -223,17 +223,17 @@ guestCartRouter.get(
  *         required: true
  *         description: Token of the guest cart
  *       - in: path
- *         name: productId
+ *         name: guestCartItemId
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID of the product to remove
+ *         description: Exact ID of the carted variant to remove
  *     responses:
  *       200:
  *         description: Item removed successfully
  */
 guestCartRouter.delete(
-  "/item/:productId",
+  "/item/:guestCartItemId",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token =
@@ -242,8 +242,8 @@ guestCartRouter.delete(
 
       if (!token) throw new BadRequestError("Guest token missing");
 
-      const productId = BigInt(req.params.productId);
-      const result = await GuestCartService.removeItem(token, productId);
+      const guestCartItemId = BigInt(req.params.guestCartItemId);
+      const result = await GuestCartService.removeItem(token, guestCartItemId);
 
       return ApiResponse.success(
         res,

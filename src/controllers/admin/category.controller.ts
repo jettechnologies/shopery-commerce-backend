@@ -101,4 +101,19 @@ export class AdminCategoryController {
       handleError(res, error);
     }
   }
+
+  static async getProductsByCategorySlug(req: Request, res: Response) {
+    try {
+      const { slug } = req.params;
+      const { page, limit } = req.query;
+      const data = await CategoryService.getProductsByCategorySlug(
+        slug,
+        Number(page) || 1,
+        Number(limit) || 10
+      );
+      return ApiResponse.success(res, 200, "Products retrieved successfully", data);
+    } catch (error) {
+      handleError(res, error);
+    }
+  }
 }

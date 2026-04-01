@@ -294,7 +294,10 @@ export class AuthService {
 
   static async forgotPassword(data: ForgotPasswordInput) {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
-    if (!user) throw new NotFoundError("User not found");
+    if (!user) {
+      // User enumeration prevention: Return success even if user doesn't exist.
+      return { message: "If this email is registered, a password reset OTP has been sent." };
+    }
 
     const rawOtp = generateOTP();
     const hashedOtp = await bcryptHash(rawOtp);
