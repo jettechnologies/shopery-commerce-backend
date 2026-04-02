@@ -288,7 +288,7 @@ export class AuthService {
       data: {
         userId: user.id,
         otpHash: hashedOtp,
-        expiresAt: new Date(Date.now() + 2 * 60 * 1000),
+        expiresAt: OTP_TIMER,
       },
     });
 
