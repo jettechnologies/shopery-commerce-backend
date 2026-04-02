@@ -186,7 +186,7 @@ export class AuthService {
 
   static async verifyEmail({ otp, email }: VerifyEmailInput) {
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
     });
 
     if (!user) {
