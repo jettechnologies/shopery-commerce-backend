@@ -33,9 +33,11 @@ const csrfMiddleware = (req: Request, res: Response, next: NextFunction) => {
   //   return next();
   // }
 
-  const isAuthRoute =
-    req.path.startsWith("/shopery/auth/login") ||
-    req.path.startsWith("/shopery/auth/register");
+  // const isAuthRoute =
+  //   req.path.startsWith("/shopery/auth/login") ||
+  //   req.path.startsWith("/shopery/auth/register");
+
+  const isAuthRoute = req.path.startsWith("/shopery/auth/");
 
   const isBearerAuth = req.headers.authorization?.startsWith("Bearer ");
 

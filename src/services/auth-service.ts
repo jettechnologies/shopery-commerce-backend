@@ -211,8 +211,19 @@ export class AuthService {
       throw new UnauthorizedError("Invalid or expired OTP");
     }
 
-    if (record.expiresAt < new Date()) {
-      console.log(new Date(), "current date");
+    const now = new Date();
+
+    // 2 mins difference
+    const diffMs = now.getTime() - record.expiresAt.getTime();
+
+    const TWO_MINUTES = 2 * 60 * 1000;
+
+    if (diffMs > TWO_MINUTES) {
+      await prisma.emailVerification.update({
+        where: { id: record.id },
+        data: { used: true },
+      });
+
       throw new UnauthorizedError("OTP expired");
     }
 
