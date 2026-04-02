@@ -26,7 +26,7 @@ import { generateOTP, OTP_TIMER } from "@/utils/misc";
 export class AuthService {
   static async register(data: CreateUserInput & { guestToken?: string }) {
     const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
+      where: { email: data.email.toLowerCase() },
     });
     if (existingUser) throw new ConflictError("Email already in use");
 
@@ -34,7 +34,7 @@ export class AuthService {
 
     const newUser = await prisma.user.create({
       data: {
-        email: data.email,
+        email: data.email.toLowerCase(),
         passwordHash,
         name: data.name,
       },
@@ -116,14 +116,12 @@ export class AuthService {
     //   );
 
     const user = await prisma.user.findUnique({
-      where: { email: data.email },
+      where: { email: data.email.toLowerCase() },
     });
 
     if (!user) {
       throw new UnauthorizedError("Invalid email or password");
     }
-
-    console.log(user, "user in login");
 
     if (user.role !== "admin" && !user.isEmailVerified) {
       throw new UnauthorizedError("Please verify your email before logging in");
