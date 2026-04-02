@@ -251,7 +251,9 @@ export class AuthService {
   static async resendEmailVerification({
     email,
   }: ResendVerificationEmailInput) {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
     if (!user) throw new NotFoundError("User not found");
 
     if (user.isEmailVerified) {
