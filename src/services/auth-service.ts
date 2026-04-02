@@ -212,6 +212,7 @@ export class AuthService {
     }
 
     if (record.expiresAt < new Date()) {
+      console.log(new Date(), "current date");
       throw new UnauthorizedError("OTP expired");
     }
 
@@ -280,6 +281,16 @@ export class AuthService {
         );
       }
     }
+
+    await prisma.emailVerification.updateMany({
+      where: {
+        userId: user.id,
+        used: false,
+      },
+      data: {
+        used: true,
+      },
+    });
 
     const rawOtp = generateOTP();
     const hashedOtp = await bcryptHash(rawOtp);
