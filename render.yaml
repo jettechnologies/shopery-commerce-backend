@@ -61,3 +61,6 @@ services:
 
       - key: EMAIL_PROVIDER
         sync: false
+
+      - key: CSRF_SECRET
+        sync: false

@@ -31,6 +31,7 @@ export class PublicProductService {
           images: true,
           categories: { include: { category: true } },
           tags: { include: { tag: true } },
+          variants: true,
         },
       }),
       prisma.product.count({ where: { isActive: true } }),
@@ -67,6 +68,12 @@ export class PublicProductService {
       },
       take: limit + 1,
       orderBy: { id: sortOrder },
+      include: {
+        images: true,
+        categories: { include: { category: true } },
+        tags: { include: { tag: true } },
+        variants: true,
+      },
     });
 
     let nextCursor: string | null = null;
@@ -102,6 +109,7 @@ export class PublicProductService {
         categories: { include: { category: true } },
         tags: { include: { tag: true } },
         reviews: true,
+        variants: true,
       },
     });
 
@@ -117,6 +125,7 @@ export class PublicProductService {
         categories: { include: { category: true } },
         tags: { include: { tag: true } },
         reviews: true,
+        variants: true,
       },
     });
 
@@ -124,13 +133,3 @@ export class PublicProductService {
     return product;
   }
 }
-
-// const products = await prisma.product.findMany({
-//   where: { isActive: true },
-//   orderBy: { createdAt: "desc" },
-//   include: {
-//     images: true,
-//     categories: { include: { category: true } },
-//     tags: { include: { tag: true } },
-//   },
-// });

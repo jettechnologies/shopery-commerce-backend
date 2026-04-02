@@ -7,7 +7,6 @@ import sanitizer from "@/libs/sanitizer";
 import csrfMiddleware from "@/middlewares/csrf-middlewares.js";
 import dotenv from "dotenv";
 
-
 dotenv.config();
 
 export function configureExpress(app: Application): void {
@@ -21,7 +20,7 @@ export function configureExpress(app: Application): void {
 
   app.use(
     session({
-      store: new PrismaSessionStore(60 * 60 * 24), // 1 day in seconds
+      store: new PrismaSessionStore(60 * 60 * 24),
       secret: process.env.SESSION_SECRET || "defaultsecret",
       resave: false,
       saveUninitialized: false,

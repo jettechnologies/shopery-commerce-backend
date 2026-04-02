@@ -170,9 +170,6 @@ export class CategoryService {
         ? { id: BigInt(cursor) }
         : undefined;
 
-    console.log(cursorObj, "cursor obj");
-    console.log(cursor, "cursor");
-
     const categories = await prisma.category.findMany({
       take: limit + 1, // Fetch one more to know if there’s a next page
       ...(cursorObj && { skip: 1, cursor: cursorObj }),
@@ -244,11 +241,8 @@ export class CategoryService {
     // Use findFirst to match either exactly the slug or case-insensitive name
     const category = await prisma.category.findFirst({
       where: {
-        OR: [
-          { slug: slug },
-          { name: { equals: slug, mode: "insensitive" } }
-        ]
-      }
+        OR: [{ slug: slug }, { name: { equals: slug, mode: "insensitive" } }],
+      },
     });
 
     if (!category) throw new NotFoundError(`Category '${slug}' not found`);
@@ -258,7 +252,9 @@ export class CategoryService {
         where: { categoryId: category.id },
         skip,
         take: limit,
-        include: { product: { include: { images: true, variants: true } } },
+        include: {
+          product: { include: { images: true, wishlistItems: true } },
+        },
       }),
       prisma.productCategory.count({ where: { categoryId: category.id } }),
     ]);
@@ -267,7 +263,7 @@ export class CategoryService {
 
     return {
       category,
-      products: productLinks.map(pc => pc.product),
+      products: productLinks.map((pc) => pc.product),
       pagination: {
         total,
         totalPages,

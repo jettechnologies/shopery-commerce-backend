@@ -107,13 +107,31 @@ export class AuthService {
   }
 
   static async login(data: LoginUserInput) {
+    // const user = await prisma.user.findUnique({
+    //   where: { email: data.email, isEmailVerified: true },
+    // });
+    // if (!user)
+    //   throw new UnauthorizedError(
+    //     "Unauthorized user, Please verify your email",
+    //   );
+
     const user = await prisma.user.findUnique({
-      where: { email: data.email, isEmailVerified: true },
+      where: { email: data.email },
     });
-    if (!user)
-      throw new UnauthorizedError(
-        "Unauthorized user, Please verify your email",
-      );
+
+    if (!user) {
+      throw new UnauthorizedError("Invalid email or password");
+    }
+
+    console.log(user, "user in login");
+
+    if (user.role !== "admin" && !user.isEmailVerified) {
+      throw new UnauthorizedError("Please verify your email before logging in");
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedError("Account is disabled");
+    }
 
     const isValid = await bcryptCompare(data.password, user.passwordHash!);
     if (!isValid) throw new UnauthorizedError("Invalid password");
@@ -296,7 +314,10 @@ export class AuthService {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user) {
       // User enumeration prevention: Return success even if user doesn't exist.
-      return { message: "If this email is registered, a password reset OTP has been sent." };
+      return {
+        message:
+          "If this email is registered, a password reset OTP has been sent.",
+      };
     }
 
     const rawOtp = generateOTP();

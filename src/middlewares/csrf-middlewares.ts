@@ -28,8 +28,18 @@ declare global {
 
 const csrfMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // Skip CSRF for Bearer-token authenticated requests (mobile clients)
-  const authHeader = req.headers["authorization"];
-  if (authHeader?.startsWith("Bearer ")) {
+  // const authHeader = req.headers["authorization"];
+  // if (authHeader?.startsWith("Bearer ")) {
+  //   return next();
+  // }
+
+  const isAuthRoute =
+    req.path.startsWith("/shopery/auth/login") ||
+    req.path.startsWith("/shopery/auth/register");
+
+  const isBearerAuth = req.headers.authorization?.startsWith("Bearer ");
+
+  if (isAuthRoute || isBearerAuth) {
     return next();
   }
 
@@ -83,4 +93,3 @@ const csrfMiddleware = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export default csrfMiddleware;
-
