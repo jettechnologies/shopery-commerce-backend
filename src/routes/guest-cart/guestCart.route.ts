@@ -65,14 +65,19 @@ guestCartRouter.post(
  *       type: object
  *       required:
  *         - productId
+ *         - variantId
  *         - quantity
  *       properties:
  *         productId:
  *           type: string
  *           example: b1b07e9e-58c1-4da4-8acc-0e96cf3c16d1
+ *         variantId:
+ *           type: integer
+ *           example: 2
  *         quantity:
  *           type: integer
  *           example: 2
+ *
  *     GuestCartItemResponse:
  *       type: object
  *       properties:
@@ -100,6 +105,7 @@ guestCartRouter.post(
  *             guestCartId:
  *               type: integer
  *               example: 8
+ *
  *     GuestCartResponse:
  *       type: object
  *       properties:

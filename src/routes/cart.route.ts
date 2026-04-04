@@ -21,12 +21,17 @@ cartRouter.use(authGuard);
  *       type: object
  *       required:
  *         - productId
+ *         - variantId
  *         - quantity
  *       properties:
  *         productId:
  *           type: string
  *           format: uuid
  *           example: "b231f010-daa1-42e3-bc87-984a0382b8d2"
+ *         variantId:
+ *           type: integer
+ *           minimum: 1
+ *           example: 2
  *         quantity:
  *           type: integer
  *           minimum: 1
