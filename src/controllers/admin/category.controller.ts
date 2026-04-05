@@ -16,7 +16,7 @@ export class AdminCategoryController {
         res,
         201,
         "Category created successfully",
-        category
+        category,
       );
     } catch (error) {
       handleError(res, error);
@@ -32,7 +32,7 @@ export class AdminCategoryController {
         res,
         200,
         "Category updated successfully",
-        category
+        category,
       );
     } catch (error) {
       handleError(res, error);
@@ -61,7 +61,7 @@ export class AdminCategoryController {
         res,
         200,
         "Categories fetched successfully",
-        data
+        data,
       );
     } catch (error) {
       handleError(res, error);
@@ -80,7 +80,7 @@ export class AdminCategoryController {
         res,
         200,
         "Categories fetched successfully",
-        data
+        data,
       );
     } catch (error) {
       handleError(res, error);
@@ -90,12 +90,20 @@ export class AdminCategoryController {
   static async getCategoryById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const category = await CategoryService.getCategoryById(id);
+      const { page, limit, sortOrder } = req.query;
+
+      const data = await CategoryService.getCategoryById({
+        id,
+        page: Number(page) || 1,
+        limit: Number(limit) || 10,
+        sortOrder: (sortOrder as "asc" | "desc") || "desc",
+      });
+
       return ApiResponse.success(
         res,
         200,
         "Category retrieved successfully",
-        category
+        data,
       );
     } catch (error) {
       handleError(res, error);
@@ -109,9 +117,14 @@ export class AdminCategoryController {
       const data = await CategoryService.getProductsByCategorySlug(
         slug,
         Number(page) || 1,
-        Number(limit) || 10
+        Number(limit) || 10,
       );
-      return ApiResponse.success(res, 200, "Products retrieved successfully", data);
+      return ApiResponse.success(
+        res,
+        200,
+        "Products retrieved successfully",
+        data,
+      );
     } catch (error) {
       handleError(res, error);
     }

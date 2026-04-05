@@ -222,14 +222,81 @@ export class CategoryService {
   /**
    * Get a single category by ID
    */
-  static async getCategoryById(id: string) {
+  // static async getCategoryById(id: string) {
+  //   const category = await prisma.category.findUnique({
+  //     where: { categoryId: id },
+  //     include: { products: true, children: true },
+  //   });
+
+  //   if (!category) throw new NotFoundError("Category not found");
+  //   return category;
+  // }
+
+  static async getCategoryById({
+    id,
+    page = 1,
+    limit = 10,
+    sortOrder = "desc",
+  }: {
+    id: string;
+    page?: number;
+    limit?: number;
+    sortOrder?: SortOrder;
+  }) {
+    const skip = (page - 1) * limit;
+
     const category = await prisma.category.findUnique({
       where: { categoryId: id },
-      include: { products: true },
     });
 
     if (!category) throw new NotFoundError("Category not found");
-    return category;
+
+    const [productsData, total] = await prisma.$transaction([
+      prisma.productCategory.findMany({
+        where: {
+          categoryId: category.id,
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          product: {
+            createdAt: sortOrder,
+          },
+        },
+        include: {
+          product: {
+            include: {
+              images: true,
+              variants: true,
+            },
+          },
+        },
+      }),
+      prisma.productCategory.count({
+        where: {
+          categoryId: category.id,
+        },
+      }),
+    ]);
+
+    const products = productsData.map((pc) => pc.product);
+
+    const totalPages = Math.ceil(total / limit);
+
+    const pagination = {
+      total,
+      totalPages,
+      currentPage: page,
+      limit,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+
+    return {
+      ...category,
+      products,
+      pagination,
+    };
   }
 
   /**

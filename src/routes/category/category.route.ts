@@ -115,8 +115,8 @@ categoryRouter.get("/cursor", AdminCategoryController.getAllCategoriesCursor);
  * @swagger
  * /categories/{id}:
  *   get:
- *     summary: Get a single category by ID
- *     description: Retrieve the details of a specific category by its ID.
+ *     summary: Get a single category by ID (with paginated products)
+ *     description: Retrieve a category and its products with pagination.
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -127,23 +127,66 @@ categoryRouter.get("/cursor", AdminCategoryController.getAllCategoriesCursor);
  *         schema:
  *           type: string
  *         description: Category ID
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *           example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *           example: 10
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           example: desc
  *     responses:
  *       200:
- *         description: Category details retrieved successfully
+ *         description: Category with paginated products
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 categoryId:
  *                   type: string
- *                   example: "ca34ad7b-7d5c-4e8b-87a4-99ac4b3e1c31"
  *                 name:
  *                   type: string
- *                   example: "Wireless Chargers"
  *                 description:
  *                   type: string
- *                   example: "Fast and efficient wireless chargers for devices"
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       productId:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       slug:
+ *                         type: string
+ *                       minPrice:
+ *                         type: number
+ *                       maxPrice:
+ *                         type: number
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: number
+ *                     totalPages:
+ *                       type: number
+ *                     currentPage:
+ *                       type: number
+ *                     limit:
+ *                       type: number
+ *                     hasNextPage:
+ *                       type: boolean
+ *                     hasPreviousPage:
+ *                       type: boolean
  *       404:
  *         description: Category not found
  */
@@ -181,6 +224,9 @@ categoryRouter.get("/:id", AdminCategoryController.getCategoryById);
  *       404:
  *         description: Category not found
  */
-categoryRouter.get("/:slug/products", AdminCategoryController.getProductsByCategorySlug);
+categoryRouter.get(
+  "/:slug/products",
+  AdminCategoryController.getProductsByCategorySlug,
+);
 
 export default categoryRouter;
