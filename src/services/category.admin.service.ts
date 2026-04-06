@@ -98,10 +98,14 @@ export class CategoryService {
       prisma.category.count(),
     ]);
 
-    const formatted = categories.map((cat) => ({
-      ...cat,
-      productCount: cat.products.length,
-    }));
+    const formatted = categories.map((cat) => {
+      const { products, ...rest } = cat;
+      const productCount = products.length;
+      return {
+        ...rest,
+        productCount,
+      };
+    });
 
     const totalPages = Math.ceil(total / limit);
     const pagination = {
@@ -213,10 +217,14 @@ export class CategoryService {
       };
     }
 
-    const formatted = categories.map((cat) => ({
-      ...cat,
-      productCount: cat.products.length,
-    }));
+    const formatted = categories.map((cat) => {
+      const { products, ...rest } = cat;
+      const productCount = products.length;
+      return {
+        ...rest,
+        productCount,
+      };
+    });
 
     // Compute nextCursor properly
     let nextCursor: string | null = null;
