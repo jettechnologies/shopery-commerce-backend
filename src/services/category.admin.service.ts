@@ -86,9 +86,22 @@ export class CategoryService {
         skip,
         take: limit,
         orderBy: { createdAt: sortOrder },
+        include: {
+          products: {
+            where: {
+              product: { isActive: true },
+            },
+            select: { id: true },
+          },
+        },
       }),
       prisma.category.count(),
     ]);
+
+    const formatted = categories.map((cat) => ({
+      ...cat,
+      productCount: cat.products.length,
+    }));
 
     const totalPages = Math.ceil(total / limit);
     const pagination = {
@@ -100,7 +113,7 @@ export class CategoryService {
       hasPreviousPage: page > 1,
     };
 
-    return { categories, pagination };
+    return { categories: formatted, pagination };
   }
 
   /**
@@ -174,6 +187,14 @@ export class CategoryService {
       take: limit + 1, // Fetch one more to know if there’s a next page
       ...(cursorObj && { skip: 1, cursor: cursorObj }),
       orderBy: { id: sortOrder },
+      include: {
+        products: {
+          where: {
+            product: { isActive: true },
+          },
+          select: { id: true },
+        },
+      },
     });
 
     // If no categories, return early
@@ -191,6 +212,11 @@ export class CategoryService {
         },
       };
     }
+
+    const formatted = categories.map((cat) => ({
+      ...cat,
+      productCount: cat.products.length,
+    }));
 
     // Compute nextCursor properly
     let nextCursor: string | null = null;
@@ -216,7 +242,7 @@ export class CategoryService {
         : null,
     };
 
-    return { categories, pagination };
+    return { categories: formatted, pagination };
   }
 
   /**
