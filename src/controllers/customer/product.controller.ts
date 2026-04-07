@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { PublicProductService } from "@/services/publicProduct.service";
 import { PublicProductFilterService } from "@/services/publicProductFilter.service";
+import ApiResponse from "@/libs/ApiResponse";
+import { handleError } from "@/libs/misc";
 
 export class PublicProductController {
   static async getAllProducts(req: Request, res: Response) {
@@ -12,9 +14,14 @@ export class PublicProductController {
         sortOrder: (sortOrder as "asc" | "desc") || "desc",
       });
 
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
+      return ApiResponse.success(
+        res,
+        200,
+        "All Products fetched successfully",
+        data,
+      );
+    } catch (error) {
+      handleError(res, error);
     }
   }
 
@@ -26,9 +33,15 @@ export class PublicProductController {
         cursor: cursor as string,
         sortOrder: (sortOrder as "asc" | "desc") || "desc",
       });
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
+
+      return ApiResponse.success(
+        res,
+        200,
+        "All Products fetched successfully",
+        data,
+      );
+    } catch (error) {
+      handleError(res, error);
     }
   }
 
@@ -38,9 +51,15 @@ export class PublicProductController {
       const product = await PublicProductService.getProductById(id);
       if (!product)
         return res.status(404).json({ message: "Product not found" });
-      res.json(product);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
+
+      return ApiResponse.success(
+        res,
+        200,
+        "Product details fetched successfully",
+        product,
+      );
+    } catch (err) {
+      handleError(res, err);
     }
   }
 
@@ -50,9 +69,15 @@ export class PublicProductController {
       const product = await PublicProductService.getProductBySlug(slug);
       if (!product)
         return res.status(404).json({ message: "Product not found" });
-      res.json(product);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
+
+      return ApiResponse.success(
+        res,
+        200,
+        "Product details fetched successfully",
+        product,
+      );
+    } catch (err) {
+      handleError(res, err);
     }
   }
 
@@ -80,9 +105,14 @@ export class PublicProductController {
         sortBy: sortBy as any,
       });
 
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
+      return ApiResponse.success(
+        res,
+        200,
+        "Filtered Products fetched successfully",
+        data,
+      );
+    } catch (err) {
+      handleError(res, err);
     }
   }
 
@@ -110,9 +140,14 @@ export class PublicProductController {
         sortBy: sortBy as any,
       });
 
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
+      return ApiResponse.success(
+        res,
+        200,
+        "Filtered Products fetched successfully",
+        data,
+      );
+    } catch (err) {
+      handleError(res, err);
     }
   }
 }
