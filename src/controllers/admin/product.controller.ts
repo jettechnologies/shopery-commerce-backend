@@ -19,7 +19,10 @@ export class AdminProductController {
         ...body,
         price: body.price ? Number(body.price) : undefined,
         salePrice: body.salePrice ? Number(body.salePrice) : undefined,
-        variants: typeof body.variants === "string" ? JSON.parse(body.variants) : body.variants,
+        variants:
+          typeof body.variants === "string"
+            ? JSON.parse(body.variants)
+            : body.variants,
         weight: body.weight ? Number(body.weight) : undefined,
 
         // Handle JSON arrays (from multipart/form-data)
@@ -61,7 +64,11 @@ export class AdminProductController {
 
         price: body.price === "" ? undefined : Number(body.price),
         salePrice: body.salePrice === "" ? undefined : Number(body.salePrice),
-        variants: body.variants ? (typeof body.variants === "string" ? JSON.parse(body.variants) : body.variants) : undefined,
+        variants: body.variants
+          ? typeof body.variants === "string"
+            ? JSON.parse(body.variants)
+            : body.variants
+          : undefined,
         weight: body.weight === "" ? undefined : Number(body.weight),
 
         categoryIds:
@@ -93,6 +100,7 @@ export class AdminProductController {
         product,
       );
     } catch (error: any) {
+      console.log(error, "error from update product service");
       handleError(res, error);
     }
   }
@@ -131,7 +139,11 @@ export class AdminProductController {
         throw new BadRequestError("Change must be a valid number");
       }
 
-      const result = await ProductService.adjustVariantInventory(productId, variantId, change);
+      const result = await ProductService.adjustVariantInventory(
+        productId,
+        variantId,
+        change,
+      );
       return ApiResponse.success(res, 200, result.message, result.variant);
     } catch (error) {
       handleError(res, error);
@@ -142,7 +154,11 @@ export class AdminProductController {
     try {
       const { productId, variantId } = req.params;
       const body = req.body;
-      const result = await ProductService.updateVariantDetails(productId, variantId, body);
+      const result = await ProductService.updateVariantDetails(
+        productId,
+        variantId,
+        body,
+      );
       return ApiResponse.success(res, 200, result.message, result.variant);
     } catch (error) {
       handleError(res, error);
@@ -152,7 +168,10 @@ export class AdminProductController {
   static async toggleVariantActive(req: Request, res: Response) {
     try {
       const { productId, variantId } = req.params;
-      const result = await ProductService.toggleVariantActive(productId, variantId);
+      const result = await ProductService.toggleVariantActive(
+        productId,
+        variantId,
+      );
       return ApiResponse.success(res, 200, result.message, result.variant);
     } catch (error) {
       handleError(res, error);

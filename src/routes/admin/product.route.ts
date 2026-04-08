@@ -32,7 +32,6 @@ productRouter.use(authGuard, handleMulterError);
  *             type: object
  *             required:
  *               - name
- *               - price
  *             properties:
  *               name:
  *                 type: string
@@ -61,16 +60,35 @@ productRouter.use(authGuard, handleMulterError);
  *               dimensions:
  *                 type: string
  *                 example: "10x10x2cm"
+ *
  *               categoryIds:
  *                 type: array
  *                 items:
  *                   type: string
  *                 example: ["c1f1bcb3-7a8f-4c19-9b2c-03d2e4f26a4d"]
+ *
  *               tagIds:
  *                 type: array
  *                 items:
  *                   type: number
  *                 example: [4, 5, 6]
+ *
+ *               variants:
+ *                 type: string
+ *                 description: JSON stringified array of product variants
+ *                 example: |
+ *                   [
+ *                     {
+ *                       "sku": "VAR-001",
+ *                       "size": "M",
+ *                       "color": ["black"],
+ *                       "stockQuantity": 20,
+ *                       "price": 2500,
+ *                       "salePrice": 2200,
+ *                       "isActive": true
+ *                     }
+ *                   ]
+ *
  *               images:
  *                 type: array
  *                 items:
@@ -139,6 +157,30 @@ productRouter.post(
  *                 type: array
  *                 items:
  *                   type: number
+ *
+ *               variants:
+ *                 type: string
+ *                 description: JSON stringified array of variants
+ *                 example: |
+ *                   [
+ *                     {
+ *                       "sku": "VAR-001",
+ *                       "size": "M",
+ *                       "color": ["red"],
+ *                       "stockQuantity": 10,
+ *                       "price": 100,
+ *                       "salePrice": 90,
+ *                       "isActive": true
+ *                     },
+ *                     {
+ *                       "sku": "VAR-002",
+ *                       "size": "L",
+ *                       "color": ["blue"],
+ *                       "stockQuantity": 5,
+ *                       "price": 120
+ *                     }
+ *                   ]
+ *
  *               images:
  *                 type: array
  *                 items:

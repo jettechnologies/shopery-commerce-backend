@@ -1,10 +1,36 @@
 import { Router } from "express";
 import { CartController } from "@/controllers/cart.controller";
-import { authGuard } from "@/middlewares/auth.middleware";
+import { authGuard, AuthRequest } from "@/middlewares/auth.middleware";
+import rateLimit from "express-rate-limit";
+import { GuestCartRequest } from "@/middlewares/guest-cart.middleware";
 
 const cartRouter = Router();
 
 cartRouter.use(authGuard);
+
+// Combined type: either AuthRequest (user) or GuestCartRequest (guest)
+type RateLimitRequest = AuthRequest & GuestCartRequest;
+
+export const updateCartLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: (req: RateLimitRequest) => {
+    if (req.user) return 50;
+
+    if (req.guestCart) return 20;
+
+    return 10;
+  },
+  keyGenerator: (req: RateLimitRequest) => {
+    const key = req.user?.userId || req.guestCart?.token || req.ip;
+    return key ?? "unknown";
+  },
+  message: {
+    status: 429,
+    message: "Too many requests. Please slow down.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /**
  * @swagger
@@ -114,7 +140,11 @@ cartRouter.post("/", CartController.addToCart);
  *       404:
  *         description: Item not found
  */
-cartRouter.patch("/:cartItemId", CartController.updateCartItem);
+cartRouter.patch(
+  "/:cartItemId",
+  updateCartLimiter,
+  CartController.updateCartItem,
+);
 
 /**
  * @swagger

@@ -5,6 +5,7 @@ import { BadRequestError } from "@/libs/AppError";
 import { handleError } from "@/libs/misc";
 import { guestCartMiddleware } from "@/middlewares/guest-cart.middleware";
 import { guestCartToken } from "@/utils/misc";
+import { updateCartLimiter } from "../cart.route";
 
 const guestCartRouter = Router();
 guestCartRouter.use(guestCartMiddleware);
@@ -211,6 +212,93 @@ guestCartRouter.get(
     } catch (err) {
       handleError(res, err);
       next(err);
+    }
+  },
+);
+
+/**
+ * @swagger
+ * /guest-cart/items/{cartItemId}:
+ *   patch:
+ *     summary: Update guest cart item quantity (showing only the updated item)
+ *     tags: [GuestCart]
+ *     parameters:
+ *       - in: path
+ *         name: cartItemId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Guest cart item ID
+ *       - in: header
+ *         name: x-guest-token
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Guest cart token (can also be sent via cookie)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - quantity
+ *             properties:
+ *               quantity:
+ *                 type: integer
+ *                 example: 3
+ *     responses:
+ *       200:
+ *         description: Guest cart item updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 quantity:
+ *                   type: integer
+ *                 unitPrice:
+ *                   type: number
+ *                 totalPrice:
+ *                   type: number
+ *       404:
+ *         description: Item or cart not found
+ *       400:
+ *         description: Invalid request
+ */
+
+guestCartRouter.patch(
+  "/items/:cartItemId",
+  updateCartLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const { cartItemId } = req.params;
+      const { quantity } = req.body;
+
+      const token =
+        (req.headers["x-guest-token"] as string) ||
+        (req.cookies?.[guestCartToken] as string);
+
+      if (!token) {
+        throw new BadRequestError("Guest cart token is required");
+      }
+
+      const updatedItem = await GuestCartService.updateItem(
+        token,
+        cartItemId,
+        Number(quantity),
+      );
+
+      return ApiResponse.success(
+        res,
+        200,
+        "Guest cart item updated successfully",
+        updatedItem,
+      );
+    } catch (error) {
+      handleError(res, error);
     }
   },
 );
