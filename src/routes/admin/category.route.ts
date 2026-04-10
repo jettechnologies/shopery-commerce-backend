@@ -1,9 +1,13 @@
 import { Router } from "express";
 import { AdminCategoryController } from "@/controllers/admin/category.controller";
 import { authGuard, roleGuard } from "@/middlewares/auth.middleware";
+import {
+  handleMulterError,
+  uploadSingle,
+} from "@/middlewares/multer.middleware";
 
 const categoryRouter = Router();
-categoryRouter.use(authGuard);
+categoryRouter.use(authGuard, handleMulterError);
 
 /**
  * @swagger
@@ -17,14 +21,14 @@ categoryRouter.use(authGuard);
  * /admin/categories:
  *   post:
  *     summary: Create a new category
- *     description: Admin-only endpoint to create a new category.
+ *     description: Admin-only endpoint to create a new category with an optional image.
  *     tags: [Categories (Admin)]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -36,9 +40,42 @@ categoryRouter.use(authGuard);
  *               description:
  *                 type: string
  *                 example: "Fast 15W wireless charger for mobile devices"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Category image file
  *     responses:
  *       201:
  *         description: Category created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Category created successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "c1f1bcb3-7a8f-4c19-9b2c-03d2e4f26a4d"
+ *                     name:
+ *                       type: string
+ *                       example: "Wireless Charging Pad"
+ *                     slug:
+ *                       type: string
+ *                       example: "wireless-charging-pad"
+ *                     description:
+ *                       type: string
+ *                       example: "Fast 15W wireless charger for mobile devices"
+ *                     imageUrl:
+ *                       type: string
+ *                       example: "https://res.cloudinary.com/demo/image/upload/v123/category.jpg"
  *       400:
  *         description: Invalid request payload
  *       401:
@@ -47,6 +84,7 @@ categoryRouter.use(authGuard);
 categoryRouter.post(
   "/",
   roleGuard(["admin"]),
+  uploadSingle("image"),
   AdminCategoryController.createCategory,
 );
 
@@ -55,7 +93,7 @@ categoryRouter.post(
  * /admin/categories/{id}:
  *   patch:
  *     summary: Update an existing category
- *     description: Admin-only endpoint to update a category by its ID.
+ *     description: Admin-only endpoint to update a category by its ID, including optional image replacement.
  *     tags: [Categories (Admin)]
  *     security:
  *       - bearerAuth: []
@@ -67,9 +105,9 @@ categoryRouter.post(
  *         schema:
  *           type: string
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -79,9 +117,42 @@ categoryRouter.post(
  *               description:
  *                 type: string
  *                 example: "Updated description for this category"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: New category image (optional, replaces existing one)
  *     responses:
  *       200:
  *         description: Category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Category updated successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "c1f1bcb3-7a8f-4c19-9b2c-03d2e4f26a4d"
+ *                     name:
+ *                       type: string
+ *                       example: "Updated Category Name"
+ *                     slug:
+ *                       type: string
+ *                       example: "updated-category-name"
+ *                     description:
+ *                       type: string
+ *                       example: "Updated description for this category"
+ *                     imageUrl:
+ *                       type: string
+ *                       example: "https://res.cloudinary.com/demo/image/upload/v123/category.jpg"
  *       400:
  *         description: Invalid request payload
  *       401:
@@ -92,6 +163,7 @@ categoryRouter.post(
 categoryRouter.patch(
   "/:id",
   roleGuard(["admin"]),
+  uploadSingle("image"),
   AdminCategoryController.updateCategory,
 );
 

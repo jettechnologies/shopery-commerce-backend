@@ -6,8 +6,14 @@ export const CreateCategorySchema = z.object({
 });
 
 export const UpdateCategorySchema = z.object({
-  name: z.string().min(2, "Category name is required").optional(),
-  description: z.string().optional(),
+  name: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.string().min(2, "Category name is required").optional(),
+  ),
+  description: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.string().optional(),
+  ),
 });
 
 export type CreateCategorySchemaType = z.infer<typeof CreateCategorySchema>;

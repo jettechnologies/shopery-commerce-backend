@@ -101,6 +101,7 @@ model User {
   Order             Order[]
   likedComments     CommentLikes[]
   dislikedComments  CommentDislikes[]
+  userProfileImage  UserProfileImage?
 }
 
 model EmailVerification {
@@ -125,6 +126,18 @@ model Admin {
   createdAt DateTime   @default(now())
 }
 
+model UserProfileImage {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  imageUrl String
+  publicId String @map("public_id")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Address {
   id       BigInt   @id @default(autoincrement())
   user     User     @relation(fields: [userId], references: [id])
@@ -138,7 +151,7 @@ model Address {
   created  DateTime @default(now()) @map("created")
   modified DateTime @updatedAt @map("modified")
 
-  orders   Order[]
+  orders Order[]
 }
 
 model Product {
@@ -192,14 +205,14 @@ model ProductVariant {
 }
 
 model Coupon {
-  id              BigInt   @id @default(autoincrement())
-  code            String   @unique
-  discountPercent Float    @map("discount_percent")
-  isActive        Boolean  @default(true) @map("is_active")
+  id              BigInt    @id @default(autoincrement())
+  code            String    @unique
+  discountPercent Float     @map("discount_percent")
+  isActive        Boolean   @default(true) @map("is_active")
   expiresAt       DateTime? @map("expires_at")
-  createdAt       DateTime @default(now()) @map("created_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
-  orders          Order[]
+  orders Order[]
 }
 
 model Category {
@@ -210,7 +223,20 @@ model Category {
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
 
-  products ProductCategory[]
+  products      ProductCategory[]
+  categoryImage CategoryImage?
+}
+
+model CategoryImage {
+  id         BigInt   @id @default(autoincrement())
+  categoryId BigInt   @unique
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  imageUrl String
+  publicId String @map("public_id")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ProductCategory {
@@ -379,10 +405,10 @@ model Cart {
 }
 
 model CartItem {
-  id        BigInt   @id @default(autoincrement())
-  cart      Cart     @relation(fields: [cartId], references: [id])
+  id        BigInt  @id @default(autoincrement())
+  cart      Cart    @relation(fields: [cartId], references: [id])
   cartId    BigInt
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
   productId BigInt
 
   variant   ProductVariant? @relation(fields: [variantId], references: [id])
@@ -415,11 +441,11 @@ model GuestCartItem {
   product     Product   @relation(fields: [productId], references: [id])
   productId   BigInt
 
-  variant     ProductVariant? @relation(fields: [variantId], references: [id])
-  variantId   BigInt?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  variantId BigInt?
 
-  quantity    Int
-  unitPrice   Float     @map("unit_price")
+  quantity  Int
+  unitPrice Float @map("unit_price")
 }
 
 model Order {
@@ -434,10 +460,10 @@ model Order {
   guestCartId BigInt?
   guestCart   GuestCart? @relation(fields: [guestCartId], references: [id])
 
-  email      String
-  status     OrderStatus @default(pending)
-  total      Decimal
-  paymentId  String?
+  email     String
+  status    OrderStatus @default(pending)
+  total     Decimal
+  paymentId String?
 
   shippingAddressId BigInt?
   shippingAddress   Address? @relation(fields: [shippingAddressId], references: [id])

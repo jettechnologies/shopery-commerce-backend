@@ -57,11 +57,13 @@ export const ModelName = {
   User: 'User',
   EmailVerification: 'EmailVerification',
   Admin: 'Admin',
+  UserProfileImage: 'UserProfileImage',
   Address: 'Address',
   Product: 'Product',
   ProductVariant: 'ProductVariant',
   Coupon: 'Coupon',
   Category: 'Category',
+  CategoryImage: 'CategoryImage',
   ProductCategory: 'ProductCategory',
   Tag: 'Tag',
   ProductTag: 'ProductTag',
@@ -174,6 +176,18 @@ export const AdminScalarFieldEnum = {
 export type AdminScalarFieldEnum = (typeof AdminScalarFieldEnum)[keyof typeof AdminScalarFieldEnum]
 
 
+export const UserProfileImageScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  imageUrl: 'imageUrl',
+  publicId: 'publicId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserProfileImageScalarFieldEnum = (typeof UserProfileImageScalarFieldEnum)[keyof typeof UserProfileImageScalarFieldEnum]
+
+
 export const AddressScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -252,6 +266,18 @@ export const CategoryScalarFieldEnum = {
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
+export const CategoryImageScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  imageUrl: 'imageUrl',
+  publicId: 'publicId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryImageScalarFieldEnum = (typeof CategoryImageScalarFieldEnum)[keyof typeof CategoryImageScalarFieldEnum]
 
 
 export const ProductCategoryScalarFieldEnum = {

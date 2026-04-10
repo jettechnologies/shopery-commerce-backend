@@ -11,7 +11,8 @@ export class AdminCategoryController {
   static async createCategory(req: Request, res: Response) {
     try {
       const data = CreateCategorySchema.parse(req.body);
-      const category = await CategoryService.createCategory(data);
+      const file = req.file as Express.Multer.File;
+      const category = await CategoryService.createCategory(data, file);
       return ApiResponse.success(
         res,
         201,
@@ -27,7 +28,9 @@ export class AdminCategoryController {
     try {
       const { id } = req.params;
       const data = UpdateCategorySchema.parse(req.body);
-      const category = await CategoryService.updateCategory(id, data);
+      const file = req.file as Express.Multer.File;
+
+      const category = await CategoryService.updateCategory(id, data, file);
       return ApiResponse.success(
         res,
         200,

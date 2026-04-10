@@ -57,6 +57,49 @@ orderRouter.use(authGuard);
  *         email: "john.doe@maildrop.cc"
  *         total: 120.5
  *         paymentId: "pay_12345"
+ *     OrderHistory:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "1"
+ *         orderId:
+ *           type: string
+ *           example: "ORD-12345"
+ *         status:
+ *           type: string
+ *           example: "delivered"
+ *         totalAmount:
+ *           type: number
+ *           example: 250.5
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         user:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *               example: "john@example.com"
+ *             name:
+ *               type: string
+ *               example: "John Doe"
+ *
+ *     Pagination:
+ *       type: object
+ *       properties:
+ *         total:
+ *           type: integer
+ *           example: 100
+ *         totalPages:
+ *           type: integer
+ *           example: 10
+ *         currentPage:
+ *           type: integer
+ *           example: 1
+ *         limit:
+ *           type: integer
+ *           example: 10
  *
  * /orders/create:
  *   post:
@@ -142,11 +185,19 @@ orderRouter.post("/create", async (req: AuthRequest, res: Response) => {
  *       200:
  *         description: Order details
  */
- orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
+orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
   try {
     const order = await OrderService.getOrderById(req.params.id);
-    if (req.user?.role !== "admin" && order.userId !== BigInt(req.user!.userId)) {
-      return ApiResponse.error(res, 403, "Forbidden: you do not own this order", "Authorization Error");
+    if (
+      req.user?.role !== "admin" &&
+      order.userId !== BigInt(req.user!.userId)
+    ) {
+      return ApiResponse.error(
+        res,
+        403,
+        "Forbidden: you do not own this order",
+        "Authorization Error",
+      );
     }
     return ApiResponse.success(res, 200, "Order fetched successfully", order);
   } catch (err) {
@@ -175,7 +226,12 @@ orderRouter.post("/create", async (req: AuthRequest, res: Response) => {
 orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
   try {
     if (req.user?.role !== "admin" && req.user?.userId !== req.params.userId) {
-       return ApiResponse.error(res, 403, "Forbidden: cannot read another user's orders", "Authorization Error");
+      return ApiResponse.error(
+        res,
+        403,
+        "Forbidden: cannot read another user's orders",
+        "Authorization Error",
+      );
     }
     const orders = await OrderService.getOrdersByUser(req.params.userId);
     return ApiResponse.success(res, 200, "Orders fetched successfully", orders);
@@ -186,38 +242,112 @@ orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
 
 /**
  * @swagger
- * /orders/{id}/status:
- *   patch:
- *     summary: Update order status
+ * /orders/history:
+ *   get:
+ *     summary: Get all delivered orders - Paginated
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [pending, paid, failed, cancelled, shipped, delivered, refunded]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         required: false
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         required: false
+ *         description: Number of orders per page
  *     responses:
  *       200:
- *         description: Order status updated
+ *         description: Successfully fetched order history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Order history fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     orderHistory:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/OrderHistory'
+ *                     pagination:
+ *                       $ref: '#/components/schemas/Pagination'
+ *       403:
+ *         description: Forbidden - Admin access required
+ *       500:
+ *         description: Internal server error
  */
-orderRouter.patch("/:id/status", async (req: AuthRequest, res: Response) => {
+
+orderRouter.get("/history", async (req: AuthRequest, res: Response) => {
   try {
-    if (req.user?.role !== "admin") {
-      return ApiResponse.error(res, 403, "Forbidden: only admins can update order status", "Authorization Error");
-    }
-    const { status } = req.body;
-    const order = await OrderService.updateOrderStatus(req.params.id, status);
-    return ApiResponse.success(res, 200, "Order status updated", order);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const data = await OrderService.getOrderHistory(
+      page,
+      limit,
+      req.user?.userId!,
+    );
+
+    return ApiResponse.success(
+      res,
+      200,
+      "Order history fetched successfully",
+      data,
+    );
   } catch (err) {
     handleError(res, err);
   }
 });
+
+// /**
+//  * @swagger
+//  * /orders/{id}/status:
+//  *   patch:
+//  *     summary: Update order status
+//  *     tags: [Orders]
+//  *     security:
+//  *       - bearerAuth: []
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               status:
+//  *                 type: string
+//  *                 enum: [pending, paid, failed, cancelled, shipped, delivered, refunded]
+//  *     responses:
+//  *       200:
+//  *         description: Order status updated
+//  */
+// orderRouter.patch("/:id/status", async (req: AuthRequest, res: Response) => {
+//   try {
+//     if (req.user?.role !== "admin") {
+//       return ApiResponse.error(res, 403, "Forbidden: only admins can update order status", "Authorization Error");
+//     }
+//     const { status } = req.body;
+//     const order = await OrderService.updateOrderStatus(req.params.id, status);
+//     return ApiResponse.success(res, 200, "Order status updated", order);
+//   } catch (err) {
+//     handleError(res, err);
+//   }
+// });
 
 /**
  * @swagger
@@ -255,7 +385,12 @@ orderRouter.patch("/:id/address", async (req: AuthRequest, res: Response) => {
     const { addressId } = req.body;
     if (!addressId) throw new BadRequestError("addressId is required");
     const isAdmin = req.user?.role === "admin";
-    const order = await OrderService.updateOrderAddress(req.params.id, addressId, req.user!.userId, isAdmin);
+    const order = await OrderService.updateOrderAddress(
+      req.params.id,
+      addressId,
+      req.user!.userId,
+      isAdmin,
+    );
     return ApiResponse.success(res, 200, "Order address updated", order);
   } catch (err) {
     handleError(res, err);

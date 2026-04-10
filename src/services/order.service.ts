@@ -55,7 +55,9 @@ export class OrderService {
           email: parsedData.email,
           total: parsedData.total,
           paymentId: parsedData.paymentId ?? null,
-          shippingAddressId: parsedData.addressId ? BigInt(parsedData.addressId) : null,
+          shippingAddressId: parsedData.addressId
+            ? BigInt(parsedData.addressId)
+            : null,
           couponId: parsedData.couponId ?? null,
           status: OrderStatus.pending,
         },
@@ -84,7 +86,10 @@ export class OrderService {
     });
 
     const formattedItems = cartItems.map((item) => {
-      const unitPrice = Number(item.unitPrice ?? (item.variant ? (item.variant.salePrice ?? item.variant.price) : 0));
+      const unitPrice = Number(
+        item.unitPrice ??
+          (item.variant ? (item.variant.salePrice ?? item.variant.price) : 0),
+      );
       const quantity = item.quantity;
       const subtotal = unitPrice * quantity;
 
@@ -140,23 +145,32 @@ export class OrderService {
   }
 
   /** ✅ Update order shipping address */
-  static async updateOrderAddress(orderId: string, addressId: number, userId: string, isAdmin: boolean) {
+  static async updateOrderAddress(
+    orderId: string,
+    addressId: number,
+    userId: string,
+    isAdmin: boolean,
+  ) {
     const order = await prisma.order.findUnique({ where: { orderId } });
     if (!order) throw new NotFoundError("Order not found");
 
     if (!isAdmin && order.userId?.toString() !== userId) {
-      throw new BadRequestError("Forbidden: Cannot update address for an order you do not own");
+      throw new BadRequestError(
+        "Forbidden: Cannot update address for an order you do not own",
+      );
     }
 
     if (
       order.status === OrderStatus.shipped ||
       order.status === OrderStatus.delivered
     ) {
-      throw new BadRequestError("Cannot change address for shipped or delivered orders");
+      throw new BadRequestError(
+        "Cannot change address for shipped or delivered orders",
+      );
     }
 
     const address = await prisma.address.findUnique({
-      where: { id: BigInt(addressId) }
+      where: { id: BigInt(addressId) },
     });
 
     if (!address) throw new NotFoundError("Address not found");
@@ -194,32 +208,41 @@ export class OrderService {
     });
 
     // 🔥 AUTOMATION TRIGGER: Reduce variant inventory precisely upon shipping
-    if (previousStatus !== OrderStatus.shipped && status === OrderStatus.shipped) {
+    if (
+      previousStatus !== OrderStatus.shipped &&
+      status === OrderStatus.shipped
+    ) {
       await prisma.$transaction(async (tx) => {
         for (const item of orderItems) {
-           if (item.variantId) {
-             await tx.productVariant.update({
-               where: { id: item.variantId },
-               data: { stockQuantity: { decrement: item.quantity } }
-             });
+          if (item.variantId) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: { stockQuantity: { decrement: item.quantity } },
+            });
 
-             // Re-map active aggregate product stocks globally mapping from arrays
-             const allVariants = await tx.productVariant.findMany({
-                where: { productId: item.productId }
-             });
-             const totalStock = allVariants.reduce((sum, v) => sum + v.stockQuantity, 0);
+            // Re-map active aggregate product stocks globally mapping from arrays
+            const allVariants = await tx.productVariant.findMany({
+              where: { productId: item.productId },
+            });
+            const totalStock = allVariants.reduce(
+              (sum, v) => sum + v.stockQuantity,
+              0,
+            );
 
-             await tx.product.update({
-               where: { id: item.productId },
-               data: { stockQuantity: totalStock }
-             });
-           }
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stockQuantity: totalStock },
+            });
+          }
         }
       });
     }
 
     const formattedItems = orderItems.map((item) => {
-      const unitPrice = Number(item.unitPrice ?? (item.variant ? (item.variant.salePrice ?? item.variant.price) : 0));
+      const unitPrice = Number(
+        item.unitPrice ??
+          (item.variant ? (item.variant.salePrice ?? item.variant.price) : 0),
+      );
       const quantity = item.quantity;
       const subtotal = unitPrice * quantity;
 
@@ -273,7 +296,10 @@ export class OrderService {
     if (!order) throw new NotFoundError("Order not found");
 
     const formattedItems = orderItems.map((item) => {
-      const unitPrice = Number(item.unitPrice ?? (item.variant ? (item.variant.salePrice ?? item.variant.price) : 0));
+      const unitPrice = Number(
+        item.unitPrice ??
+          (item.variant ? (item.variant.salePrice ?? item.variant.price) : 0),
+      );
       const quantity = item.quantity;
       const subtotal = unitPrice * quantity;
 
@@ -316,6 +342,49 @@ export class OrderService {
 
     return {
       orders,
+      pagination: {
+        total,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
+  /** ✅ Get all orders (Admin - Paginated) */
+  static async getOrderHistory(
+    page: number = 1,
+    limit: number = 10,
+    userId: string,
+  ) {
+    const user = await prisma.user.findUnique({ where: { userId: userId } });
+    if (!user) throw new BadRequestError("Cant access orders for this user");
+
+    const skip = (page - 1) * limit;
+    const [orders, total] = await prisma.$transaction([
+      prisma.order.findMany({
+        where: {
+          userId: user.id,
+          status: OrderStatus.delivered,
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: { user: { select: { email: true, name: true } } },
+      }),
+      prisma.order.count({
+        where: {
+          status: OrderStatus.delivered,
+        },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    console.log(orders, "order history");
+
+    return {
+      orderHistory: orders,
       pagination: {
         total,
         totalPages,

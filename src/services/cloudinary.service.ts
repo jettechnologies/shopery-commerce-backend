@@ -15,7 +15,7 @@ export interface CloudinaryUploadResult {
  */
 export const uploadToCloudinary = async (
   filePath: string,
-  folder: "products" | "posts"
+  folder: "products" | "posts" | "profile" | "categories",
 ): Promise<CloudinaryUploadResult> => {
   try {
     const uniqueId = uuidv4();

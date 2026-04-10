@@ -390,11 +390,13 @@ export const ModelName = {
   User: 'User',
   EmailVerification: 'EmailVerification',
   Admin: 'Admin',
+  UserProfileImage: 'UserProfileImage',
   Address: 'Address',
   Product: 'Product',
   ProductVariant: 'ProductVariant',
   Coupon: 'Coupon',
   Category: 'Category',
+  CategoryImage: 'CategoryImage',
   ProductCategory: 'ProductCategory',
   Tag: 'Tag',
   ProductTag: 'ProductTag',
@@ -429,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "session" | "userSession" | "passwordReset" | "user" | "emailVerification" | "admin" | "address" | "product" | "productVariant" | "coupon" | "category" | "productCategory" | "tag" | "productTag" | "productImage" | "review" | "productComment" | "commentLikes" | "commentDislikes" | "post" | "postTag" | "postComment" | "wishlist" | "wishlistItem" | "cart" | "cartItem" | "guestCart" | "guestCartItem" | "order" | "orderItem"
+    modelProps: "session" | "userSession" | "passwordReset" | "user" | "emailVerification" | "admin" | "userProfileImage" | "address" | "product" | "productVariant" | "coupon" | "category" | "categoryImage" | "productCategory" | "tag" | "productTag" | "productImage" | "review" | "productComment" | "commentLikes" | "commentDislikes" | "post" | "postTag" | "postComment" | "wishlist" | "wishlistItem" | "cart" | "cartItem" | "guestCart" | "guestCartItem" | "order" | "orderItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -877,6 +879,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserProfileImage: {
+      payload: Prisma.$UserProfileImagePayload<ExtArgs>
+      fields: Prisma.UserProfileImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserProfileImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserProfileImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>
+        }
+        findFirst: {
+          args: Prisma.UserProfileImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserProfileImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>
+        }
+        findMany: {
+          args: Prisma.UserProfileImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>[]
+        }
+        create: {
+          args: Prisma.UserProfileImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>
+        }
+        createMany: {
+          args: Prisma.UserProfileImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserProfileImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>[]
+        }
+        delete: {
+          args: Prisma.UserProfileImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>
+        }
+        update: {
+          args: Prisma.UserProfileImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.UserProfileImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserProfileImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserProfileImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.UserProfileImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserProfileImagePayload>
+        }
+        aggregate: {
+          args: Prisma.UserProfileImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserProfileImage>
+        }
+        groupBy: {
+          args: Prisma.UserProfileImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserProfileImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserProfileImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserProfileImageCountAggregateOutputType> | number
+        }
+      }
+    }
     Address: {
       payload: Prisma.$AddressPayload<ExtArgs>
       fields: Prisma.AddressFieldRefs
@@ -1244,6 +1320,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CategoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    CategoryImage: {
+      payload: Prisma.$CategoryImagePayload<ExtArgs>
+      fields: Prisma.CategoryImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CategoryImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CategoryImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>
+        }
+        findFirst: {
+          args: Prisma.CategoryImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CategoryImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>
+        }
+        findMany: {
+          args: Prisma.CategoryImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>[]
+        }
+        create: {
+          args: Prisma.CategoryImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>
+        }
+        createMany: {
+          args: Prisma.CategoryImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CategoryImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>[]
+        }
+        delete: {
+          args: Prisma.CategoryImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>
+        }
+        update: {
+          args: Prisma.CategoryImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.CategoryImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CategoryImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CategoryImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.CategoryImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryImagePayload>
+        }
+        aggregate: {
+          args: Prisma.CategoryImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCategoryImage>
+        }
+        groupBy: {
+          args: Prisma.CategoryImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CategoryImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryImageCountAggregateOutputType> | number
         }
       }
     }
@@ -2767,6 +2917,18 @@ export const AdminScalarFieldEnum = {
 export type AdminScalarFieldEnum = (typeof AdminScalarFieldEnum)[keyof typeof AdminScalarFieldEnum]
 
 
+export const UserProfileImageScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  imageUrl: 'imageUrl',
+  publicId: 'publicId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserProfileImageScalarFieldEnum = (typeof UserProfileImageScalarFieldEnum)[keyof typeof UserProfileImageScalarFieldEnum]
+
+
 export const AddressScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2845,6 +3007,18 @@ export const CategoryScalarFieldEnum = {
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
+export const CategoryImageScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  imageUrl: 'imageUrl',
+  publicId: 'publicId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryImageScalarFieldEnum = (typeof CategoryImageScalarFieldEnum)[keyof typeof CategoryImageScalarFieldEnum]
 
 
 export const ProductCategoryScalarFieldEnum = {
@@ -3382,11 +3556,13 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   emailVerification?: Prisma.EmailVerificationOmit
   admin?: Prisma.AdminOmit
+  userProfileImage?: Prisma.UserProfileImageOmit
   address?: Prisma.AddressOmit
   product?: Prisma.ProductOmit
   productVariant?: Prisma.ProductVariantOmit
   coupon?: Prisma.CouponOmit
   category?: Prisma.CategoryOmit
+  categoryImage?: Prisma.CategoryImageOmit
   productCategory?: Prisma.ProductCategoryOmit
   tag?: Prisma.TagOmit
   productTag?: Prisma.ProductTagOmit

@@ -6,24 +6,61 @@ import {
 } from "@/schema/zod-schema/category.schema";
 import { ConflictError, NotFoundError } from "@/libs/AppError";
 import { SortOrder } from "@/utils/types";
+import { deleteFromCloudinary, uploadToCloudinary } from "./cloudinary.service";
 
 export class CategoryService {
   /**
    * Create a new category
    */
-  static async createCategory(data: CreateCategorySchemaType) {
+  // static async createCategory(data: CreateCategorySchemaType) {
+  //   const slug = slugify(data.name, { lower: true, strict: true });
+
+  //   const existing = await prisma.category.findUnique({ where: { slug } });
+  //   if (existing)
+  //     throw new ConflictError("A category with this name already exists");
+
+  //   const category = await prisma.category.create({
+  //     data: {
+  //       name: data.name,
+  //       slug,
+  //       description: data.description,
+  //     },
+  //   });
+
+  //   return category;
+  // }
+
+  static async createCategory(
+    data: CreateCategorySchemaType,
+    file?: Express.Multer.File,
+  ) {
     const slug = slugify(data.name, { lower: true, strict: true });
 
     const existing = await prisma.category.findUnique({ where: { slug } });
-    if (existing)
-      throw new ConflictError("A category with this name already exists");
+    if (existing) throw new ConflictError("Category already exists");
 
-    const category = await prisma.category.create({
+    let imageData = null;
+
+    if (file) {
+      const uploaded = await uploadToCloudinary(file.path, "categories");
+      imageData = {
+        imageUrl: uploaded.url,
+        publicId: uploaded.public_id,
+      };
+    }
+
+    const category = prisma.category.create({
       data: {
         name: data.name,
         slug,
         description: data.description,
+        categoryImage: imageData
+          ? {
+              create: imageData,
+            }
+          : undefined,
       },
+      include: { categoryImage: true },
     });
 
     return category;
@@ -32,26 +69,75 @@ export class CategoryService {
   /**
    * Update an existing category
    */
-  static async updateCategory(id: string, data: UpdateCategorySchemaType) {
+  // static async updateCategory(id: string, data: UpdateCategorySchemaType) {
+  //   const existing = await prisma.category.findUnique({
+  //     where: { categoryId: id },
+  //   });
+  //   if (!existing) throw new NotFoundError("Category not found");
+
+  //   const updatedSlug = data.name
+  //     ? slugify(data.name, { lower: true, strict: true })
+  //     : existing.slug;
+
+  //   const updated = await prisma.category.update({
+  //     where: { categoryId: id },
+  //     data: {
+  //       name: data.name ?? existing.name,
+  //       slug: updatedSlug,
+  //       description: data.description ?? existing.description,
+  //     },
+  //   });
+
+  //   return updated;
+  // }
+
+  static async updateCategory(
+    id: string,
+    data: UpdateCategorySchemaType,
+    file?: Express.Multer.File,
+  ) {
     const existing = await prisma.category.findUnique({
       where: { categoryId: id },
+      include: { categoryImage: true },
     });
+
     if (!existing) throw new NotFoundError("Category not found");
 
-    const updatedSlug = data.name
-      ? slugify(data.name, { lower: true, strict: true })
-      : existing.slug;
+    let imageUpdate = undefined;
 
-    const updated = await prisma.category.update({
+    if (file) {
+      const uploaded = await uploadToCloudinary(file.path, "categories");
+
+      if (existing.categoryImage) {
+        await deleteFromCloudinary(existing.categoryImage.publicId);
+
+        imageUpdate = {
+          update: {
+            imageUrl: uploaded.url,
+            publicId: uploaded.public_id,
+          },
+        };
+      } else {
+        imageUpdate = {
+          create: {
+            imageUrl: uploaded.url,
+            publicId: uploaded.public_id,
+          },
+        };
+      }
+    }
+
+    const updatedCategory = prisma.category.update({
       where: { categoryId: id },
       data: {
         name: data.name ?? existing.name,
-        slug: updatedSlug,
         description: data.description ?? existing.description,
+        categoryImage: imageUpdate,
       },
+      include: { categoryImage: true },
     });
 
-    return updated;
+    return updatedCategory;
   }
 
   /**
@@ -93,6 +179,7 @@ export class CategoryService {
             },
             select: { id: true },
           },
+          categoryImage: true,
         },
       }),
       prisma.category.count(),
@@ -198,6 +285,7 @@ export class CategoryService {
           },
           select: { id: true },
         },
+        categoryImage: true,
       },
     });
 
@@ -281,6 +369,9 @@ export class CategoryService {
 
     const category = await prisma.category.findUnique({
       where: { categoryId: id },
+      include: {
+        categoryImage: true,
+      },
     });
 
     if (!category) throw new NotFoundError("Category not found");

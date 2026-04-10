@@ -48,6 +48,11 @@ export type EmailVerification = Prisma.EmailVerificationModel
  */
 export type Admin = Prisma.AdminModel
 /**
+ * Model UserProfileImage
+ * 
+ */
+export type UserProfileImage = Prisma.UserProfileImageModel
+/**
  * Model Address
  * 
  */
@@ -72,6 +77,11 @@ export type Coupon = Prisma.CouponModel
  * 
  */
 export type Category = Prisma.CategoryModel
+/**
+ * Model CategoryImage
+ * 
+ */
+export type CategoryImage = Prisma.CategoryImageModel
 /**
  * Model ProductCategory
  * 

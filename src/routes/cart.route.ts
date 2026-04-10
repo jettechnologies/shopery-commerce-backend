@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { CartController } from "@/controllers/cart.controller";
 import { authGuard, AuthRequest } from "@/middlewares/auth.middleware";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { GuestCartRequest } from "@/middlewares/guest-cart.middleware";
 
 const cartRouter = Router();
@@ -11,23 +11,47 @@ cartRouter.use(authGuard);
 // Combined type: either AuthRequest (user) or GuestCartRequest (guest)
 type RateLimitRequest = AuthRequest & GuestCartRequest;
 
+// export const updateCartLimiter = rateLimit({
+//   windowMs: 60 * 1000, // 1 minute
+//   max: (req: RateLimitRequest) => {
+//     if (req.user) return 50;
+
+//     if (req.guestCart) return 20;
+
+//     return 10;
+//   },
+//   keyGenerator: (req: RateLimitRequest) => {
+//     const key = req.user?.userId || req.guestCart?.token || req.ip;
+//     return key ?? "unknown";
+//   },
+//   message: {
+//     status: 429,
+//     message: "Too many requests. Please slow down.",
+//   },
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
+
 export const updateCartLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
+
   max: (req: RateLimitRequest) => {
     if (req.user) return 50;
-
     if (req.guestCart) return 20;
-
     return 10;
   },
+
   keyGenerator: (req: RateLimitRequest) => {
-    const key = req.user?.userId || req.guestCart?.token || req.ip;
-    return key ?? "unknown";
+    if (req.user) return `user-${req.user.userId}`;
+    if (req.guestCart) return `guest-${req.guestCart.token}`;
+    return `ip-${ipKeyGenerator(req.ip!)}`;
   },
+
   message: {
     status: 429,
     message: "Too many requests. Please slow down.",
   },
+
   standardHeaders: true,
   legacyHeaders: false,
 });

@@ -23,7 +23,8 @@ export class ProfileService {
         carts: {
           include: { items: { include: { product: true } } },
         },
-        Session: true,
+        Order: true,
+        userProfileImage: true,
       },
     });
 
