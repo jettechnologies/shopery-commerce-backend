@@ -76,11 +76,7 @@ export const searchLimiter = rateLimit({
  *       200:
  *         description: Search results
  */
-publicSearchRouter.get(
-  "/search",
-  searchLimiter,
-  ProductSearchController.search,
-);
+publicSearchRouter.get("/", searchLimiter, ProductSearchController.search);
 
 /**
  * @swagger
@@ -101,7 +97,7 @@ publicSearchRouter.get(
  *         description: Autocomplete results
  */
 publicSearchRouter.get(
-  "/search/autocomplete",
+  "/autocomplete",
   searchLimiter,
   ProductSearchController.autocomplete,
 );
