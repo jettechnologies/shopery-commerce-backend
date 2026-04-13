@@ -1,6 +1,12 @@
 import express from "express";
 import { PublicProductController } from "@/controllers/customer";
-import { authGuard, roleGuard } from "@/middlewares/auth.middleware";
+import {
+  authGuard,
+  AuthRequest,
+  roleGuard,
+} from "@/middlewares/auth.middleware";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import { GuestCartRequest } from "@/middlewares/guest-cart.middleware";
 
 const publicProductRouter = express.Router();
 
@@ -197,6 +203,18 @@ publicProductRouter.get(
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The current page number for pagination.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of products per page.
+ *       - in: query
  *         name: category
  *         schema:
  *           type: string
@@ -261,6 +279,34 @@ publicProductRouter.get("/filter", PublicProductController.getFilteredProducts);
  *         name: category
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum product price.
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum product price.
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of tags to filter products.
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [price, rating, createdAt]
+ *           default: createdAt
+ *         description: The field to sort products by.
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
  *         description: Category to filter products by.
  *     responses:
  *       200:

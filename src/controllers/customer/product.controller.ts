@@ -99,9 +99,9 @@ export class PublicProductController {
         limit: Number(limit) || 10,
         categorySlug: categorySlug as string,
         tagSlug: tagSlug as string,
-        minPrice: Number(minPrice),
-        maxPrice: Number(maxPrice),
-        minRating: Number(minRating),
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+        minRating: minRating ? Number(minRating) : undefined,
         sortBy: sortBy as any,
       });
 
@@ -134,9 +134,9 @@ export class PublicProductController {
         cursor: cursor as string,
         categorySlug: categorySlug as string,
         tagSlug: tagSlug as string,
-        minPrice: Number(minPrice),
-        maxPrice: Number(maxPrice),
-        minRating: Number(minRating),
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+        minRating: minRating ? Number(minRating) : undefined,
         sortBy: sortBy as any,
       });
 

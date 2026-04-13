@@ -14,13 +14,6 @@ profileRouter.use(authGuard, handleMulterError);
 
 /**
  * @swagger
- * tags:
- *   name: Categories (Admin)
- *   description: Category management routes for administrators
- */
-
-/**
- * @swagger
  * components:
  *   schemas:
  *     ProfileImage:

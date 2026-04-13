@@ -20,7 +20,7 @@ export const CreateProductSchema = z.object({
         price: z.number().positive("Variant price must be strictly positive"),
         salePrice: z.number().optional(),
         isActive: z.boolean().default(true),
-      })
+      }),
     )
     .optional(),
   images: z
@@ -35,7 +35,22 @@ export const CreateProductSchema = z.object({
     .optional(),
 });
 
+export const SearchQuerySchema = z.object({
+  search: z
+    .string()
+    .min(1, "Search query is required")
+    .max(100, "Query too long")
+    .regex(/^[a-zA-Z0-9\s\-_,.]+$/, "Invalid characters in search query"),
+
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(50).default(10),
+
+  minPrice: z.coerce.number().optional(),
+  maxPrice: z.coerce.number().optional(),
+});
+
 export const UpdateProductSchema = CreateProductSchema.partial();
 
 export type CreateProductSchemaType = z.infer<typeof CreateProductSchema>;
 export type UpdateProductSchemaType = z.infer<typeof UpdateProductSchema>;
+export type SearchQueryType = z.infer<typeof SearchQuerySchema>;

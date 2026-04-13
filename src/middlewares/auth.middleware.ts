@@ -92,6 +92,45 @@ export async function authGuard(
   }
 }
 
+export async function optionalAuthGuard(
+  req: AuthRequest,
+  _res: Response,
+  next: NextFunction,
+) {
+  try {
+    const authHeader = req.headers["authorization"];
+
+    // ✅ No header → just continue (guest)
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return next();
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = verifyAccessToken(token);
+
+    if (!decoded) return next();
+
+    const session = await prisma.userSession.findUnique({
+      where: { sessionId: decoded.sessionId },
+    });
+
+    if (!session || session.revoked || session.expiresAt < new Date()) {
+      return next();
+    }
+
+    req.user = {
+      userId: decoded.userId,
+      role: decoded.role,
+      email: decoded.email,
+      sessionId: decoded.sessionId,
+    };
+
+    next();
+  } catch {
+    next();
+  }
+}
+
 // Role-based + ownership guard
 export function roleGuard(roles: string[]) {
   return (req: AuthRequest, _res: Response, next: NextFunction) => {

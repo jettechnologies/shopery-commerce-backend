@@ -12,6 +12,7 @@ import cartRouter from "./cart.route.js";
 import wishlistRouter from "./wishlist.route.js";
 import productCommentRouter from "./product.comment.route.js";
 import reviewRouter from "./review.route.js";
+import publicSearchRouter from "./product/productSearch.route.js";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.use("/checkout", checkoutRouter);
 router.use("/categories", categoryRouter);
 router.use("/guest-cart", guestCartRouter);
 router.use("/products", publicProductRouter);
+router.use("/product-search", publicSearchRouter);
 router.use("/orders", orderRouter);
 router.use("/tags", tagRouter);
 router.use("/cart", cartRouter);
