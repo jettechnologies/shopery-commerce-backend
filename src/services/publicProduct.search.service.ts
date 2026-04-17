@@ -35,40 +35,91 @@ export class ProductSearchService {
     const { search: q, page = 1, limit = 10 } = params;
     const offset = (page - 1) * limit;
 
+    // const [products, totalResult] = await prisma.$transaction([
+    //   prisma.$queryRaw`
+    //   SELECT
+    //    p.id,
+    //    p."productId",
+    //    p.name,
+    //    p.slug,
+    //    p."min_price" as minPrice,
+    //    p."max_price" as maxPrice,
+    //    p."stock_quantity",
+    //    p."average_rating",
+    //    p."review_count",
+    //    p."is_active",
+    //    p."created_at",
+    //    p."updated_at",
+    //     ts_rank(p.search_vector, plainto_tsquery('english', ${q})) AS rank
+    //   FROM "Product" p
+    //   WHERE
+    //     p."is_active" = true
+    //     AND p.search_vector @@ plainto_tsquery('english', ${q})
+    //   ORDER BY rank DESC
+    //   LIMIT ${limit}
+    //   OFFSET ${offset}
+    // `,
+    //   prisma.$queryRaw`
+    //   SELECT COUNT(*)::int AS total
+    //   FROM "Product" p
+    //   WHERE
+    //     p."is_active" = true
+    //     AND p.search_vector @@ plainto_tsquery('english', ${q})
+    // `,
+    // ]);
+
     const [products, totalResult] = await prisma.$transaction([
       prisma.$queryRaw`
-      SELECT 
-       p.id,
-       p."productId",
-       p.name,
-       p.slug,
-       p."min_price",
-       p."max_price",
-       p."stock_quantity",
-       p."average_rating",
-       p."review_count",
-       p."is_active",
-       p."created_at",
-       p."updated_at",
-        ts_rank(p.search_vector, plainto_tsquery('english', ${q})) AS rank
-      FROM "Product" p
-      WHERE 
-        p."is_active" = true
-        AND p.search_vector @@ plainto_tsquery('english', ${q})
-      ORDER BY rank DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `,
-      prisma.$queryRaw`
-      SELECT COUNT(*)::int AS total
-      FROM "Product" p
-      WHERE 
-        p."is_active" = true
-        AND p.search_vector @@ plainto_tsquery('english', ${q})
-    `,
-    ]);
+    SELECT 
+      p.id,
+      p."productId",
+      p.name,
+      p.slug,
+      p."min_price" as "minPrice",
+      p."max_price" as "maxPrice",
+      p."stock_quantity" as "stockQuantity",
+      p."average_rating" as "averageRating",
+      p."review_count" as "reviewCount",
+      p."is_active" as "isActive",
+      p."created_at" as "createdAt",
+      p."updated_at" as "updatedAt",
 
-    console.log(totalResult, "totalResult");
+      -- 🔥 aggregate images
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'id', pi.id,
+            'url', pi.url,
+            'alt', pi.alt
+          )
+        ) FILTER (WHERE pi.id IS NOT NULL),
+        '[]'
+      ) AS images,
+
+      ts_rank(p.search_vector, plainto_tsquery('english', ${q})) AS rank
+
+    FROM "Product" p
+    LEFT JOIN "ProductImage" pi ON pi."productId" = p.id
+
+    WHERE 
+      p."is_active" = true
+      AND p.search_vector @@ plainto_tsquery('english', ${q})
+
+    GROUP BY p.id
+
+    ORDER BY rank DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `,
+
+      prisma.$queryRaw`
+    SELECT COUNT(*)::int AS total
+    FROM "Product" p
+    WHERE 
+      p."is_active" = true
+      AND p.search_vector @@ plainto_tsquery('english', ${q})
+  `,
+    ]);
 
     const total = (totalResult as any)[0]?.total || 0;
     const totalPages = Math.ceil(total / limit);
