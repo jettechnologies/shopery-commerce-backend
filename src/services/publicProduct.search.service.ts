@@ -89,8 +89,8 @@ export class ProductSearchService {
         json_agg(
           json_build_object(
             'id', pi.id,
-            'url', pi.url,
-            'alt', pi.alt
+            'url', pi."image_url",
+            'alt', pi."alt_text"
           )
         ) FILTER (WHERE pi.id IS NOT NULL),
         '[]'
