@@ -35,6 +35,8 @@ export class ProductSearchService {
     const { search: q, page = 1, limit = 10 } = params;
     const offset = (page - 1) * limit;
 
+    console.log(q, "search");
+
     // const [products, totalResult] = await prisma.$transaction([
     //   prisma.$queryRaw`
     //   SELECT
@@ -84,7 +86,6 @@ export class ProductSearchService {
       p."created_at" as "createdAt",
       p."updated_at" as "updatedAt",
 
-      -- 🔥 aggregate images
       COALESCE(
         json_agg(
           json_build_object(
