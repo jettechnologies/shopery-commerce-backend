@@ -131,17 +131,40 @@ export class OrderService {
   }
 
   /** ✅ Get all orders for a user */
-  static async getOrdersByUser(userId: string) {
+  static async getOrdersByUser(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
     const user = await prisma.user.findUnique({ where: { userId } });
     if (!user) throw new NotFoundError("User not found");
 
-    const orders = await prisma.order.findMany({
-      where: { userId: user.id },
-      include: { OrderItems: true },
-      orderBy: { createdAt: "desc" },
-    });
+    const skip = (page - 1) * limit;
 
-    return orders;
+    const [orders, total] = await prisma.$transaction([
+      prisma.order.findMany({
+        where: { userId: user.id },
+        include: { OrderItems: true },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.order.count({
+        where: { userId: user.id },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      orders,
+      pagination: {
+        total,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+    };
   }
 
   /** ✅ Update order shipping address */
@@ -380,8 +403,6 @@ export class OrderService {
     ]);
 
     const totalPages = Math.ceil(total / limit);
-
-    console.log(orders, "order history");
 
     return {
       orderHistory: orders,

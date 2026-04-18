@@ -20,43 +20,80 @@ orderRouter.use(authGuard);
  * @swagger
  * components:
  *   schemas:
- *     CreateOrder:
+ *
+ *     OrderItem:
  *       type: object
- *       required:
- *         - email
- *         - total
  *       properties:
- *         userId:
+ *         id:
  *           type: string
- *           format: uuid
- *           description: Optional ID of the logged-in user
- *         cartId:
+ *           description: OrderItem ID (BigInt serialized as string)
+ *           example: "123"
+ *         orderId:
  *           type: string
- *           format: int64
- *           description: Optional ID of the user's cart
- *         guestCartId:
+ *           example: "456"
+ *         productId:
  *           type: string
- *           format: int64
- *           description: Optional ID of the guest cart
- *         email:
- *           type: string
- *           format: email
- *           description: Email address to send the order confirmation
- *         total:
- *           type: number
- *           format: float
- *           description: Total amount for the order
- *         paymentId:
+ *           example: "789"
+ *         variantId:
  *           type: string
  *           nullable: true
- *           description: Optional payment provider ID
- *       example:
- *         userId: "09f3ef2a-2030-409c-9f2a-4c1f61daa9c7"
- *         cartId: "1"
- *         guestCartId: null
- *         email: "john.doe@maildrop.cc"
- *         total: 120.5
- *         paymentId: "pay_12345"
+ *           example: "1011"
+ *         quantity:
+ *           type: integer
+ *           example: 2
+ *         unitPrice:
+ *           type: string
+ *           description: Decimal serialized as string
+ *           example: "49.99"
+ *         product:
+ *           type: object
+ *           properties:
+ *             productId:
+ *               type: string
+ *             name:
+ *               type: string
+ *             slug:
+ *               type: string
+ *         variant:
+ *           type: object
+ *           nullable: true
+ *           properties:
+ *             id:
+ *               type: string
+ *             size:
+ *               type: string
+ *             color:
+ *               type: array
+ *               items:
+ *                 type: string
+ *             price:
+ *               type: number
+ *             salePrice:
+ *               type: number
+ *               nullable: true
+ *
+ *     Order:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         userId:
+ *           type: string
+ *         status:
+ *           type: string
+ *           example: delivered
+ *         total:
+ *           type: string
+ *           description: Decimal serialized as string
+ *           example: "250.50"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         OrderItems:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/OrderItem'
+ *
  *     OrderHistory:
  *       type: object
  *       properties:
@@ -69,9 +106,9 @@ orderRouter.use(authGuard);
  *         status:
  *           type: string
  *           example: "delivered"
- *         totalAmount:
- *           type: number
- *           example: 250.5
+ *         total:
+ *           type: string
+ *           example: "250.50"
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -101,71 +138,25 @@ orderRouter.use(authGuard);
  *           type: integer
  *           example: 10
  *
- * /orders/create:
- *   post:
- *     summary: Create a new order
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CreateOrder'
- *     responses:
- *       201:
- *         description: Order created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   description: Order ID
- *                 userId:
- *                   type: string
- *                   nullable: true
- *                 cartId:
- *                   type: string
- *                   nullable: true
- *                 guestCartId:
- *                   type: string
- *                   nullable: true
- *                 email:
- *                   type: string
- *                 total:
- *                   type: number
- *                 paymentId:
- *                   type: string
- *                   nullable: true
- *                 status:
- *                   type: string
- *                   enum: [pending, paid, failed, cancelled, shipped, delivered, refunded]
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                 updatedAt:
- *                   type: string
- *                   format: date-time
+ *     OrdersResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: Orders fetched successfully
+ *         data:
+ *           type: object
+ *           properties:
+ *             orders:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ *             pagination:
+ *               $ref: '#/components/schemas/Pagination'
  */
-
-orderRouter.post("/create", async (req: AuthRequest, res: Response) => {
-  try {
-    const payload = {
-      ...req.body,
-      userId: req.user?.userId ?? req.body.userId,
-      email: req.user?.email ?? req.body.email,
-    };
-
-    const order = await OrderService.createOrder(payload);
-    res.clearCookie(guestCartToken, { httpOnly: true, sameSite: "lax" });
-    return ApiResponse.success(res, 201, "Order created successfully", order);
-  } catch (err) {
-    handleError(res, err);
-  }
-});
 
 /**
  * @swagger
@@ -209,7 +200,8 @@ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
  * @swagger
  * /orders/user/{userId}:
  *   get:
- *     summary: Get all orders for a specific user
+ *     summary: Get paginated orders for a user
+ *     description: Returns a paginated list of orders for a user. Only the user or an admin can access.
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
@@ -217,11 +209,39 @@ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
  *       - name: userId
  *         in: path
  *         required: true
+ *         description: User ID
  *         schema:
  *           type: string
+ *
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: Page number (default is 1)
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: Number of records per page (default is 10)
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *
  *     responses:
  *       200:
- *         description: List of orders
+ *         description: Orders fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OrdersResponse'
+ *
+ *       403:
+ *         description: Forbidden - cannot access another user's orders
+ *
+ *       404:
+ *         description: User not found
  */
 orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
   try {
@@ -233,7 +253,16 @@ orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
         "Authorization Error",
       );
     }
-    const orders = await OrderService.getOrdersByUser(req.params.userId);
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const orders = await OrderService.getOrdersByUser(
+      req.params.userId,
+      page,
+      limit,
+    );
+
     return ApiResponse.success(res, 200, "Orders fetched successfully", orders);
   } catch (err) {
     handleError(res, err);
