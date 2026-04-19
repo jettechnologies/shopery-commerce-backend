@@ -24,6 +24,23 @@ const AddressSchema = z.object({
   country: z.string().min(2, "Country is required"),
 });
 
+export const changePasswordSchema = z
+  .object({
+    oldPassword: z
+      .string()
+      .min(6, "Old password must be at least 6 characters"),
+
+    newPassword: z
+      .string()
+      .min(8, "New password must be at least 8 characters"),
+  })
+  .refine((data) => data.oldPassword !== data.newPassword, {
+    message: "New password must be different from old password",
+    path: ["newPassword"],
+  });
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
 // Address update schema (all optional fields)
 export const UpdateAddressSchema = AddressSchema.partial();
 export const CreateAddressSchema = AddressSchema;

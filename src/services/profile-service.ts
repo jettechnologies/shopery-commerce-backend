@@ -1,5 +1,10 @@
 // services/profile.service.ts
-import { NotFoundError, BadRequestError, ConflictError } from "@/libs/AppError";
+import {
+  NotFoundError,
+  BadRequestError,
+  ConflictError,
+  UnauthorizedError,
+} from "@/libs/AppError";
 import {
   UpdateAddressSchema,
   CreateAddressSchema,
@@ -7,8 +12,10 @@ import {
   type UpdateAddressSchemaType,
   type UpdateProfileSchemaType,
   type CreateAddressSchemaType,
+  ChangePasswordInput,
 } from "@/schema/zod-schema/profile.schema";
 import { prisma } from "@/prisma/client.js";
+import { bcryptCompare, bcryptHash } from "@/libs/password-hash-verify";
 
 export class ProfileService {
   // Get a user profile by uuid (include relations)
@@ -97,5 +104,46 @@ export class ProfileService {
       where: { userId },
       data: { isActive: false },
     });
+  }
+
+  // changing password and then logout the user out of all active sessions
+  static async changePassword(userId: string, data: ChangePasswordInput) {
+    const user = await prisma.user.findUnique({
+      where: { userId },
+    });
+
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedError("Invalid credentials");
+    }
+
+    const isValid = await bcryptCompare(data.oldPassword, user.passwordHash);
+
+    if (!isValid) {
+      throw new UnauthorizedError("Old password is incorrect");
+    }
+
+    const newHash = await bcryptHash(data.newPassword);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash: newHash },
+      }),
+
+      // revoke all active sessions
+      prisma.userSession.updateMany({
+        where: {
+          userId: user.id,
+          revoked: false,
+        },
+        data: {
+          revoked: true,
+        },
+      }),
+    ]);
+
+    return {
+      message: "Password changed successfully. Please log in again.",
+    };
   }
 }

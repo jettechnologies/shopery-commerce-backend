@@ -6,6 +6,7 @@ import { authGuard, AuthRequest } from "@/middlewares/auth.middleware";
 import { handleError } from "@/libs/misc";
 import { ProfileImageService } from "@/services/profile-image-service";
 import { uploadSingle } from "@/middlewares/multer.middleware";
+import { changePasswordSchema } from "@/schema/zod-schema";
 
 const profileRouter = Router();
 profileRouter.use(authGuard);
@@ -68,6 +69,19 @@ profileRouter.use(authGuard);
  *         publicId:
  *           type: string
  *           example: "profile/abc123"
+ *
+ *     ChangePassword:
+ *       type: object
+ *       required:
+ *         - oldPassword
+ *         - newPassword
+ *       properties:
+ *         oldPassword:
+ *           type: string
+ *           example: "oldPassword123"
+ *         newPassword:
+ *           type: string
+ *           example: "newSecurePassword456"
  */
 
 /**
@@ -364,6 +378,55 @@ profileRouter.delete("/image/delete", async (req: AuthRequest, res) => {
     const userId = req.user.userId;
 
     const result = await ProfileImageService.deleteProfileImage(userId);
+
+    return ApiResponse.success(res, 200, result.message);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+/**
+ * @swagger
+ * /profile/change-password:
+ *   patch:
+ *     summary: Change user password
+ *     description: Allows an authenticated user to change their password using their current password.
+ *     tags: [Profile]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChangePassword'
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Password changed successfully. Please log in again.
+ *       401:
+ *         description: Unauthorized or invalid credentials
+ */
+
+profileRouter.patch("/change-password", async (req: AuthRequest, res) => {
+  try {
+    if (!req.user) {
+      throw new UnauthorizedError("User not authenticated");
+    }
+
+    const parsed = changePasswordSchema.parse(req.body);
+
+    const result = await ProfileService.changePassword(req.user.userId, parsed);
 
     return ApiResponse.success(res, 200, result.message);
   } catch (err) {
