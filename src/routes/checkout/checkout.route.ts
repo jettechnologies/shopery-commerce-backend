@@ -64,7 +64,6 @@ checkoutRouter.post(
     try {
       let cart: any;
 
-      // ✅ 1. Identify checkout source (registered or guest)
       if (req.user) {
         const user = await prisma.user.findUnique({
           where: { userId: req.user.userId },
@@ -101,10 +100,14 @@ checkoutRouter.post(
       let couponId: bigint | null = null;
       if (req.body.couponCode) {
         const coupon = await prisma.coupon.findUnique({
-          where: { code: req.body.couponCode }
+          where: { code: req.body.couponCode },
         });
-        if (coupon && coupon.isActive && (!coupon.expiresAt || coupon.expiresAt > new Date())) {
-          total = total - (total * (coupon.discountPercent / 100)); // Apply % discount
+        if (
+          coupon &&
+          coupon.isActive &&
+          (!coupon.expiresAt || coupon.expiresAt > new Date())
+        ) {
+          total = total - total * (coupon.discountPercent / 100); // Apply % discount
           couponId = coupon.id;
         } else {
           throw new BadRequestError("Invalid or expired coupon code");
