@@ -70,6 +70,7 @@ export class OrderService {
             productId: item.productId,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
+            variantId: item.variantId,
           },
         });
       }
@@ -408,7 +409,20 @@ export class OrderService {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: { user: { select: { email: true, name: true } } },
+        include: {
+          user: { select: { email: true, name: true } },
+          OrderItems: {
+            include: {
+              product: {
+                include: {
+                  images: { where: { isPrimary: true } },
+                  categories: true,
+                },
+              },
+              variant: true,
+            },
+          },
+        },
       }),
       prisma.order.count({
         where: {
