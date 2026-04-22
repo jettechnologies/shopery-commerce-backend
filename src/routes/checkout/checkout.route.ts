@@ -2,8 +2,11 @@ import { Router, Response, NextFunction } from "express";
 import { OrderService } from "@/services/order.service";
 // import { PrismaClient } from ;
 import { prisma } from "@/prisma/client.js";
-import { AuthRequest } from "@/middlewares/auth.middleware";
-import { GuestCartRequest } from "@/middlewares/guest-cart.middleware";
+import { AuthRequest, optionalAuthGuard } from "@/middlewares/auth.middleware";
+import {
+  guestCartMiddleware,
+  GuestCartRequest,
+} from "@/middlewares/guest-cart.middleware";
 import { BadRequestError, NotFoundError } from "@/libs/AppError";
 import ApiResponse from "@/libs/ApiResponse";
 import { handleError } from "@/libs/misc";
@@ -56,6 +59,8 @@ const checkoutRouter = Router();
 
 checkoutRouter.post(
   "/",
+  optionalAuthGuard,
+  guestCartMiddleware,
   async (
     req: AuthRequest & GuestCartRequest,
     res: Response,
