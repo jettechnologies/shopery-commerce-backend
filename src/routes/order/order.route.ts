@@ -198,7 +198,7 @@ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
 
 /**
  * @swagger
- * /orders/user/{userId}:
+ * /orders/user:
  *   get:
  *     summary: Get paginated orders for a user
  *     description: Returns a paginated list of orders for a user. Only the user or an admin can access.
@@ -236,7 +236,7 @@ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
  *       404:
  *         description: User not found
  */
-orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
+orderRouter.get("/user", async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user?.userId) {
       return ApiResponse.error(
