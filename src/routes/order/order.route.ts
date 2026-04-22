@@ -206,13 +206,6 @@ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         description: User ID
- *         schema:
- *           type: string
- *
  *       - name: page
  *         in: query
  *         required: false
@@ -245,7 +238,7 @@ orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
  */
 orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
   try {
-    if (req.user?.role !== "admin" && req.user?.userId !== req.params.userId) {
+    if (!req.user?.userId) {
       return ApiResponse.error(
         res,
         403,
@@ -258,7 +251,7 @@ orderRouter.get("/user/:userId", async (req: AuthRequest, res: Response) => {
     const limit = Number(req.query.limit) || 10;
 
     const orders = await OrderService.getOrdersByUser(
-      req.params.userId,
+      req.user?.userId,
       page,
       limit,
     );
