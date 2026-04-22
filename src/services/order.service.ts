@@ -150,7 +150,9 @@ export class OrderService {
             include: {
               product: {
                 include: {
-                  images: true,
+                  images: {
+                    where: { isPrimary: true },
+                  },
                   categories: true,
                 },
               },
