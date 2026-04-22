@@ -160,44 +160,6 @@ orderRouter.use(authGuard);
 
 /**
  * @swagger
- * /orders/{id}:
- *   get:
- *     summary: Get a single order by ID
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Order details
- */
-orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
-  try {
-    const order = await OrderService.getOrderById(req.params.id);
-    if (
-      req.user?.role !== "admin" &&
-      order.userId !== BigInt(req.user!.userId)
-    ) {
-      return ApiResponse.error(
-        res,
-        403,
-        "Forbidden: you do not own this order",
-        "Authorization Error",
-      );
-    }
-    return ApiResponse.success(res, 200, "Order fetched successfully", order);
-  } catch (err) {
-    handleError(res, err);
-  }
-});
-
-/**
- * @swagger
  * /orders/user:
  *   get:
  *     summary: Get paginated orders for a user
@@ -370,6 +332,44 @@ orderRouter.get("/history", async (req: AuthRequest, res: Response) => {
 //     handleError(res, err);
 //   }
 // });
+
+/**
+ * @swagger
+ * /orders/{id}:
+ *   get:
+ *     summary: Get a single order by ID
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order details
+ */
+orderRouter.get("/:id", async (req: AuthRequest, res: Response) => {
+  try {
+    const order = await OrderService.getOrderById(req.params.id);
+    if (
+      req.user?.role !== "admin" &&
+      order.userId !== BigInt(req.user!.userId)
+    ) {
+      return ApiResponse.error(
+        res,
+        403,
+        "Forbidden: you do not own this order",
+        "Authorization Error",
+      );
+    }
+    return ApiResponse.success(res, 200, "Order fetched successfully", order);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
 
 /**
  * @swagger

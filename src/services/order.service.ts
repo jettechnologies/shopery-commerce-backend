@@ -137,6 +137,7 @@ export class OrderService {
     limit: number = 10,
   ) {
     const user = await prisma.user.findUnique({ where: { userId } });
+
     if (!user) throw new NotFoundError("User not found");
 
     const skip = (page - 1) * limit;
