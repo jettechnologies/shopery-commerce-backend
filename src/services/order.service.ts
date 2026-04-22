@@ -144,7 +144,19 @@ export class OrderService {
     const [orders, total] = await prisma.$transaction([
       prisma.order.findMany({
         where: { userId: user.id },
-        include: { OrderItems: true },
+        include: {
+          OrderItems: {
+            include: {
+              product: {
+                include: {
+                  images: true,
+                  categories: true,
+                },
+              },
+              variant: true,
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
