@@ -122,8 +122,8 @@ checkoutRouter.post(
       // ✅ 4. Create "intermediate" (pending) order
       const order = await OrderService.createOrder({
         userId: req.user ? req.user.userId : null,
-        cartId: req.user ? cart.id : null,
-        guestCartId: !req.user && req.guestCart ? cart.id : null,
+        cartId: req.user ? cart.cartId : null,
+        guestCartId: !req.user && req.guestCart ? cart.cartId : null,
         email: req.user?.email ?? req.body.email,
         total,
         paymentId: req.body.paymentId ?? null,
